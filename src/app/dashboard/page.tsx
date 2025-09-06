@@ -16,10 +16,14 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useRoles } from "@/hooks/use-roles"
+import { useUsers } from "@/hooks/use-users"
+import { useProviders } from "@/hooks/use-providers"
 
 export default function DashboardPage() {
   const router = useRouter()
   const { currentRole, hasPermission } = useRoles()
+  const { users, loading: usersLoading } = useUsers()
+  const { providers, loading: providersLoading } = useProviders()
 
   const modules = [
     {
@@ -199,7 +203,9 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-3">
                     <Users className="h-8 w-8 text-blue-500" />
                     <div>
-                      <p className="text-2xl font-bold">5</p>
+                      <p className="text-2xl font-bold">
+                        {usersLoading ? "..." : users.length}
+                      </p>
                       <p className="text-sm text-muted-foreground">Total Usuarios</p>
                     </div>
                   </div>
@@ -209,10 +215,14 @@ export default function DashboardPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                      <span className="text-white font-bold">4</span>
+                      <span className="text-white font-bold">
+                        {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
+                      </span>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">4</p>
+                      <p className="text-2xl font-bold">
+                        {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
+                      </p>
                       <p className="text-sm text-muted-foreground">Usuarios Activos</p>
                     </div>
                   </div>
@@ -222,10 +232,14 @@ export default function DashboardPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
-                      <span className="text-white font-bold">1</span>
+                      <span className="text-white font-bold">
+                        {usersLoading ? "..." : users.filter(u => u.status === 'pending').length}
+                      </span>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">1</p>
+                      <p className="text-2xl font-bold">
+                        {usersLoading ? "..." : users.filter(u => u.status === 'pending').length}
+                      </p>
                       <p className="text-sm text-muted-foreground">Pendientes</p>
                     </div>
                   </div>
@@ -242,47 +256,43 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary" />
+                  {usersLoading ? (
+                    <div className="text-center py-4">
+                      <p className="text-muted-foreground">Cargando usuarios...</p>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">María González</h4>
-                      <p className="text-sm text-muted-foreground">maria@onpoint.com • Administradora</p>
+                  ) : users.length === 0 ? (
+                    <div className="text-center py-4">
+                      <p className="text-muted-foreground">No hay usuarios registrados</p>
                     </div>
-                    <div className="text-right">
-                      <Badge className="bg-green-100 text-green-800">Activo</Badge>
-                      <p className="text-xs text-muted-foreground mt-1">Hace 2 horas</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Carlos Rodríguez</h4>
-                      <p className="text-sm text-muted-foreground">carlos@onpoint.com • Ejecutivo</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge className="bg-green-100 text-green-800">Activo</Badge>
-                      <p className="text-xs text-muted-foreground mt-1">Hace 4 horas</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Users className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium">Roberto Silva</h4>
-                      <p className="text-sm text-muted-foreground">roberto@onpoint.com • Ejecutivo</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge className="bg-yellow-100 text-yellow-800">Pendiente</Badge>
-                      <p className="text-xs text-muted-foreground mt-1">Hace 1 día</p>
-                    </div>
-                  </div>
+                  ) : (
+                    users.slice(0, 5).map((user) => (
+                      <div key={user.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Users className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">{user.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {user.email} • {user.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <Badge 
+                            className={
+                              user.status === 'active' 
+                                ? "bg-green-100 text-green-800" 
+                                : "bg-yellow-100 text-yellow-800"
+                            }
+                          >
+                            {user.status === 'active' ? 'Activo' : 'Pendiente'}
+                          </Badge>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
                 
                 <div className="mt-4 pt-4 border-t">
@@ -292,6 +302,135 @@ export default function DashboardPage() {
                     onClick={() => router.push('/users')}
                   >
                     Ver Todos los Usuarios
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Gestión de Proveedores - Solo para Administradores */}
+        {hasPermission('canManageProviders') && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Gestión de Proveedores</h2>
+                <p className="text-muted-foreground">
+                  Administra proveedores, logos y información comercial
+                </p>
+              </div>
+              <Button onClick={() => router.push('/providers')}>
+                <Package className="h-4 w-4 mr-2" />
+                Ver Todos los Proveedores
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <Package className="h-8 w-8 text-blue-500" />
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {providersLoading ? "..." : providers.length}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Total Proveedores</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                      <span className="text-white font-bold">
+                        {providersLoading ? "..." : providers.filter(p => p.status === 'active').length}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {providersLoading ? "..." : providers.filter(p => p.status === 'active').length}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Proveedores Activos</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
+                      <span className="text-white font-bold">
+                        {providersLoading ? "..." : providers.filter(p => p.status === 'inactive').length}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {providersLoading ? "..." : providers.filter(p => p.status === 'inactive').length}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Inactivos</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Proveedores Recientes</CardTitle>
+                <CardDescription>
+                  Últimos proveedores registrados y su actividad
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {providersLoading ? (
+                    <div className="text-center py-4">
+                      <p className="text-muted-foreground">Cargando proveedores...</p>
+                    </div>
+                  ) : providers.length === 0 ? (
+                    <div className="text-center py-4">
+                      <p className="text-muted-foreground">No hay proveedores registrados</p>
+                    </div>
+                  ) : (
+                    providers.slice(0, 5).map((provider) => (
+                      <div key={provider.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Package className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium">{provider.name}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {provider.email} • {provider.category}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <Badge 
+                            className={
+                              provider.status === 'active' 
+                                ? "bg-green-100 text-green-800" 
+                                : "bg-red-100 text-red-800"
+                            }
+                          >
+                            {provider.status === 'active' ? 'Activo' : 'Inactivo'}
+                          </Badge>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(provider.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                
+                <div className="mt-4 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => router.push('/providers')}
+                  >
+                    Ver Todos los Proveedores
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
