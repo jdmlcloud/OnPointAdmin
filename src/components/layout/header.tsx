@@ -17,6 +17,7 @@ import { signOut } from "next-auth/react"
 import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
+import { RoleSwitcher } from "@/components/role-switcher"
 
 export function Header() {
   const { data: session } = useSession()
@@ -80,6 +81,9 @@ export function Header() {
           <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
             <Settings className="h-4 w-4" />
           </Button>
+
+          {/* Role Switcher */}
+          <RoleSwitcher />
 
           {/* User Profile */}
           <div className="flex items-center gap-3 pl-4 border-l">

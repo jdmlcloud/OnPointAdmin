@@ -17,10 +17,17 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Building2,
+  BarChart3,
+  Shield,
+  FileBarChart,
+  Template,
+  Zap
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useState } from "react"
+import { useRoles } from "@/hooks/use-roles"
 
 const navigation = [
   {
@@ -28,42 +35,105 @@ const navigation = [
     href: "/dashboard",
     icon: LayoutDashboard,
     badge: null,
+    permission: "canViewDashboard"
   },
   {
     name: "Proveedores",
     href: "/providers",
-    icon: Users,
+    icon: Building2,
     badge: "V1",
+    permission: "canManageProviders"
   },
   {
     name: "Productos",
     href: "/products",
     icon: Package,
     badge: "V1",
+    permission: "canManageProducts"
   },
   {
     name: "WhatsApp + IA",
     href: "/whatsapp",
     icon: MessageSquare,
     badge: "V2",
+    permission: "canManageWhatsApp"
   },
   {
     name: "Cotizaciones",
     href: "/quotations",
     icon: TrendingUp,
     badge: "V3",
+    permission: "canManageQuotations"
   },
   {
     name: "Propuestas",
     href: "/proposals",
     icon: FileText,
     badge: "V4",
+    permission: "canManageProposals"
+  },
+  {
+    name: "Generador PDFs",
+    href: "/pdf-generator",
+    icon: FileBarChart,
+    badge: "V5",
+    permission: "canGeneratePDFs"
+  },
+  {
+    name: "Envío y Tracking",
+    href: "/tracking",
+    icon: BarChart3,
+    badge: "V6",
+    permission: "canViewAnalytics"
+  },
+  {
+    name: "Editor Visual",
+    href: "/editor",
+    icon: Template,
+    badge: "V7",
+    permission: "canManageTemplates"
+  },
+  {
+    name: "Analytics",
+    href: "/analytics",
+    icon: BarChart3,
+    badge: null,
+    permission: "canViewAnalytics"
+  },
+  {
+    name: "Reportes",
+    href: "/reports",
+    icon: FileBarChart,
+    badge: null,
+    permission: "canViewReports"
+  },
+  {
+    name: "Usuarios",
+    href: "/users",
+    icon: Users,
+    badge: null,
+    permission: "canManageUsers"
+  },
+  {
+    name: "Integraciones",
+    href: "/integrations",
+    icon: Zap,
+    badge: null,
+    permission: "canManageIntegrations"
+  },
+  {
+    name: "Sistema",
+    href: "/system",
+    icon: Shield,
+    badge: null,
+    permission: "canManageSystem"
   },
   {
     name: "Configuración",
     href: "/settings",
     icon: Settings,
     badge: "V1",
+    permission: "canManageSettings"
   },
 ]
 
@@ -71,6 +141,7 @@ export function Sidebar() {
   const { data: session } = useSession()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const { hasPermission } = useRoles()
 
   const handleSignOut = () => {
     signOut({ callbackUrl: '/auth/signin' })
@@ -103,7 +174,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navigation.map((item) => {
+        {navigation.filter(item => hasPermission(item.permission as any)).map((item) => {
           const isActive = pathname === item.href
           const Icon = item.icon
           
