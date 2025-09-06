@@ -16,6 +16,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.17.2",
     "@auth/dynamodb-adapter": "^1.0.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.883.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.490.0",
     "@aws-sdk/client-dynamodb": "^3.883.0",
     "@aws-sdk/client-s3": "^3.883.0",

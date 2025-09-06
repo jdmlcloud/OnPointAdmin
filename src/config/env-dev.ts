@@ -27,6 +27,10 @@ export const envDev = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
   ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
   
+  // AWS AI Services
+  AWS_BEDROCK_REGION: process.env.AWS_BEDROCK_REGION || 'us-east-1',
+  AWS_BEDROCK_MODEL_ID: process.env.AWS_BEDROCK_MODEL_ID || 'anthropic.claude-3-5-sonnet-20241022-v2:0',
+  
   // WhatsApp Business API
   WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN || '',
   WHATSAPP_PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
