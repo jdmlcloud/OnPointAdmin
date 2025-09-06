@@ -1,0 +1,40 @@
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { ThemeProvider } from '@/components/theme-provider'
+import { Toaster } from '@/components/ui/toaster'
+import { AuthProvider } from '@/components/providers/session-provider'
+
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: 'OnPoint Admin - Plataforma de Ventas B2B',
+  description: 'Plataforma integral que automatiza el proceso completo de ventas B2B desde WhatsApp hasta PDF final, con IA integrada.',
+  keywords: ['ventas', 'B2B', 'WhatsApp', 'IA', 'cotizaciones', 'propuestas'],
+  authors: [{ name: 'OnPoint Team' }],
+  viewport: 'width=device-width, initial-scale=1',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="es" suppressHydrationWarning>
+      <body className={inter.className}>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  )
+}
