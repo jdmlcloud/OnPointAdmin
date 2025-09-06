@@ -73,7 +73,7 @@ const rolePermissions: Record<UserRole, RolePermissions> = {
 }
 
 export function useRoles() {
-  const [currentRole, setCurrentRole] = useState<UserRole>('ejecutivo')
+  const [currentRole, setCurrentRole] = useState<UserRole>('admin')
   const [isDevelopmentMode] = useState(process.env.NODE_ENV === 'development')
 
   const permissions = rolePermissions[currentRole]

@@ -22,7 +22,7 @@ import {
   BarChart3,
   Shield,
   FileBarChart,
-  Template,
+  Palette,
   Zap
 } from "lucide-react"
 import { signOut } from "next-auth/react"
@@ -89,7 +89,7 @@ const navigation = [
   {
     name: "Editor Visual",
     href: "/editor",
-    icon: Template,
+    icon: Palette,
     badge: "V7",
     permission: "canManageTemplates"
   },
@@ -134,6 +134,18 @@ const navigation = [
     icon: Settings,
     badge: "V1",
     permission: "canManageSettings"
+  },
+  {
+    name: "Integraciones",
+    href: "/integrations",
+    icon: Settings,
+    permission: "canManageIntegrations"
+  },
+  {
+    name: "Sistema",
+    href: "/system",
+    icon: Shield,
+    permission: "canManageSystem"
   },
 ]
 
@@ -228,7 +240,7 @@ export function Sidebar() {
                 {session?.user?.email || "usuario@ejemplo.com"}
               </p>
               <Badge variant="outline" className="text-xs mt-1">
-                {session?.role || "ejecutivo"}
+                {(session as any)?.role || "ejecutivo"}
               </Badge>
             </div>
           )}
