@@ -7,6 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { AnimatedButton } from "@/components/ui/animated-button"
+import { ActionModal } from "@/components/ui/action-modal"
+import { useCardActions } from "@/hooks/use-card-actions"
 import { 
   Plus, 
   Search, 
@@ -17,7 +20,9 @@ import {
   Edit,
   Trash2,
   Eye,
-  Upload
+  Upload,
+  Download,
+  Share
 } from "lucide-react"
 
 interface Product {
@@ -39,6 +44,17 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const {
+    modals,
+    handleView,
+    handleEdit,
+    handleDelete,
+    handleSave,
+    handleDeleteConfirm,
+    handleDownload,
+    handleShare,
+    closeModal
+  } = useCardActions()
 
   // Simular carga de datos
   useState(() => {
@@ -231,17 +247,34 @@ export default function ProductsPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1">
+                  <AnimatedButton 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleView(product)}
+                    animation="pulse"
+                  >
                     <Eye className="h-4 w-4 mr-2" />
                     Ver
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1">
+                  </AnimatedButton>
+                  <AnimatedButton 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex-1"
+                    onClick={() => handleEdit(product)}
+                    animation="pulse"
+                  >
                     <Edit className="h-4 w-4 mr-2" />
                     Editar
-                  </Button>
-                  <Button variant="outline" size="sm">
+                  </AnimatedButton>
+                  <AnimatedButton 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleDelete(product)}
+                    animation="pulse"
+                  >
                     <Trash2 className="h-4 w-4" />
-                  </Button>
+                  </AnimatedButton>
                 </div>
               </CardContent>
             </Card>
@@ -262,6 +295,183 @@ export default function ProductsPage() {
           </div>
         )}
       </div>
+
+      {/* Modales */}
+      <ActionModal
+        isOpen={modals.view.isOpen}
+        onClose={() => closeModal('view')}
+        title="Detalles del Producto"
+        description="Información completa del producto"
+        type="view"
+      >
+        {modals.view.data && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <Package className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">{modals.view.data.name}</h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{modals.view.data.category}</Badge>
+                  <Badge variant={modals.view.data.isActive ? "default" : "secondary"}>
+                    {modals.view.data.isActive ? "Activo" : "Inactivo"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Descripción</label>
+                <p className="text-sm">{modals.view.data.description || "Sin descripción"}</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Proveedor</label>
+                  <p className="text-sm">{modals.view.data.providerName}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Precio</label>
+                  <p className="text-sm font-semibold">${modals.view.data.price} {modals.view.data.currency}</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Stock</label>
+                  <p className={`text-sm font-semibold ${modals.view.data.stock < 10 ? 'text-red-500' : 'text-green-500'}`}>
+                    {modals.view.data.stock} unidades
+                  </p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Fecha de Creación</label>
+                  <p className="text-sm">{new Date(modals.view.data.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+              
+              {modals.view.data.images && modals.view.data.images.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Imágenes</label>
+                  <div className="flex gap-2 mt-2">
+                    {modals.view.data.images.map((image: string, index: number) => (
+                      <img 
+                        key={index}
+                        src={image} 
+                        alt={`${modals.view.data.name} ${index + 1}`}
+                        className="w-16 h-16 rounded-lg object-cover border"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </ActionModal>
+
+      <ActionModal
+        isOpen={modals.edit.isOpen}
+        onClose={() => closeModal('edit')}
+        title="Editar Producto"
+        description="Modifica la información del producto"
+        type="edit"
+        onConfirm={() => handleSave(modals.edit.data)}
+        loadingKey="save-item"
+      >
+        {modals.edit.data && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Nombre</label>
+                <Input 
+                  defaultValue={modals.edit.data.name}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Categoría</label>
+                <Input 
+                  defaultValue={modals.edit.data.category}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium">Descripción</label>
+              <textarea 
+                defaultValue={modals.edit.data.description}
+                className="w-full mt-1 p-2 border rounded-md resize-none h-20"
+                placeholder="Descripción del producto..."
+              />
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">Precio</label>
+                <Input 
+                  type="number"
+                  defaultValue={modals.edit.data.price}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Stock</label>
+                <Input 
+                  type="number"
+                  defaultValue={modals.edit.data.stock}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Moneda</label>
+                <Input 
+                  defaultValue={modals.edit.data.currency}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </ActionModal>
+
+      <ActionModal
+        isOpen={modals.delete.isOpen}
+        onClose={() => closeModal('delete')}
+        title="Eliminar Producto"
+        description="¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer."
+        type="delete"
+        onConfirm={() => handleDeleteConfirm(modals.delete.data)}
+        loadingKey="delete-item"
+        destructive
+      >
+        {modals.delete.data && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <Package className="h-8 w-8 text-red-600" />
+              <div>
+                <h4 className="font-medium text-red-900 dark:text-red-100">
+                  {modals.delete.data.name}
+                </h4>
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  {modals.delete.data.category} - ${modals.delete.data.price} {modals.delete.data.currency}
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-sm text-muted-foreground">
+              <p>Al eliminar este producto:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Se eliminará de todas las cotizaciones pendientes</li>
+                <li>Se cancelarán las propuestas que lo incluyan</li>
+                <li>Esta acción no se puede deshacer</li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </ActionModal>
     </MainLayout>
   )
 }
