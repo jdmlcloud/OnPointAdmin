@@ -20,10 +20,6 @@ import { useRoles } from "@/hooks/use-roles"
 export default function DashboardPage() {
   const router = useRouter()
   const { currentRole, hasPermission } = useRoles()
-  
-  // Debug: verificar permisos
-  console.log('Dashboard - Current role:', currentRole)
-  console.log('Dashboard - Can manage users:', hasPermission('canManageUsers'))
 
   const modules = [
     {
