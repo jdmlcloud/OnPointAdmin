@@ -8,22 +8,23 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
-  LayoutDashboard,
-  Users,
-  Package,
-  MessageSquare,
-  TrendingUp,
-  FileText,
-  Settings,
-  LogOut,
-  ChevronLeft,
+  LayoutDashboard, 
+  Users, 
+  Package, 
+  MessageSquare, 
+  TrendingUp, 
+  FileText, 
+  Settings, 
+  LogOut, 
+  ChevronLeft, 
   ChevronRight,
   Building2,
   BarChart3,
   Shield,
   FileBarChart,
   Palette,
-  Zap
+  Zap,
+  Bot
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useState } from "react"
@@ -134,6 +135,13 @@ const navigation = [
     icon: Settings,
     badge: "V1",
     permission: "canManageSettings"
+  },
+  {
+    name: "AI Test",
+    href: "/ai-test",
+    icon: Bot,
+    badge: "TEST",
+    permission: "canManageSystem"
   },
 ]
 
