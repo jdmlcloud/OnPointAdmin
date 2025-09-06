@@ -45,10 +45,10 @@ export class CognitoAuthService {
         return {
           id: user.userId,
           email: credentials.email,
-          name: attributes.name || 'Usuario',
+          name: 'Usuario',
           role: role as UserRole,
           accessToken: session.tokens?.accessToken?.toString() || '',
-          refreshToken: session.tokens?.refreshToken?.toString() || ''
+          refreshToken: ''
         }
       } else {
         throw new Error('Error en el proceso de autenticación')
@@ -89,7 +89,7 @@ export class CognitoAuthService {
         name: 'Usuario',
         role: role as UserRole,
         accessToken: session.tokens?.accessToken?.toString() || '',
-        refreshToken: session.tokens?.refreshToken?.toString() || ''
+        refreshToken: ''
       }
     } catch (error) {
       console.error('Error al obtener usuario actual:', error)
