@@ -2,13 +2,17 @@ import { Amplify } from 'aws-amplify'
 
 // Configuración de AWS Amplify para Cognito
 export const configureAmplify = () => {
-  Amplify.configure({
+  const config = {
     Auth: {
-      region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1',
-      userPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID || '',
-      userPoolWebClientId: process.env.NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID || '',
+      Cognito: {
+        region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1',
+        userPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID || '',
+        userPoolClientId: process.env.NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID || '',
+      }
     }
-  })
+  }
+  
+  Amplify.configure(config)
 }
 
 // Configuración para el lado del servidor
