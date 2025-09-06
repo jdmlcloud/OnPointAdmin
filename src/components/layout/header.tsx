@@ -32,7 +32,10 @@ export function Header() {
       setTheme("dark")
     } else if (theme === "dark") {
       setTheme("system")
+    } else if (theme === "system") {
+      setTheme("light")
     } else {
+      // Si theme es undefined o cualquier otro valor, empezar con light
       setTheme("light")
     }
   }
