@@ -15,9 +15,11 @@ import {
   ArrowRight
 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useRoles } from "@/hooks/use-roles"
 
 export default function DashboardPage() {
   const router = useRouter()
+  const { currentRole, hasPermission } = useRoles()
 
   const modules = [
     {
@@ -174,6 +176,129 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
+
+        {/* Gestión de Usuarios - Solo para Administradores */}
+        {hasPermission('canManageUsers') && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Gestión de Usuarios</h2>
+                <p className="text-muted-foreground">
+                  Administra usuarios internos, roles y permisos del sistema
+                </p>
+              </div>
+              <Button onClick={() => router.push('/users')}>
+                <Users className="h-4 w-4 mr-2" />
+                Ver Todos los Usuarios
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-8 w-8 text-blue-500" />
+                    <div>
+                      <p className="text-2xl font-bold">5</p>
+                      <p className="text-sm text-muted-foreground">Total Usuarios</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                      <span className="text-white font-bold">4</span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">4</p>
+                      <p className="text-sm text-muted-foreground">Usuarios Activos</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
+                      <span className="text-white font-bold">1</span>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">1</p>
+                      <p className="text-sm text-muted-foreground">Pendientes</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Usuarios Recientes</CardTitle>
+                <CardDescription>
+                  Últimos usuarios registrados y su actividad
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">María González</h4>
+                      <p className="text-sm text-muted-foreground">maria@onpoint.com • Administradora</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                      <p className="text-xs text-muted-foreground mt-1">Hace 2 horas</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">Carlos Rodríguez</h4>
+                      <p className="text-sm text-muted-foreground">carlos@onpoint.com • Ejecutivo</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                      <p className="text-xs text-muted-foreground mt-1">Hace 4 horas</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 p-3 border rounded-lg">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">Roberto Silva</h4>
+                      <p className="text-sm text-muted-foreground">roberto@onpoint.com • Ejecutivo</p>
+                    </div>
+                    <div className="text-right">
+                      <Badge className="bg-yellow-100 text-yellow-800">Pendiente</Badge>
+                      <p className="text-xs text-muted-foreground mt-1">Hace 1 día</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => router.push('/users')}
+                  >
+                    Ver Todos los Usuarios
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </MainLayout>
   )
