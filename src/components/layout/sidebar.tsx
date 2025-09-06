@@ -135,18 +135,6 @@ const navigation = [
     badge: "V1",
     permission: "canManageSettings"
   },
-  {
-    name: "Integraciones",
-    href: "/integrations",
-    icon: Settings,
-    permission: "canManageIntegrations"
-  },
-  {
-    name: "Sistema",
-    href: "/system",
-    icon: Shield,
-    permission: "canManageSystem"
-  },
 ]
 
 export function Sidebar() {
