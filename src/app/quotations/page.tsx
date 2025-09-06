@@ -31,7 +31,9 @@ import {
   RefreshCw
 } from "lucide-react"
 import { AnimatedButton } from "@/components/ui/animated-button"
+import { ActionModal } from "@/components/ui/action-modal"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
+import { useCardActions } from "@/hooks/use-card-actions"
 
 interface Quotation {
   id: string
@@ -63,6 +65,17 @@ interface Quotation {
 
 export default function QuotationsPage() {
   const { isLoading, createQuotation, approveQuotation } = useMicrointeractions()
+  const {
+    modals,
+    handleView,
+    handleEdit,
+    handleDelete,
+    handleSave,
+    handleDeleteConfirm,
+    handleDownload,
+    handleShare,
+    closeModal
+  } = useCardActions()
   const [quotations, setQuotations] = useState<Quotation[]>([
     {
       id: "Q-2024-001",
@@ -490,12 +503,22 @@ export default function QuotationsPage() {
                     )}
 
                     <div className="flex gap-2">
-                      <AnimatedButton variant="outline" size="sm" animation="pulse">
+                      <AnimatedButton 
+                        variant="outline" 
+                        size="sm" 
+                        animation="pulse"
+                        onClick={() => handleView(quotation)}
+                      >
                         <Eye className="h-4 w-4 mr-2" />
                         Ver
                       </AnimatedButton>
                       {quotation.status === 'draft' && (
-                        <AnimatedButton variant="outline" size="sm" animation="pulse">
+                        <AnimatedButton 
+                          variant="outline" 
+                          size="sm" 
+                          animation="pulse"
+                          onClick={() => handleEdit(quotation)}
+                        >
                           <Edit className="h-4 w-4 mr-2" />
                           Editar
                         </AnimatedButton>
@@ -523,7 +546,12 @@ export default function QuotationsPage() {
                           Aprobar
                         </AnimatedButton>
                       )}
-                      <AnimatedButton variant="outline" size="sm" animation="pulse">
+                      <AnimatedButton 
+                        variant="outline" 
+                        size="sm" 
+                        animation="pulse"
+                        onClick={() => handleDownload(quotation)}
+                      >
                         <Download className="h-4 w-4 mr-2" />
                         PDF
                       </AnimatedButton>

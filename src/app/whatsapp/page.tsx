@@ -24,7 +24,9 @@ import {
   Save
 } from "lucide-react"
 import { AnimatedButton } from "@/components/ui/animated-button"
+import { ActionModal } from "@/components/ui/action-modal"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
+import { useCardActions } from "@/hooks/use-card-actions"
 
 interface WhatsAppMessage {
   id: string
@@ -43,6 +45,17 @@ interface WhatsAppMessage {
 
 export default function WhatsAppPage() {
   const { isLoading, processWhatsAppMessage, sendMessage } = useMicrointeractions()
+  const {
+    modals,
+    handleView,
+    handleEdit,
+    handleDelete,
+    handleSave,
+    handleDeleteConfirm,
+    handleDownload,
+    handleShare,
+    closeModal
+  } = useCardActions()
   const [messages, setMessages] = useState<WhatsAppMessage[]>([
     {
       id: "1",
@@ -302,7 +315,12 @@ export default function WhatsAppPage() {
                     )}
 
                     <div className="flex gap-2 mt-4">
-                      <AnimatedButton variant="outline" size="sm" animation="pulse">
+                      <AnimatedButton 
+                        variant="outline" 
+                        size="sm" 
+                        animation="pulse"
+                        onClick={() => handleView(message)}
+                      >
                         Ver Detalles
                       </AnimatedButton>
                       {message.status === 'received' && (
@@ -315,6 +333,19 @@ export default function WhatsAppPage() {
                         >
                           <Bot className="h-4 w-4 mr-2" />
                           Procesar
+                        </AnimatedButton>
+                      )}
+                      {message.response && (
+                        <AnimatedButton 
+                          variant="outline" 
+                          size="sm"
+                          loading={isLoading(`send-response-${message.id}`)}
+                          loadingText="Enviando..."
+                          onClick={() => sendMessage(message.response || '')}
+                          animation="pulse"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          Enviar Respuesta
                         </AnimatedButton>
                       )}
                     </div>
@@ -465,6 +496,83 @@ export default function WhatsAppPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Modales */}
+      <ActionModal
+        isOpen={modals.view.isOpen}
+        onClose={() => closeModal('view')}
+        title="Detalles del Mensaje"
+        description="Información completa del mensaje de WhatsApp"
+        type="view"
+      >
+        {modals.view.data && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <MessageSquare className="h-8 w-8 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold">Mensaje de WhatsApp</h3>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">
+                    {modals.view.data.status === 'received' ? 'Recibido' : 
+                     modals.view.data.status === 'processed' ? 'Procesado' : 'Enviado'}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(modals.view.data.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">De</label>
+                <p className="text-sm">{modals.view.data.from}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Para</label>
+                <p className="text-sm">{modals.view.data.to}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Contenido</label>
+                <p className="text-sm bg-muted p-3 rounded-lg">{modals.view.data.content}</p>
+              </div>
+              
+              {modals.view.data.aiAnalysis && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Análisis de IA</label>
+                  <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Intención:</span>
+                        <p className="text-blue-700 dark:text-blue-300">{modals.view.data.aiAnalysis.intent}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Confianza:</span>
+                        <p className="text-blue-700 dark:text-blue-300">
+                          {(modals.view.data.aiAnalysis.confidence * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {modals.view.data.response && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Respuesta Enviada</label>
+                  <p className="text-sm bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-3 rounded-lg">
+                    {modals.view.data.response}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </ActionModal>
     </MainLayout>
   )
 }
