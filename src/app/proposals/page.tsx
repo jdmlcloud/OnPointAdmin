@@ -40,7 +40,9 @@ import {
   Tablet
 } from "lucide-react"
 import { AnimatedButton } from "@/components/ui/animated-button"
+import { ActionModal } from "@/components/ui/action-modal"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
+import { useCardActions } from "@/hooks/use-card-actions"
 
 interface Proposal {
   id: string
@@ -80,6 +82,17 @@ interface Proposal {
 
 export default function ProposalsPage() {
   const { isLoading, createProposal, generateMockup } = useMicrointeractions()
+  const {
+    modals,
+    handleView,
+    handleEdit,
+    handleDelete,
+    handleSave,
+    handleDeleteConfirm,
+    handleDownload,
+    handleShare,
+    closeModal
+  } = useCardActions()
   const [proposals, setProposals] = useState<Proposal[]>([
     {
       id: "P-2024-001",
@@ -262,6 +275,60 @@ export default function ProposalsPage() {
       default:
         return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  const handleUseTemplate = async (templateId: string) => {
+    await simulateAction(
+      'use-template',
+      async () => {
+        // Simular uso de template
+        await new Promise(resolve => setTimeout(resolve, 1500))
+      },
+      {
+        successMessage: "Template aplicado exitosamente",
+        notification: {
+          type: 'success',
+          title: 'Template Aplicado',
+          message: 'El template se ha aplicado a tu propuesta'
+        }
+      }
+    )
+  }
+
+  const handlePreviewTemplate = async (templateId: string) => {
+    await simulateAction(
+      'preview-template',
+      async () => {
+        // Simular preview
+        await new Promise(resolve => setTimeout(resolve, 800))
+      },
+      {
+        successMessage: "Preview generado",
+        notification: {
+          type: 'info',
+          title: 'Preview Generado',
+          message: 'El preview del template se está mostrando'
+        }
+      }
+    )
+  }
+
+  const handleGenerateMockup3D = async (mockupId: string) => {
+    await simulateAction(
+      'generate-3d-mockup',
+      async () => {
+        // Simular generación de mockup 3D
+        await new Promise(resolve => setTimeout(resolve, 3000))
+      },
+      {
+        successMessage: "Mockup 3D generado exitosamente",
+        notification: {
+          type: 'success',
+          title: 'Mockup 3D Generado',
+          message: 'El mockup 3D está listo para visualizar'
+        }
+      }
+    )
   }
 
   const getPriorityColor = (priority: string) => {
@@ -623,12 +690,26 @@ export default function ProposalsPage() {
                     Diseño profesional para empresas grandes
                   </p>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1">
+                    <AnimatedButton 
+                      size="sm" 
+                      className="flex-1"
+                      loading={isLoading('use-template')}
+                      loadingText="Aplicando..."
+                      onClick={() => handleUseTemplate('template')}
+                      animation="pulse"
+                    >
                       Usar Template
-                    </Button>
-                    <Button variant="outline" size="sm">
+                    </AnimatedButton>
+                    <AnimatedButton 
+                      variant="outline" 
+                      size="sm"
+                      loading={isLoading('preview-template')}
+                      loadingText="Cargando..."
+                      onClick={() => handlePreviewTemplate('template')}
+                      animation="pulse"
+                    >
                       <Eye className="h-4 w-4" />
-                    </Button>
+                    </AnimatedButton>
                   </div>
                 </CardContent>
               </Card>
@@ -643,12 +724,26 @@ export default function ProposalsPage() {
                     Diseño contemporáneo para startups
                   </p>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1">
+                    <AnimatedButton 
+                      size="sm" 
+                      className="flex-1"
+                      loading={isLoading('use-template')}
+                      loadingText="Aplicando..."
+                      onClick={() => handleUseTemplate('template')}
+                      animation="pulse"
+                    >
                       Usar Template
-                    </Button>
-                    <Button variant="outline" size="sm">
+                    </AnimatedButton>
+                    <AnimatedButton 
+                      variant="outline" 
+                      size="sm"
+                      loading={isLoading('preview-template')}
+                      loadingText="Cargando..."
+                      onClick={() => handlePreviewTemplate('template')}
+                      animation="pulse"
+                    >
                       <Eye className="h-4 w-4" />
-                    </Button>
+                    </AnimatedButton>
                   </div>
                 </CardContent>
               </Card>
@@ -663,12 +758,26 @@ export default function ProposalsPage() {
                     Diseño limpio y elegante
                   </p>
                   <div className="flex gap-2">
-                    <Button size="sm" className="flex-1">
+                    <AnimatedButton 
+                      size="sm" 
+                      className="flex-1"
+                      loading={isLoading('use-template')}
+                      loadingText="Aplicando..."
+                      onClick={() => handleUseTemplate('template')}
+                      animation="pulse"
+                    >
                       Usar Template
-                    </Button>
-                    <Button variant="outline" size="sm">
+                    </AnimatedButton>
+                    <AnimatedButton 
+                      variant="outline" 
+                      size="sm"
+                      loading={isLoading('preview-template')}
+                      loadingText="Cargando..."
+                      onClick={() => handlePreviewTemplate('template')}
+                      animation="pulse"
+                    >
                       <Eye className="h-4 w-4" />
-                    </Button>
+                    </AnimatedButton>
                   </div>
                 </CardContent>
               </Card>
@@ -691,10 +800,15 @@ export default function ProposalsPage() {
                   <p className="text-muted-foreground mb-4">
                     El editor visual avanzado estará disponible en la versión V7
                   </p>
-                  <Button>
+                  <AnimatedButton 
+                    loading={isLoading('generate-3d-mockup')}
+                    loadingText="Generando..."
+                    onClick={() => handleGenerateMockup3D('new')}
+                    animation="pulse"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Mockup
-                  </Button>
+                  </AnimatedButton>
                 </div>
               </CardContent>
             </Card>
