@@ -18,10 +18,15 @@ export const envDev = {
   S3_REGION: process.env.S3_REGION || 'us-east-1',
   CLOUDFRONT_DOMAIN: process.env.CLOUDFRONT_DOMAIN || '',
   
-  // Authentication
-  COGNITO_CLIENT_ID: process.env.COGNITO_CLIENT_ID || '',
-  COGNITO_CLIENT_SECRET: process.env.COGNITO_CLIENT_SECRET || '',
-  COGNITO_ISSUER: process.env.COGNITO_ISSUER || '',
+  // AWS Cognito Authentication
+  AWS_COGNITO_USER_POOL_ID: process.env.AWS_COGNITO_USER_POOL_ID || '',
+  AWS_COGNITO_CLIENT_ID: process.env.AWS_COGNITO_CLIENT_ID || '',
+  AWS_COGNITO_CLIENT_SECRET: process.env.AWS_COGNITO_CLIENT_SECRET || '',
+  
+  // Public variables (accessible in browser)
+  NEXT_PUBLIC_AWS_REGION: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1',
+  NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID || '',
+  NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID: process.env.NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID || '',
   
   // AI Services
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
