@@ -24,7 +24,7 @@ import {
   FileBarChart,
   Palette,
   Zap,
-  Bot
+  Cpu
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useState } from "react"
@@ -139,7 +139,7 @@ const navigation = [
   {
     name: "AI Test",
     href: "/ai-test",
-    icon: Bot,
+    icon: Cpu,
     badge: "TEST",
     permission: "canManageSystem"
   },
