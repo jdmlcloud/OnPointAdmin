@@ -1,13 +1,16 @@
 import { DynamoDBProvider } from '@/lib/aws/dynamodb';
 import DynamoDBProviderRepository from './dynamodb-provider-repository';
+import DynamoDBProviderRepositoryReal from './dynamodb-provider-repository-real';
 
 // Repositorio híbrido que usa datos reales o simulados según la configuración
 export class DynamoDBProviderRepositoryHybrid {
   private static instance: DynamoDBProviderRepositoryHybrid;
   private mockRepository: DynamoDBProviderRepository;
+  private realRepository: DynamoDBProviderRepositoryReal;
 
   private constructor() {
     this.mockRepository = DynamoDBProviderRepository.getInstance();
+    this.realRepository = DynamoDBProviderRepositoryReal.getInstance();
   }
 
   public static getInstance(): DynamoDBProviderRepositoryHybrid {
@@ -28,8 +31,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async listAll(): Promise<DynamoDBProvider[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.listAll();
+        return await this.realRepository.listAll();
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.listAll();
@@ -42,8 +44,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async findById(id: string): Promise<DynamoDBProvider | null> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.findById(id);
+        return await this.realRepository.findById(id);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findById(id);
@@ -56,8 +57,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async findByEmail(email: string): Promise<DynamoDBProvider | null> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.findByEmail(email);
+        return await this.realRepository.findByEmail(email);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findByEmail(email);
@@ -70,8 +70,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async findByStatus(status: 'active' | 'inactive' | 'pending'): Promise<DynamoDBProvider[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.findByStatus(status);
+        return await this.realRepository.findByStatus(status);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findByStatus(status);
@@ -84,8 +83,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async create(providerData: Omit<DynamoDBProvider, 'id' | 'createdAt' | 'updatedAt'>): Promise<DynamoDBProvider> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.create(providerData);
+        return await this.realRepository.create(providerData);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.create(providerData);
@@ -98,8 +96,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async update(id: string, providerData: Partial<DynamoDBProvider>): Promise<DynamoDBProvider | null> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.update(id, providerData);
+        return await this.realRepository.update(id, providerData);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.update(id, providerData);
@@ -112,8 +109,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async delete(id: string): Promise<boolean> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.delete(id);
+        return await this.realRepository.delete(id);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.delete(id);
@@ -131,8 +127,7 @@ export class DynamoDBProviderRepositoryHybrid {
   }> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.getStats();
+        return await this.realRepository.getStats();
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.getStats();
@@ -145,8 +140,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async search(query: string): Promise<DynamoDBProvider[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.search(query);
+        return await this.realRepository.search(query);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.search(query);
@@ -159,8 +153,7 @@ export class DynamoDBProviderRepositoryHybrid {
   async getActiveProviders(): Promise<DynamoDBProvider[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para proveedores
-        return await this.mockRepository.getActiveProviders();
+        return await this.realRepository.getActiveProviders();
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.getActiveProviders();

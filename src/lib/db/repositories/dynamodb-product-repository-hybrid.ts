@@ -1,13 +1,16 @@
 import { DynamoDBProduct } from '@/lib/aws/dynamodb';
 import DynamoDBProductRepository from './dynamodb-product-repository';
+import DynamoDBProductRepositoryReal from './dynamodb-product-repository-real';
 
 // Repositorio híbrido que usa datos reales o simulados según la configuración
 export class DynamoDBProductRepositoryHybrid {
   private static instance: DynamoDBProductRepositoryHybrid;
   private mockRepository: DynamoDBProductRepository;
+  private realRepository: DynamoDBProductRepositoryReal;
 
   private constructor() {
     this.mockRepository = DynamoDBProductRepository.getInstance();
+    this.realRepository = DynamoDBProductRepositoryReal.getInstance();
   }
 
   public static getInstance(): DynamoDBProductRepositoryHybrid {
@@ -28,8 +31,7 @@ export class DynamoDBProductRepositoryHybrid {
   async listAll(): Promise<DynamoDBProduct[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.listAll();
+        return await this.realRepository.listAll();
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.listAll();
@@ -42,8 +44,7 @@ export class DynamoDBProductRepositoryHybrid {
   async findById(id: string): Promise<DynamoDBProduct | null> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.findById(id);
+        return await this.realRepository.findById(id);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findById(id);
@@ -56,8 +57,7 @@ export class DynamoDBProductRepositoryHybrid {
   async findByProvider(providerId: string): Promise<DynamoDBProduct[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.findByProvider(providerId);
+        return await this.realRepository.findByProvider(providerId);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findByProvider(providerId);
@@ -70,8 +70,7 @@ export class DynamoDBProductRepositoryHybrid {
   async findByCategory(category: string): Promise<DynamoDBProduct[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.findByCategory(category);
+        return await this.realRepository.findByCategory(category);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findByCategory(category);
@@ -84,8 +83,7 @@ export class DynamoDBProductRepositoryHybrid {
   async findByStatus(status: 'active' | 'inactive' | 'out_of_stock'): Promise<DynamoDBProduct[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.findByStatus(status);
+        return await this.realRepository.findByStatus(status);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findByStatus(status);
@@ -98,8 +96,7 @@ export class DynamoDBProductRepositoryHybrid {
   async create(productData: Omit<DynamoDBProduct, 'id' | 'createdAt' | 'updatedAt'>): Promise<DynamoDBProduct> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.create(productData);
+        return await this.realRepository.create(productData);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.create(productData);
@@ -112,8 +109,7 @@ export class DynamoDBProductRepositoryHybrid {
   async update(id: string, productData: Partial<DynamoDBProduct>): Promise<DynamoDBProduct | null> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.update(id, productData);
+        return await this.realRepository.update(id, productData);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.update(id, productData);
@@ -126,8 +122,7 @@ export class DynamoDBProductRepositoryHybrid {
   async delete(id: string): Promise<boolean> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.delete(id);
+        return await this.realRepository.delete(id);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.delete(id);
@@ -147,8 +142,7 @@ export class DynamoDBProductRepositoryHybrid {
   }> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.getStats();
+        return await this.realRepository.getStats();
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.getStats();
@@ -161,8 +155,7 @@ export class DynamoDBProductRepositoryHybrid {
   async search(query: string): Promise<DynamoDBProduct[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.search(query);
+        return await this.realRepository.search(query);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.search(query);
@@ -175,8 +168,7 @@ export class DynamoDBProductRepositoryHybrid {
   async getActiveProducts(): Promise<DynamoDBProduct[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.getActiveProducts();
+        return await this.realRepository.getActiveProducts();
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.getActiveProducts();
@@ -189,8 +181,7 @@ export class DynamoDBProductRepositoryHybrid {
   async findByPriceRange(minPrice: number, maxPrice: number): Promise<DynamoDBProduct[]> {
     if (this.shouldUseRealData()) {
       try {
-        // TODO: Implementar repositorio real para productos
-        return await this.mockRepository.findByPriceRange(minPrice, maxPrice);
+        return await this.realRepository.findByPriceRange(minPrice, maxPrice);
       } catch (error) {
         console.warn('Error con datos reales, usando datos simulados:', error);
         return await this.mockRepository.findByPriceRange(minPrice, maxPrice);
