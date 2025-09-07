@@ -58,6 +58,12 @@ export class DynamoDBUserRepositoryProduction {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.getStats();
   }
+
+  // Buscar usuarios - SOLO datos reales
+  async search(query: string): Promise<DynamoDBUser[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.search(query);
+  }
 }
 
 export default DynamoDBUserRepositoryProduction;

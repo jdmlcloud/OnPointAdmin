@@ -58,6 +58,18 @@ export class DynamoDBProviderRepositoryProduction {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.getStats();
   }
+
+  // Buscar proveedores - SOLO datos reales
+  async search(query: string): Promise<DynamoDBProvider[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.search(query);
+  }
+
+  // Obtener proveedores por estado - SOLO datos reales
+  async findByStatus(status: string): Promise<DynamoDBProvider[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.findByStatus(status);
+  }
 }
 
 export default DynamoDBProviderRepositoryProduction;

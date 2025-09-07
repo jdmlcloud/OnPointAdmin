@@ -58,6 +58,24 @@ export class DynamoDBProductRepositoryProduction {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.getStats();
   }
+
+  // Buscar productos - SOLO datos reales
+  async search(query: string): Promise<DynamoDBProduct[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.search(query);
+  }
+
+  // Obtener productos por categoría - SOLO datos reales
+  async findByCategory(category: string): Promise<DynamoDBProduct[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.findByCategory(category);
+  }
+
+  // Obtener productos por estado - SOLO datos reales
+  async findByStatus(status: string): Promise<DynamoDBProduct[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.findByStatus(status);
+  }
 }
 
 export default DynamoDBProductRepositoryProduction;
