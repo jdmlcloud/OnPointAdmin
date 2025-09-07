@@ -51,7 +51,7 @@ export class CognitoDirectService {
         // Obtener información del usuario
         const userInfo = await this.getUserInfo(data.AuthenticationResult.AccessToken)
         
-        return {
+        const user: CognitoUser = {
           id: userInfo.sub,
           email: credentials.email,
           name: userInfo.name || 'Usuario',
@@ -59,6 +59,13 @@ export class CognitoDirectService {
           accessToken: data.AuthenticationResult.AccessToken,
           refreshToken: data.AuthenticationResult.RefreshToken || ''
         }
+        
+        // Guardar usuario en localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('cognito_user', JSON.stringify(user))
+        }
+        
+        return user
       } else {
         throw new Error('No se recibió el token de autenticación')
       }
@@ -98,7 +105,10 @@ export class CognitoDirectService {
    */
   static async signOut(): Promise<void> {
     try {
-      // En una implementación real, aquí se invalidaría el token
+      // Limpiar localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('cognito_user')
+      }
       console.log('Usuario desconectado')
     } catch (error) {
       console.error('Error en signOut:', error)
@@ -107,11 +117,22 @@ export class CognitoDirectService {
   }
 
   /**
-   * Obtener usuario actual (simplificado)
+   * Obtener usuario actual desde localStorage
    */
   static async getCurrentUser(): Promise<CognitoUser | null> {
     try {
-      // En una implementación real, aquí se verificaría el token almacenado
+      if (typeof window === 'undefined') return null
+      
+      const storedUser = localStorage.getItem('cognito_user')
+      if (!storedUser) return null
+      
+      const user = JSON.parse(storedUser)
+      
+      // Verificar si el token sigue siendo válido (simplificado)
+      if (user.accessToken) {
+        return user
+      }
+      
       return null
     } catch (error) {
       console.error('Error al obtener usuario actual:', error)

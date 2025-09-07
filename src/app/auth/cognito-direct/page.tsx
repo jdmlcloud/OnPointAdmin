@@ -23,8 +23,10 @@ export default function CognitoDirectPage() {
     clearError()
     
     try {
-      await signIn({ email, password })
-      router.push('/cognito-dashboard')
+      const user = await signIn({ email, password })
+      console.log('Usuario autenticado:', user)
+      // Redirigir a dashboard específico de Cognito
+      router.push('/cognito-dashboard-direct')
     } catch (err) {
       console.error('Error en login:', err)
     }
