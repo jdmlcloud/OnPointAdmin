@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import DynamoDBUserRepositoryHybrid from '@/lib/db/repositories/dynamodb-user-repository-hybrid';
-import DynamoDBProviderRepository from '@/lib/db/repositories/dynamodb-provider-repository';
-import DynamoDBProductRepository from '@/lib/db/repositories/dynamodb-product-repository';
+import DynamoDBProviderRepositoryHybrid from '@/lib/db/repositories/dynamodb-provider-repository-hybrid';
+import DynamoDBProductRepositoryHybrid from '@/lib/db/repositories/dynamodb-product-repository-hybrid';
 import { checkDynamoDBStatus } from '@/lib/aws/dynamodb';
 
 const userRepository = DynamoDBUserRepositoryHybrid.getInstance();
-const providerRepository = DynamoDBProviderRepository.getInstance();
-const productRepository = DynamoDBProductRepository.getInstance();
+const providerRepository = DynamoDBProviderRepositoryHybrid.getInstance();
+const productRepository = DynamoDBProductRepositoryHybrid.getInstance();
 
 // GET /api/dynamodb/stats - Obtener estadísticas de DynamoDB
 export async function GET(request: NextRequest) {

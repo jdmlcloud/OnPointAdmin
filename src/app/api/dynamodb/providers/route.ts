@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBProviderRepository from '@/lib/db/repositories/dynamodb-provider-repository';
+import DynamoDBProviderRepositoryHybrid from '@/lib/db/repositories/dynamodb-provider-repository-hybrid';
 
-const providerRepository = DynamoDBProviderRepository.getInstance();
+const providerRepository = DynamoDBProviderRepositoryHybrid.getInstance();
 
 // GET /api/dynamodb/providers - Obtener todos los proveedores
 export async function GET(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: providers,
       count: providers.length,
-      source: 'DynamoDB (Simulado)',
+      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     });
   } catch (error) {
     console.error('Error al obtener proveedores DynamoDB:', error);
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newProvider,
       message: 'Proveedor creado exitosamente',
-      source: 'DynamoDB (Simulado)',
+      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     }, { status: 201 });
   } catch (error) {
     console.error('Error al crear proveedor DynamoDB:', error);

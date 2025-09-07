@@ -77,8 +77,21 @@ interface DynamoDBStats {
   };
 }
 
+interface DynamoDBProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  providerId: string;
+  status: 'active' | 'inactive' | 'out_of_stock';
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function DashboardDynamoDBPage() {
   const [stats, setStats] = useState<DynamoDBStats | null>(null);
+  const [products, setProducts] = useState<DynamoDBProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,17 +100,26 @@ export default function DashboardDynamoDBPage() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/dynamodb/stats');
-      const data = await response.json();
+      const [statsResponse, productsResponse] = await Promise.all([
+        fetch('/api/dynamodb/stats'),
+        fetch('/api/dynamodb/products')
+      ]);
       
-      if (data.success) {
-        setStats(data.data);
+      const statsData = await statsResponse.json();
+      const productsData = await productsResponse.json();
+      
+      if (statsData.success) {
+        setStats(statsData.data);
       } else {
-        setError(data.message || 'Error al obtener estadísticas');
+        setError(statsData.message || 'Error al obtener estadísticas');
+      }
+
+      if (productsData.success) {
+        setProducts(productsData.data);
       }
     } catch (err) {
       setError('Error de conexión');
-      console.error('Error fetching DynamoDB stats:', err);
+      console.error('Error fetching DynamoDB data:', err);
     } finally {
       setLoading(false);
     }
@@ -287,6 +309,7 @@ export default function DashboardDynamoDBPage() {
           <TabsTrigger value="users">Usuarios</TabsTrigger>
           <TabsTrigger value="providers">Proveedores</TabsTrigger>
           <TabsTrigger value="products">Productos</TabsTrigger>
+          <TabsTrigger value="products-list">Lista de Productos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -434,6 +457,89 @@ export default function DashboardDynamoDBPage() {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="products-list" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Lista de Productos en AWS DynamoDB
+              </CardTitle>
+              <CardDescription>
+                Productos almacenados en la tabla real de AWS DynamoDB
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {products.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Total de productos: {products.length}
+                    </p>
+                    <Button 
+                      onClick={fetchStats} 
+                      variant="outline" 
+                      size="sm"
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Actualizar
+                    </Button>
+                  </div>
+                  
+                  <div className="grid gap-4">
+                    {products.map((product) => (
+                      <Card key={product.id} className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold">{product.name}</h3>
+                              <Badge 
+                                variant={
+                                  product.status === 'active' ? 'default' :
+                                  product.status === 'inactive' ? 'secondary' : 'destructive'
+                                }
+                              >
+                                {product.status === 'active' ? 'Activo' :
+                                 product.status === 'inactive' ? 'Inactivo' : 'Sin Stock'}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {product.description}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className="font-medium">
+                                ${product.price.toFixed(2)}
+                              </span>
+                              <span className="text-muted-foreground">
+                                Categoría: {product.category}
+                              </span>
+                              <span className="text-muted-foreground">
+                                ID: {product.id}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No hay productos</h3>
+                  <p className="text-muted-foreground mb-4">
+                    No se encontraron productos en la tabla de AWS DynamoDB
+                  </p>
+                  <Button onClick={fetchStats} variant="outline">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Actualizar
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

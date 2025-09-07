@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBProductRepository from '@/lib/db/repositories/dynamodb-product-repository';
+import DynamoDBProductRepositoryHybrid from '@/lib/db/repositories/dynamodb-product-repository-hybrid';
 
-const productRepository = DynamoDBProductRepository.getInstance();
+const productRepository = DynamoDBProductRepositoryHybrid.getInstance();
 
 // GET /api/dynamodb/products - Obtener todos los productos
 export async function GET(request: NextRequest) {
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: products,
       count: products.length,
-      source: 'DynamoDB (Simulado)',
+      source: `DynamoDB (${productRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     });
   } catch (error) {
     console.error('Error al obtener productos DynamoDB:', error);
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newProduct,
       message: 'Producto creado exitosamente',
-      source: 'DynamoDB (Simulado)',
+      source: `DynamoDB (${productRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     }, { status: 201 });
   } catch (error) {
     console.error('Error al crear producto DynamoDB:', error);
