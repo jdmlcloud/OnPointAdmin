@@ -9,6 +9,13 @@ const createDynamoDBClient = () => {
   const accessKeyId = process.env.DYNAMODB_ACCESS_KEY_ID
   const secretAccessKey = process.env.DYNAMODB_SECRET_ACCESS_KEY
   
+  // Debug: Log de variables de entorno
+  console.log('🔍 Debug DynamoDB Config:')
+  console.log('  - DYNAMODB_REGION:', region)
+  console.log('  - DYNAMODB_ACCESS_KEY_ID:', accessKeyId ? '✅ Configurado' : '❌ No configurado')
+  console.log('  - DYNAMODB_SECRET_ACCESS_KEY:', secretAccessKey ? '✅ Configurado' : '❌ No configurado')
+  console.log('  - NODE_ENV:', process.env.NODE_ENV)
+  
   if (!accessKeyId || !secretAccessKey) {
     console.warn('⚠️ Variables DYNAMODB_* no configuradas - usando configuración por defecto')
     return new DynamoDBClient({ region })
