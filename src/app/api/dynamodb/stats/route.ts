@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBUserRepository from '@/lib/db/repositories/dynamodb-user-repository';
+import DynamoDBUserRepositoryHybrid from '@/lib/db/repositories/dynamodb-user-repository-hybrid';
 import DynamoDBProviderRepository from '@/lib/db/repositories/dynamodb-provider-repository';
 import DynamoDBProductRepository from '@/lib/db/repositories/dynamodb-product-repository';
 import { checkDynamoDBStatus } from '@/lib/aws/dynamodb';
 
-const userRepository = DynamoDBUserRepository.getInstance();
+const userRepository = DynamoDBUserRepositoryHybrid.getInstance();
 const providerRepository = DynamoDBProviderRepository.getInstance();
 const productRepository = DynamoDBProductRepository.getInstance();
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: status,
-        source: 'DynamoDB (Simulado)',
+        source: `DynamoDB (${status.connected ? 'Real' : 'Simulado'})`,
       });
     }
 
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: stats,
-        source: 'DynamoDB (Simulado)',
+        source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
       });
     }
 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: generalStats,
-      source: 'DynamoDB (Simulado)',
+      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     });
   } catch (error) {
     console.error('Error al obtener estadísticas DynamoDB:', error);
