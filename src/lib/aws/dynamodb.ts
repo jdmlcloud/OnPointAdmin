@@ -4,7 +4,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 // Configuración del cliente DynamoDB
 const createDynamoDBClient = () => {
   const client = new DynamoDBClient({
-    region: process.env.AWS_REGION || 'us-east-1',
+    region: process.env.DYNAMODB_REGION || process.env.AWS_REGION || 'us-east-1',
     credentials: {
       accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
       secretAccessKey: process.env.DYNAMODB_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
@@ -120,7 +120,7 @@ export const checkDynamoDBStatus = async (): Promise<DynamoDBStatus> => {
     if (!process.env.DYNAMODB_CONFIGURED || process.env.DYNAMODB_CONFIGURED !== 'true') {
       return {
         connected: false,
-        region: process.env.AWS_REGION || 'us-east-1',
+        region: process.env.DYNAMODB_REGION || process.env.AWS_REGION || 'us-east-1',
         tables: {
           users: false,
           providers: false,
@@ -138,7 +138,7 @@ export const checkDynamoDBStatus = async (): Promise<DynamoDBStatus> => {
     // Verificar cada tabla usando AWS SDK
     const { DynamoDBClient, DescribeTableCommand } = await import('@aws-sdk/client-dynamodb');
     const dynamoClient = new DynamoDBClient({
-      region: process.env.AWS_REGION || 'us-east-1',
+      region: process.env.DYNAMODB_REGION || process.env.AWS_REGION || 'us-east-1',
       credentials: {
         accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
         secretAccessKey: process.env.DYNAMODB_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
@@ -196,14 +196,14 @@ export const checkDynamoDBStatus = async (): Promise<DynamoDBStatus> => {
 
     return {
       connected: allTablesConnected,
-      region: process.env.AWS_REGION || 'us-east-1',
+      region: process.env.DYNAMODB_REGION || process.env.AWS_REGION || 'us-east-1',
       tables,
       lastChecked: new Date().toISOString(),
     };
   } catch (error) {
     return {
       connected: false,
-      region: process.env.AWS_REGION || 'us-east-1',
+      region: process.env.DYNAMODB_REGION || process.env.AWS_REGION || 'us-east-1',
       tables: {
         users: false,
         providers: false,
