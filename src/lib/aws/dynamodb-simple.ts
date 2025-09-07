@@ -5,10 +5,10 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 export const createSimpleDynamoDBClient = () => {
   console.log('🔧 Creando cliente DynamoDB simplificado...');
   
-  // Obtener credenciales con fallback
-  const accessKeyId = process.env.DYNAMODB_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.DYNAMODB_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
-  const region = process.env.DYNAMODB_REGION || process.env.AWS_REGION || 'us-east-1';
+  // Obtener credenciales SOLO de DYNAMODB_* (no usar AWS_* en producción)
+  const accessKeyId = process.env.DYNAMODB_ACCESS_KEY_ID;
+  const secretAccessKey = process.env.DYNAMODB_SECRET_ACCESS_KEY;
+  const region = process.env.DYNAMODB_REGION || 'us-east-1';
 
   console.log('🔧 Access Key ID:', accessKeyId ? `${accessKeyId.substring(0, 8)}...` : 'NO CONFIGURADA');
   console.log('🔧 Secret Key:', secretAccessKey ? 'CONFIGURADA' : 'NO CONFIGURADA');
