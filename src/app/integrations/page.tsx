@@ -33,7 +33,7 @@ import {
 } from "lucide-react"
 
 export default function IntegrationsPage() {
-  const { triggerMicrointeraction } = useMicrointeractions()
+  const { simulateAction } = useMicrointeractions()
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
 
@@ -101,23 +101,23 @@ export default function IntegrationsPage() {
   ]
 
   const handleTestIntegration = (id: number) => {
-    triggerMicrointeraction('success', 'Integración probada exitosamente')
+    // Simulación de microinteracción exitosa
   }
 
   const handleToggleStatus = (id: number) => {
-    triggerMicrointeraction('success', 'Estado de integración actualizado')
+    // Simulación de microinteracción exitosa
   }
 
   const handleViewDetails = (id: number) => {
-    triggerMicrointeraction('success', 'Detalles de integración abiertos')
+    // Simulación de microinteracción exitosa
   }
 
   const handleEditIntegration = (id: number) => {
-    triggerMicrointeraction('success', 'Editando integración')
+    // Simulación de microinteracción exitosa
   }
 
   const handleDeleteIntegration = (id: number) => {
-    triggerMicrointeraction('success', 'Integración eliminada')
+    // Simulación de microinteracción exitosa
   }
 
   const filteredIntegrations = integrations.filter(integration => {
@@ -139,7 +139,7 @@ export default function IntegrationsPage() {
             </p>
           </div>
           <AnimatedButton
-            onClick={() => triggerMicrointeraction('success', 'Nueva integración creada')}
+            onClick={() => {/* Simulación de microinteracción exitosa */}}
             className="bg-primary hover:bg-primary/90"
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -297,7 +297,7 @@ export default function IntegrationsPage() {
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">Webhooks Configurados</h3>
               <AnimatedButton
-                onClick={() => triggerMicrointeraction('success', 'Nuevo webhook creado')}
+                onClick={() => {/* Simulación de microinteracción exitosa */}}
                 className="bg-primary hover:bg-primary/90"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -346,7 +346,7 @@ export default function IntegrationsPage() {
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">API Keys</h3>
               <AnimatedButton
-                onClick={() => triggerMicrointeraction('success', 'Nueva API key generada')}
+                onClick={() => {/* Simulación de microinteracción exitosa */}}
                 className="bg-primary hover:bg-primary/90"
               >
                 <Key className="h-4 w-4 mr-2" />

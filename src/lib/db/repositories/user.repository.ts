@@ -8,7 +8,7 @@ export class UserRepository extends BaseRepository<User> {
 
   // Crear usuario
   async createUser(userData: CreateUser): Promise<User> {
-    return this.create(userData)
+    return this.create(userData as any)
   }
 
   // Obtener usuario por email

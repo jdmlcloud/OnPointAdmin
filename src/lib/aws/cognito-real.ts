@@ -3,7 +3,7 @@
 import { 
   CognitoIdentityProviderClient, 
   InitiateAuthCommand,
-  SignOutCommand,
+  GlobalSignOutCommand,
   GetUserCommand,
   AuthFlowType
 } from '@aws-sdk/client-cognito-identity-provider'

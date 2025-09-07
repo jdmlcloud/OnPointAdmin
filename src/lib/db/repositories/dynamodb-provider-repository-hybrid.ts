@@ -23,9 +23,9 @@ export class DynamoDBProviderRepositoryHybrid {
   // Determinar si usar datos reales o simulados
   private shouldUseRealData(): boolean {
     return process.env.DYNAMODB_CONFIGURED === 'true' && 
-           (process.env.DYNAMODB_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID) && 
-           (process.env.DYNAMODB_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY) &&
-           (process.env.DYNAMODB_REGION || process.env.AWS_REGION);
+           !!(process.env.DYNAMODB_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID) && 
+           !!(process.env.DYNAMODB_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY) &&
+           !!(process.env.DYNAMODB_REGION || process.env.AWS_REGION);
   }
 
   // Obtener todos los proveedores

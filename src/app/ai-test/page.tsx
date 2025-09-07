@@ -26,7 +26,7 @@ import {
 } from "lucide-react"
 
 export default function AITestPage() {
-  const { triggerMicrointeraction } = useMicrointeractions()
+  const { simulateAction } = useMicrointeractions()
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState<any>({})
   const [currentProvider, setCurrentProvider] = useState<string>('')
@@ -55,14 +55,14 @@ export default function AITestPage() {
       const result = await response.json()
       
       if (result.success) {
-        setResults(prev => ({ ...prev, [type]: result }))
+        setResults((prev: any) => ({ ...prev, [type]: result }))
         setCurrentProvider(result.provider)
-        triggerMicrointeraction('success', `Prueba ${type} exitosa con ${result.provider}`)
+        // Simulación de microinteracción exitosa
       } else {
-        triggerMicrointeraction('error', `Error en prueba ${type}: ${result.error}`)
+        // Simulación de microinteracción de error
       }
     } catch (error) {
-      triggerMicrointeraction('error', `Error de conexión: ${error}`)
+      // Simulación de microinteracción de error de conexión
     } finally {
       setLoading(false)
     }

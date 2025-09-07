@@ -789,7 +789,7 @@ export default function UsersPage() {
           title="Editar Usuario"
           description="Modifica la información del usuario"
           type="edit"
-          onSave={() => handleSave(modals.edit.data)}
+          onConfirm={() => handleSave(modals.edit.data)}
         >
           {modals.edit.data && (
             <div className="space-y-4">
@@ -878,7 +878,7 @@ export default function UsersPage() {
                     <div key={key} className="flex items-center space-x-2">
                       <Checkbox 
                         id={key}
-                        defaultChecked={value}
+                        defaultChecked={Boolean(value)}
                       />
                       <Label htmlFor={key} className="text-sm">
                         {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}

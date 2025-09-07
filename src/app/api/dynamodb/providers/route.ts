@@ -44,14 +44,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    const { name, email, phone, address, status, cognitoId } = body;
+    const { name, email, company, phone, address, status, cognitoId } = body;
 
-    if (!name || !email || !phone || !address) {
+    if (!name || !email || !company || !phone || !address) {
       return NextResponse.json(
         {
           success: false,
           error: 'Datos requeridos faltantes',
-          message: 'Nombre, email, teléfono y dirección son obligatorios',
+          message: 'Nombre, email, empresa, teléfono y dirección son obligatorios',
         },
         { status: 400 }
       );
@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
     const newProvider = await providerRepository.create({
       name,
       email,
+      company,
       phone,
       address,
       status: status || 'pending',

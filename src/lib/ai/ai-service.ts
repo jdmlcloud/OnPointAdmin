@@ -169,7 +169,7 @@ export class OpenAIProvider implements AIProvider {
         n: 1,
       })
 
-      return response.data[0]?.url || ''
+      return response.data?.[0]?.url || ''
     } catch (error) {
       console.error('OpenAI image error:', error)
       throw new Error('Error generando imagen con OpenAI')

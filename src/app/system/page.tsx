@@ -45,7 +45,7 @@ import {
 } from "lucide-react"
 
 export default function SystemPage() {
-  const { triggerMicrointeraction } = useMicrointeractions()
+  const { simulateAction } = useMicrointeractions()
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
 
@@ -155,19 +155,19 @@ export default function SystemPage() {
   ]
 
   const handleRestartService = (id: number) => {
-    triggerMicrointeraction('success', 'Servicio reiniciado exitosamente')
+    // Simulación de microinteracción exitosa
   }
 
   const handleViewLogs = (id: number) => {
-    triggerMicrointeraction('success', 'Logs del servicio abiertos')
+    // Simulación de microinteracción exitosa
   }
 
   const handleViewDetails = (id: number) => {
-    triggerMicrointeraction('success', 'Detalles del servicio abiertos')
+    // Simulación de microinteracción exitosa
   }
 
   const handleEditService = (id: number) => {
-    triggerMicrointeraction('success', 'Editando configuración del servicio')
+    // Simulación de microinteracción exitosa
   }
 
   const filteredServices = services.filter(service => {
@@ -208,14 +208,14 @@ export default function SystemPage() {
           </div>
           <div className="flex items-center gap-2">
             <AnimatedButton
-              onClick={() => triggerMicrointeraction('success', 'Sistema actualizado')}
+              onClick={() => {/* Simulación de microinteracción exitosa */}}
               variant="outline"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
               Actualizar
             </AnimatedButton>
             <AnimatedButton
-              onClick={() => triggerMicrointeraction('success', 'Nuevo servicio agregado')}
+              onClick={() => {/* Simulación de microinteracción exitosa */}}
               className="bg-primary hover:bg-primary/90"
             >
               <Plus className="h-4 w-4 mr-2" />

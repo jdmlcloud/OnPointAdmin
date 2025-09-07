@@ -123,7 +123,7 @@ export class DynamoDBUserRepositoryReal {
       });
 
       await this.client.send(command);
-      return updatedUser;
+      return updatedUser as DynamoDBUser;
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
       throw new Error('Error al actualizar usuario en DynamoDB');

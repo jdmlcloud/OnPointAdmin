@@ -20,7 +20,7 @@ export abstract class BaseRepository<T extends DynamoDBItem> {
     const now = DynamoDBUtils.getCurrentTimestamp()
     const id = crypto.randomUUID()
     
-    const dynamoItem: T = {
+    const dynamoItem = {
       ...item,
       id,
       PK: DynamoDBUtils.generatePK(this.entityType, id),
@@ -29,7 +29,7 @@ export abstract class BaseRepository<T extends DynamoDBItem> {
       GSI1SK: now,
       createdAt: now,
       updatedAt: now,
-    } as T
+    } as unknown as T
 
     await dynamoDB.send(new PutCommand({
       TableName: this.tableName,
@@ -200,7 +200,7 @@ export abstract class BaseRepository<T extends DynamoDBItem> {
     if (items.length === 0) return []
 
     const now = DynamoDBUtils.getCurrentTimestamp()
-    const dynamoItems: T[] = items.map(item => ({
+    const dynamoItems = items.map(item => ({
       ...item,
       id: crypto.randomUUID(),
       PK: DynamoDBUtils.generatePK(this.entityType, crypto.randomUUID()),
@@ -209,7 +209,7 @@ export abstract class BaseRepository<T extends DynamoDBItem> {
       GSI1SK: now,
       createdAt: now,
       updatedAt: now,
-    })) as T[]
+    })) as unknown as T[]
 
     // DynamoDB BatchWriteCommand permite máximo 25 items
     const chunks = []

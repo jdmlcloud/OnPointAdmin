@@ -144,7 +144,7 @@ export function SidebarCognito() {
   }
 
   const filteredNavigation = navigation.filter(item => 
-    hasPermission(item.permission)
+    hasPermission(item.permission as any)
   )
 
   return (
@@ -217,7 +217,7 @@ export function SidebarCognito() {
             collapsed ? "justify-center" : ""
           )}>
             <Avatar className="h-8 w-8">
-              <AvatarImage src={user.avatar} />
+              <AvatarImage src={(user as any).avatar} />
               <AvatarFallback>
                 {user.name?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>

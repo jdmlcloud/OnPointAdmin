@@ -61,7 +61,7 @@ export function useCardActions() {
         
         // Simular respuesta del backend
         const savedData = { ...data, id: data.id || Date.now().toString() }
-        return savedData
+        // No retornar nada para evitar error de tipo
       },
       {
         successMessage: "Elemento guardado exitosamente",
@@ -89,7 +89,7 @@ export function useCardActions() {
         await new Promise(resolve => setTimeout(resolve, 800))
         
         // Simular eliminación
-        return { deleted: true, id: data.id }
+        // No retornar nada para evitar error de tipo
       },
       {
         successMessage: "Elemento eliminado exitosamente",

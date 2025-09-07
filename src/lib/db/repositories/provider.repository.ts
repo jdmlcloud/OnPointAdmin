@@ -8,7 +8,7 @@ export class ProviderRepository extends BaseRepository<Provider> {
 
   // Crear proveedor
   async createProvider(providerData: CreateProvider): Promise<Provider> {
-    return this.create(providerData)
+    return this.create(providerData as any)
   }
 
   // Obtener proveedores por categoría

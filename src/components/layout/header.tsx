@@ -98,7 +98,7 @@ export function Header() {
               </p>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {session?.role || "ejecutivo"}
+                  {(session as any)?.role || "ejecutivo"}
                 </Badge>
               </div>
             </div>

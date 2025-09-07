@@ -81,7 +81,7 @@ interface Proposal {
 }
 
 export default function ProposalsPage() {
-  const { isLoading, createProposal, generateMockup } = useMicrointeractions()
+  const { isLoading, createProposal, generateMockup, simulateAction } = useMicrointeractions()
   const {
     modals,
     handleView,
