@@ -18,12 +18,14 @@ import { useRouter } from "next/navigation"
 import { useRoles } from "@/hooks/use-roles"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
+import { useStats } from "@/hooks/use-stats"
 
 export default function DashboardPage() {
   const router = useRouter()
   const { currentRole, hasPermission } = useRoles()
   const { users, loading: usersLoading } = useUsers()
   const { providers, loading: providersLoading } = useProviders()
+  const { stats, loading: statsLoading } = useStats()
 
   const modules = [
     {
@@ -139,8 +141,15 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <Users className="h-8 w-8 text-blue-500" />
                   <div>
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-sm text-muted-foreground">Proveedores</p>
+                    <p className="text-2xl font-bold">
+                      {statsLoading ? '...' : stats?.summary.totalUsers || 0}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Usuarios</p>
+                    {stats && (
+                      <p className="text-xs text-green-600">
+                        {stats.summary.activeUsers} activos
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -150,8 +159,15 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <Package className="h-8 w-8 text-green-500" />
                   <div>
-                    <p className="text-2xl font-bold">0</p>
+                    <p className="text-2xl font-bold">
+                      {statsLoading ? '...' : stats?.summary.totalProducts || 0}
+                    </p>
                     <p className="text-sm text-muted-foreground">Productos</p>
+                    {stats && (
+                      <p className="text-xs text-green-600">
+                        {stats.summary.activeProducts} activos
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -159,10 +175,17 @@ export default function DashboardPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <MessageSquare className="h-8 w-8 text-yellow-500" />
+                  <Users className="h-8 w-8 text-purple-500" />
                   <div>
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-sm text-muted-foreground">Mensajes IA</p>
+                    <p className="text-2xl font-bold">
+                      {statsLoading ? '...' : stats?.summary.totalProviders || 0}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Proveedores</p>
+                    {stats && (
+                      <p className="text-xs text-green-600">
+                        {stats.summary.activeProviders} activos
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -170,10 +193,17 @@ export default function DashboardPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <FileText className="h-8 w-8 text-purple-500" />
+                  <TrendingUp className="h-8 w-8 text-yellow-500" />
                   <div>
-                    <p className="text-2xl font-bold">0</p>
-                    <p className="text-sm text-muted-foreground">Propuestas</p>
+                    <p className="text-2xl font-bold">
+                      {statsLoading ? '...' : (stats?.products.lowStockProducts || 0)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Stock Bajo</p>
+                    {stats && (
+                      <p className="text-xs text-orange-600">
+                        {stats.products.totalCategories} categorías
+                      </p>
+                    )}
                   </div>
                 </div>
               </CardContent>

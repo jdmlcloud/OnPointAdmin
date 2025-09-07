@@ -37,13 +37,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, email, company, phone, address, status, contactPerson, website, notes } = body
+    const { 
+      name, 
+      email, 
+      company, 
+      phone, 
+      description,
+      website,
+      address, 
+      contacts,
+      status, 
+      logo,
+      notes 
+    } = body
 
-    if (!name || !email || !company || !phone || !address) {
+    if (!name || !email || !company || !phone) {
       return NextResponse.json({
         success: false,
         error: 'Faltan campos requeridos',
-        message: 'name, email, company, phone y address son obligatorios'
+        message: 'name, email, company y phone son obligatorios'
       }, { status: 400 })
     }
 
@@ -62,10 +74,12 @@ export async function POST(request: NextRequest) {
       email,
       company,
       phone,
-      address,
-      status: status || 'active',
-      contactPerson,
+      description,
       website,
+      address: address || {},
+      contacts: contacts || [],
+      status: status || 'active',
+      logo,
       notes
     })
 

@@ -125,19 +125,46 @@ export default function NewProviderPage() {
   const onSubmit = async (data: ProviderFormData) => {
     setIsLoading(true)
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Preparar datos para la API
+      const providerData = {
+        name: data.name,
+        email: data.email,
+        company: data.name, // Usar el nombre como compañía por ahora
+        phone: data.phone || '',
+        description: data.description,
+        website: data.website,
+        address: data.address,
+        contacts: data.contacts,
+        status: data.isActive ? 'active' : 'inactive',
+        logo: logoFile ? logoFile.name : undefined,
+        notes: ''
+      }
+
+      const response = await fetch('/api/providers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(providerData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Error al crear proveedor')
+      }
       
       toast({
         title: "Proveedor creado",
-        description: "El proveedor se ha creado exitosamente.",
+        description: result.message || "El proveedor se ha creado exitosamente.",
       })
       
       router.push("/providers")
     } catch (error) {
+      console.error('Error creando proveedor:', error)
       toast({
         title: "Error",
-        description: "Hubo un error al crear el proveedor.",
+        description: error instanceof Error ? error.message : "Hubo un error al crear el proveedor.",
         variant: "destructive",
       })
     } finally {

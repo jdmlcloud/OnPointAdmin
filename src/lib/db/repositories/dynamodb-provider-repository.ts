@@ -6,10 +6,24 @@ export interface Provider extends BaseEntity {
   email: string
   company: string
   phone: string
-  address: string
-  status: 'active' | 'inactive' | 'pending'
-  contactPerson?: string
+  description?: string
   website?: string
+  address: {
+    street?: string
+    city?: string
+    state?: string
+    zipCode?: string
+    country?: string
+  }
+  contacts: Array<{
+    name: string
+    position: string
+    email: string
+    phone?: string
+    isPrimary: boolean
+  }>
+  status: 'active' | 'inactive' | 'pending'
+  logo?: string
   notes?: string
 }
 
