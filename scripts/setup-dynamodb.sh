@@ -251,8 +251,8 @@ insert_item() {
 # Usuario administrador de ejemplo
 insert_item "$USERS_TABLE" '{
     "id": {"S": "admin-001"},
-    "email": {"S": "admin@onpoint.com"},
-    "name": {"S": "Administrador OnPoint"},
+    "email": {"S": "admin@tallerimpresion.com"},
+    "name": {"S": "María González - Administradora"},
     "role": {"S": "admin"},
     "status": {"S": "active"},
     "createdAt": {"S": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"},
@@ -263,23 +263,23 @@ insert_item "$USERS_TABLE" '{
 # Proveedor de ejemplo
 insert_item "$PROVIDERS_TABLE" '{
     "id": {"S": "provider-001"},
-    "name": {"S": "Tech Solutions Corp"},
-    "email": {"S": "contact@techsolutions.com"},
-    "phone": {"S": "+1-555-0101"},
-    "address": {"S": "123 Tech Street, Silicon Valley, CA 94000"},
+    "name": {"S": "Empresa ABC - Marketing Corporativo"},
+    "email": {"S": "pedidos@empresaabc.com"},
+    "phone": {"S": "+52-55-1234-5678"},
+    "address": {"S": "Av. Reforma 123, Col. Centro, CDMX 06000"},
     "status": {"S": "active"},
     "createdAt": {"S": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"},
     "updatedAt": {"S": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"},
-    "cognitoId": {"S": "cognito-provider-456"}
+    "cognitoId": {"S": "cognito-client-abc"}
 }'
 
 # Producto de ejemplo
 insert_item "$PRODUCTS_TABLE" '{
     "id": {"S": "product-001"},
-    "name": {"S": "Laptop Dell XPS 13"},
-    "description": {"S": "Laptop ultradelgada con pantalla 13.3\" 4K, Intel i7, 16GB RAM, 512GB SSD"},
-    "price": {"N": "1299.99"},
-    "category": {"S": "Electrónicos"},
+    "name": {"S": "Camisetas Personalizadas - Algodón 100%"},
+    "description": {"S": "Camisetas de algodón 100% con impresión digital de alta calidad. Disponible en tallas S, M, L, XL. Mínimo 50 piezas."},
+    "price": {"N": "85.00"},
+    "category": {"S": "Textiles"},
     "providerId": {"S": "provider-001"},
     "status": {"S": "active"},
     "createdAt": {"S": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"},
