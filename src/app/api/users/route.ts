@@ -71,25 +71,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar si el email ya existe
-    const existingUser = await userRepository.findByEmail(email)
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'El email ya está registrado' },
-        { status: 400 }
-      )
-    }
-
-    const newUser = await userRepository.create({
-      name,
-      email,
-      role,
-      status,
-    })
-
+    // TODO: Implementar cuando se configure DynamoDB
     return NextResponse.json({
-      ...newUser,
-      source: 'DynamoDB (Producción - Solo Real)',
+      message: 'DynamoDB no configurado - Solo Cognito activo',
+      data: { name, email, role, status },
     }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {

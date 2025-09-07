@@ -67,18 +67,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const newProvider = await providerRepository.create({
-      name,
-      email,
-      company,
-      phone: phone || '',
-      address: address || '',
-      status,
-    })
-
+    // TODO: Implementar cuando se configure DynamoDB
     return NextResponse.json({
-      ...newProvider,
-      source: 'DynamoDB (Producción - Solo Real)',
+      message: 'DynamoDB no configurado - Solo Cognito activo',
+      data: { name, email, company, phone, address, status },
     }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
