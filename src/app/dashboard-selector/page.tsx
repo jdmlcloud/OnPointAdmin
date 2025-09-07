@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Shield, Database, ArrowRight, CheckCircle } from 'lucide-react'
+import { Shield, Database, ArrowRight, CheckCircle, HardDrive } from 'lucide-react'
 
 export default function DashboardSelectorPage() {
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null)
@@ -28,6 +28,23 @@ export default function DashboardSelectorPage() {
         'Listo para producción'
       ],
       href: '/dashboard-cognito'
+    },
+    {
+      id: 'dynamodb',
+      title: 'Dashboard con AWS DynamoDB',
+      description: 'Base de datos real con AWS DynamoDB, datos persistentes y APIs reales',
+      icon: HardDrive,
+      status: 'En Desarrollo',
+      color: 'bg-purple-500',
+      badgeColor: 'bg-blue-100 text-blue-800',
+      features: [
+        'Base de datos AWS DynamoDB real',
+        'APIs REST completas',
+        'Datos persistentes',
+        'Estadísticas en tiempo real',
+        'Modo simulación disponible'
+      ],
+      href: '/dashboard-dynamodb'
     },
     {
       id: 'original',
@@ -68,7 +85,7 @@ export default function DashboardSelectorPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {dashboards.map((dashboard) => {
             const Icon = dashboard.icon
             const isSelected = selectedDashboard === dashboard.id
