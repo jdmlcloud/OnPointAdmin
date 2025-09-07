@@ -108,13 +108,7 @@ USER_POOL_ID=$(aws cognito-idp create-user-pool \
         {
             "Name": "name",
             "AttributeDataType": "String",
-            "Required": true,
-            "Mutable": true
-        },
-        {
-            "Name": "role",
-            "AttributeDataType": "String",
-            "Required": true,
+            "Required": false,
             "Mutable": true
         }
     ]' \
@@ -133,7 +127,7 @@ CLIENT_ID=$(aws cognito-idp create-user-pool-client \
     --user-pool-id "$USER_POOL_ID" \
     --client-name "$CLIENT_NAME" \
     --generate-secret \
-    --explicit-auth-flows USER_PASSWORD_AUTH ALLOW_USER_SRP_AUTH \
+    --explicit-auth-flows ALLOW_USER_PASSWORD_AUTH ALLOW_USER_SRP_AUTH \
     --supported-identity-providers COGNITO \
     --callback-urls "http://localhost:3000/auth/callback" \
     --logout-urls "http://localhost:3000/auth/signin" \
@@ -161,7 +155,7 @@ print_status "Paso 6: Creando usuario administrador..."
 aws cognito-idp admin-create-user \
     --user-pool-id "$USER_POOL_ID" \
     --username "admin@onpoint.com" \
-    --user-attributes Name=email,Value=admin@onpoint.com Name=name,Value="Admin User" Name=role,Value=admin \
+    --user-attributes Name=email,Value=admin@onpoint.com Name=name,Value="Admin User" \
     --temporary-password "TempPass123!" \
     --message-action SUPPRESS
 
@@ -179,7 +173,7 @@ print_status "Paso 7: Creando usuario ejecutivo..."
 aws cognito-idp admin-create-user \
     --user-pool-id "$USER_POOL_ID" \
     --username "ejecutivo@onpoint.com" \
-    --user-attributes Name=email,Value=ejecutivo@onpoint.com Name=name,Value="Ejecutivo User" Name=role,Value=ejecutivo \
+    --user-attributes Name=email,Value=ejecutivo@onpoint.com Name=name,Value="Ejecutivo User" \
     --temporary-password "TempPass123!" \
     --message-action SUPPRESS
 
