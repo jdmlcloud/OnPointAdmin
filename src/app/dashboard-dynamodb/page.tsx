@@ -94,6 +94,8 @@ export default function DashboardDynamoDBPage() {
   const [products, setProducts] = useState<DynamoDBProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [connectionTest, setConnectionTest] = useState<any>(null);
 
   const fetchStats = async () => {
     try {
@@ -103,6 +105,22 @@ export default function DashboardDynamoDBPage() {
       // Forzar modo real en producción
       const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('amplifyapp.com');
       const forceReal = isProduction ? '?forceReal=true' : '';
+      
+      // Obtener información de debugging
+      const [debugResponse, connectionResponse] = await Promise.all([
+        fetch('/api/debug-dynamodb'),
+        fetch('/api/test-dynamodb-connection')
+      ]);
+      
+      if (debugResponse.ok) {
+        const debugData = await debugResponse.json();
+        setDebugInfo(debugData.debug);
+      }
+      
+      if (connectionResponse.ok) {
+        const connectionData = await connectionResponse.json();
+        setConnectionTest(connectionData.testResults);
+      }
       
       const [statsResponse, productsResponse] = await Promise.all([
         fetch(`/api/dynamodb/stats${forceReal}`),
@@ -314,6 +332,7 @@ export default function DashboardDynamoDBPage() {
           <TabsTrigger value="providers">Proveedores</TabsTrigger>
           <TabsTrigger value="products">Productos</TabsTrigger>
           <TabsTrigger value="products-list">Lista de Productos</TabsTrigger>
+          <TabsTrigger value="debug">🔍 Debug</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users" className="space-y-4">
@@ -542,6 +561,57 @@ export default function DashboardDynamoDBPage() {
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Actualizar
                   </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="debug" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Información de Debugging
+              </CardTitle>
+              <CardDescription>
+                Información detallada sobre la configuración y conexión de DynamoDB
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {debugInfo && (
+                <div>
+                  <h4 className="font-semibold mb-2">Variables de Entorno:</h4>
+                  <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto">
+                    {JSON.stringify(debugInfo.environment, null, 2)}
+                  </pre>
+                </div>
+              )}
+              
+              {debugInfo && (
+                <div>
+                  <h4 className="font-semibold mb-2">Detección de Producción:</h4>
+                  <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto">
+                    {JSON.stringify(debugInfo.productionDetection, null, 2)}
+                  </pre>
+                </div>
+              )}
+              
+              {debugInfo && (
+                <div>
+                  <h4 className="font-semibold mb-2">Lógica de Datos Reales:</h4>
+                  <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto">
+                    {JSON.stringify(debugInfo.shouldUseRealData, null, 2)}
+                  </pre>
+                </div>
+              )}
+              
+              {connectionTest && (
+                <div>
+                  <h4 className="font-semibold mb-2">Prueba de Conexión DynamoDB:</h4>
+                  <pre className="bg-gray-100 p-4 rounded text-xs overflow-auto">
+                    {JSON.stringify(connectionTest, null, 2)}
+                  </pre>
                 </div>
               )}
             </CardContent>
