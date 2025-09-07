@@ -16,20 +16,36 @@ const createDynamoDBClient = () => {
   console.log('  - DYNAMODB_SECRET_ACCESS_KEY:', secretAccessKey ? '✅ Configurado' : '❌ No configurado')
   console.log('  - NODE_ENV:', process.env.NODE_ENV)
   
-  if (!accessKeyId || !secretAccessKey) {
-    console.warn('⚠️ Variables DYNAMODB_* no configuradas - usando configuración por defecto')
+  // Fallback: Si no hay credenciales DYNAMODB_*, intentar con AWS_*
+  const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID
+  const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY
+  
+  console.log('  - AWS_ACCESS_KEY_ID:', awsAccessKeyId ? '✅ Configurado' : '❌ No configurado')
+  console.log('  - AWS_SECRET_ACCESS_KEY:', awsSecretAccessKey ? '✅ Configurado' : '❌ No configurado')
+  
+  // Usar credenciales DYNAMODB_* si están disponibles, sino AWS_*, sino configuración por defecto
+  if (accessKeyId && secretAccessKey) {
+    console.log('✅ Usando credenciales DYNAMODB_*')
+    return new DynamoDBClient({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+    })
+  } else if (awsAccessKeyId && awsSecretAccessKey) {
+    console.log('✅ Usando credenciales AWS_* como fallback')
+    return new DynamoDBClient({
+      region,
+      credentials: {
+        accessKeyId: awsAccessKeyId,
+        secretAccessKey: awsSecretAccessKey,
+      },
+    })
+  } else {
+    console.warn('⚠️ No hay credenciales configuradas - usando configuración por defecto')
     return new DynamoDBClient({ region })
   }
-  
-  console.log('✅ Configuración DynamoDB con credenciales DYNAMODB_*')
-  
-  return new DynamoDBClient({
-    region,
-    credentials: {
-      accessKeyId,
-      secretAccessKey,
-    },
-  })
 }
 
 // Cliente principal
