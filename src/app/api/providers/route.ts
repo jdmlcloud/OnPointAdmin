@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptionsDev } from '@/lib/auth-dev'
-import DynamoDBProviderRepositoryHybrid from '@/lib/db/repositories/dynamodb-provider-repository-hybrid'
+import DynamoDBProviderRepositoryProduction from '@/lib/db/repositories/dynamodb-provider-repository-production'
 import { z } from 'zod'
 
-const providerRepository = DynamoDBProviderRepositoryHybrid.getInstance()
+const providerRepository = DynamoDBProviderRepositoryProduction.getInstance()
 
 // GET /api/providers - Listar proveedores
 export async function GET(request: NextRequest) {

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptionsDev } from '@/lib/auth-dev'
-import DynamoDBUserRepositoryHybrid from '@/lib/db/repositories/dynamodb-user-repository-hybrid'
+import DynamoDBUserRepositoryProduction from '@/lib/db/repositories/dynamodb-user-repository-production'
 import { z } from 'zod'
 
-const userRepository = DynamoDBUserRepositoryHybrid.getInstance()
+const userRepository = DynamoDBUserRepositoryProduction.getInstance()
 
 // GET /api/users - Listar usuarios
 export async function GET(request: NextRequest) {

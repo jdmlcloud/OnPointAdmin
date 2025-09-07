@@ -22,16 +22,17 @@ export class DynamoDBUserRepositoryHybrid {
 
   // Determinar si usar datos reales o simulados
   private shouldUseRealData(): boolean {
-    // Forzar modo real en producción
+    // Forzar modo real en producción - SIN FALLBACK A SIMULACIÓN
     const isProduction = process.env.NODE_ENV === 'production' || 
                         process.env.VERCEL === '1' ||
                         process.env.NEXTAUTH_URL?.includes('amplifyapp.com');
     
     if (isProduction) {
-      console.log('🔧 Modo producción detectado - Forzando DynamoDB real');
+      console.log('🔧 Modo producción detectado - Forzando DynamoDB real (SIN SIMULACIÓN)');
       return true;
     }
     
+    // En desarrollo, solo usar real si está configurado
     return process.env.DYNAMODB_CONFIGURED === 'true' && 
            !!(process.env.DYNAMODB_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID) && 
            !!(process.env.DYNAMODB_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY) &&
@@ -41,11 +42,22 @@ export class DynamoDBUserRepositoryHybrid {
   // Obtener todos los usuarios
   async listAll(): Promise<DynamoDBUser[]> {
     if (this.shouldUseRealData()) {
-      try {
+      // En producción, NO usar fallback a simulación
+      const isProduction = process.env.NODE_ENV === 'production' || 
+                          process.env.VERCEL === '1' ||
+                          process.env.NEXTAUTH_URL?.includes('amplifyapp.com');
+      
+      if (isProduction) {
+        console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
         return await this.realRepository.listAll();
-      } catch (error) {
-        console.warn('Error con datos reales, usando datos simulados:', error);
-        return await this.mockRepository.listAll();
+      } else {
+        // En desarrollo, permitir fallback
+        try {
+          return await this.realRepository.listAll();
+        } catch (error) {
+          console.warn('Error con datos reales en desarrollo, usando datos simulados:', error);
+          return await this.mockRepository.listAll();
+        }
       }
     }
     return await this.mockRepository.listAll();

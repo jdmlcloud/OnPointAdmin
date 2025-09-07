@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBUserRepositoryHybrid from '@/lib/db/repositories/dynamodb-user-repository-hybrid';
-import DynamoDBProviderRepositoryHybrid from '@/lib/db/repositories/dynamodb-provider-repository-hybrid';
-import DynamoDBProductRepositoryHybrid from '@/lib/db/repositories/dynamodb-product-repository-hybrid';
+import DynamoDBUserRepositoryProduction from '@/lib/db/repositories/dynamodb-user-repository-production';
+import DynamoDBProviderRepositoryProduction from '@/lib/db/repositories/dynamodb-provider-repository-production';
+import DynamoDBProductRepositoryProduction from '@/lib/db/repositories/dynamodb-product-repository-production';
 import { checkDynamoDBStatus } from '@/lib/aws/dynamodb';
 
-const userRepository = DynamoDBUserRepositoryHybrid.getInstance();
-const providerRepository = DynamoDBProviderRepositoryHybrid.getInstance();
-const productRepository = DynamoDBProductRepositoryHybrid.getInstance();
+const userRepository = DynamoDBUserRepositoryProduction.getInstance();
+const providerRepository = DynamoDBProviderRepositoryProduction.getInstance();
+const productRepository = DynamoDBProductRepositoryProduction.getInstance();
 
 // GET /api/dynamodb/stats - Obtener estadísticas de DynamoDB
 export async function GET(request: NextRequest) {
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: stats,
-        source: 'DynamoDB (Simulado)',
+        source: 'DynamoDB (Producción - Solo Real)',
       });
     }
 
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: stats,
-        source: 'DynamoDB (Simulado)',
+        source: 'DynamoDB (Producción - Solo Real)',
       });
     }
 

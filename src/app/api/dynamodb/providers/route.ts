@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBProviderRepositoryHybrid from '@/lib/db/repositories/dynamodb-provider-repository-hybrid';
+import DynamoDBProviderRepositoryProduction from '@/lib/db/repositories/dynamodb-provider-repository-production';
 
-const providerRepository = DynamoDBProviderRepositoryHybrid.getInstance();
+const providerRepository = DynamoDBProviderRepositoryProduction.getInstance();
 
 // GET /api/dynamodb/providers - Obtener todos los proveedores
 export async function GET(request: NextRequest) {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBProductRepositoryHybrid from '@/lib/db/repositories/dynamodb-product-repository-hybrid';
+import DynamoDBProductRepositoryProduction from '@/lib/db/repositories/dynamodb-product-repository-production';
 
-const productRepository = DynamoDBProductRepositoryHybrid.getInstance();
+const productRepository = DynamoDBProductRepositoryProduction.getInstance();
 
 // GET /api/dynamodb/products - Obtener todos los productos
 export async function GET(request: NextRequest) {

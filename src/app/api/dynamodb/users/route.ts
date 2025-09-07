@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBUserRepositoryHybrid from '@/lib/db/repositories/dynamodb-user-repository-hybrid';
+import DynamoDBUserRepositoryProduction from '@/lib/db/repositories/dynamodb-user-repository-production';
 
-const userRepository = DynamoDBUserRepositoryHybrid.getInstance();
+const userRepository = DynamoDBUserRepositoryProduction.getInstance();
 
 // GET /api/dynamodb/users - Obtener todos los usuarios
 export async function GET(request: NextRequest) {
