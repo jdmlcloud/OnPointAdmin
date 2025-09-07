@@ -10,16 +10,17 @@ import { LogOut, User, Mail, Shield, CheckCircle } from 'lucide-react'
 import { useCognitoDirect } from '@/hooks/use-cognito-direct'
 
 export default function CognitoDashboardDirectPage() {
-  const { user, signOut, loading, error } = useCognitoDirect()
+  const { user, signOut, loading, error, initialized } = useCognitoDirect()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
 
   useEffect(() => {
-    // Si no hay usuario autenticado, redirigir al login
-    if (!loading && !user) {
+    // Solo redirigir si ya se completó la verificación inicial y no hay usuario
+    if (initialized && !loading && !user) {
+      console.log('No hay usuario autenticado, redirigiendo al login...')
       router.push('/auth/cognito-direct')
     }
-  }, [user, loading, router])
+  }, [user, loading, initialized, router])
 
   const handleSignOut = async () => {
     try {
@@ -33,25 +34,25 @@ export default function CognitoDashboardDirectPage() {
     }
   }
 
-  if (loading) {
+  // Mostrar loading mientras se verifica la autenticación
+  if (!initialized || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Cargando...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-green-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Verificando autenticación...</p>
         </div>
       </div>
     )
   }
 
+  // Si ya se verificó y no hay usuario, mostrar mensaje mientras redirige
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Alert>
-          <AlertDescription>
-            No estás autenticado. Redirigiendo al login...
-          </AlertDescription>
-        </Alert>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400">Redirigiendo al login...</p>
+        </div>
       </div>
     )
   }

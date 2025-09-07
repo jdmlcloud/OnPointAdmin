@@ -71,6 +71,7 @@ export const useCognitoDirect = () => {
     user,
     loading,
     error,
+    initialized,
     signIn,
     signOut,
     clearError,
