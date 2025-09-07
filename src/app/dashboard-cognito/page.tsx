@@ -443,7 +443,7 @@ export default function DashboardCognitoPage() {
                         <div className="flex-1">
                           <h4 className="font-medium">{provider.name}</h4>
                           <p className="text-sm text-muted-foreground">
-                            {provider.email} • {provider.category}
+                            {provider.email} • {provider.company || 'Sin empresa'}
                           </p>
                         </div>
                         <div className="text-right">

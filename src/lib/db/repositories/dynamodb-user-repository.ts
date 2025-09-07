@@ -1,4 +1,4 @@
-import { DynamoDBBaseRepository } from './dynamodb-base-repository'
+import { DynamoDBBaseRepository, BaseEntity } from './dynamodb-base-repository'
 import { TABLE_NAMES } from '@/lib/aws/dynamodb'
 
 export interface User extends BaseEntity {

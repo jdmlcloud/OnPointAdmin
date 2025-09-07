@@ -97,7 +97,7 @@ export default function UsersPage() {
   } = useCardActions()
   
   // Usar hook de usuarios para datos reales de DynamoDB
-  const { users, isLoading: usersLoading, error, refreshUsers } = useUsers()
+  const { users, loading: usersLoading, error, refreshUsers } = useUsers()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedRole, setSelectedRole] = useState("all")
@@ -111,11 +111,10 @@ export default function UsersPage() {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (user.phone && user.phone.includes(searchTerm))
+                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRole = selectedRole === "all" || user.role === selectedRole
     const matchesStatus = selectedStatus === "all" || user.status === selectedStatus
-    const matchesDepartment = selectedDepartment === "all" || user.department === selectedDepartment
+    const matchesDepartment = selectedDepartment === "all" || (user as any).department === selectedDepartment
     return matchesSearch && matchesRole && matchesStatus && matchesDepartment
   })
 
@@ -440,11 +439,11 @@ export default function UsersPage() {
                           {getRoleIcon(user.role)}
                           {getRoleText(user.role)}
                         </span>
-                        {user.department && (
-                          <span>{user.department}</span>
+                        {(user as any).department && (
+                          <span>{(user as any).department}</span>
                         )}
-                        {user.position && (
-                          <span>{user.position}</span>
+                        {(user as any).position && (
+                          <span>{(user as any).position}</span>
                         )}
                         <span>Último acceso: {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Nunca'}</span>
                       </div>

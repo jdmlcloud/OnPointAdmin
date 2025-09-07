@@ -1,5 +1,7 @@
-import { DynamoDBBaseRepository } from './dynamodb-base-repository'
+import { DynamoDBBaseRepository, BaseEntity } from './dynamodb-base-repository'
 import { TABLE_NAMES } from '@/lib/aws/dynamodb'
+import { ScanCommand } from '@aws-sdk/client-dynamodb'
+import { marshall } from '@aws-sdk/util-dynamodb'
 
 export interface Product extends BaseEntity {
   name: string
@@ -40,14 +42,14 @@ export class DynamoDBProductRepository extends DynamoDBBaseRepository<Product> {
     const command = new ScanCommand({
       TableName: this.tableName,
       FilterExpression: 'price BETWEEN :minPrice AND :maxPrice',
-      ExpressionAttributeValues: {
+      ExpressionAttributeValues: marshall({
         ':minPrice': minPrice,
         ':maxPrice': maxPrice,
-      },
+      }),
     })
 
     const result = await this.client.send(command)
-    return (result.Items || []) as Product[]
+    return (result.Items || []) as unknown as Product[]
   }
 
   // Buscar productos con stock bajo
@@ -55,13 +57,13 @@ export class DynamoDBProductRepository extends DynamoDBBaseRepository<Product> {
     const command = new ScanCommand({
       TableName: this.tableName,
       FilterExpression: 'stock <= :threshold',
-      ExpressionAttributeValues: {
+      ExpressionAttributeValues: marshall({
         ':threshold': threshold,
-      },
+      }),
     })
 
     const result = await this.client.send(command)
-    return (result.Items || []) as Product[]
+    return (result.Items || []) as unknown as Product[]
   }
 
   // Actualizar stock
