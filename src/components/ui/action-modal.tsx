@@ -70,8 +70,8 @@ export function ActionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <div className="flex items-center gap-3">
             {getIcon()}
             <div>
@@ -85,11 +85,11 @@ export function ActionModal({
           </div>
         </DialogHeader>
 
-        <div className="py-4">
+        <div className="flex-1 overflow-y-auto py-4 scrollbar-hide">
           {children}
         </div>
 
-        <DialogFooter className="gap-2">
+        <DialogFooter className="flex-shrink-0 gap-2 border-t pt-4">
           <Button variant="outline" onClick={onClose}>
             {cancelText}
           </Button>

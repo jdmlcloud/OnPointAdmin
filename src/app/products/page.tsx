@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { AnimatedButton } from "@/components/ui/animated-button"
 import { ActionModal } from "@/components/ui/action-modal"
 import { useCardActions } from "@/hooks/use-card-actions"
+import { useProducts } from "@/hooks/use-products"
 import { 
   Plus, 
   Search, 
@@ -30,20 +31,18 @@ interface Product {
   name: string
   description?: string
   category: string
-  providerName: string
+  providerName?: string
   price: number
-  currency: string
-  stock: number
-  images: string[]
-  isActive: boolean
+  currency?: string
+  stock?: number
+  images?: string[]
+  status: string
   createdAt: string
 }
 
 export default function ProductsPage() {
   const router = useRouter()
-  const [products, setProducts] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
   const {
     modals,
     handleView,
@@ -56,52 +55,38 @@ export default function ProductsPage() {
     closeModal
   } = useCardActions()
 
-  // Simular carga de datos
-  useState(() => {
-    setTimeout(() => {
-      setProducts([
-        {
-          id: "1",
-          name: "Taza Personalizada",
-          description: "Taza de cerámica con logo personalizado",
-          category: "Promocionales",
-          providerName: "Proveedor Ejemplo S.A.",
-          price: 25.50,
-          currency: "USD",
-          stock: 150,
-          images: [],
-          isActive: true,
-          createdAt: "2024-01-15T10:00:00Z"
-        },
-        {
-          id: "2",
-          name: "Camiseta Algodón",
-          description: "Camiseta 100% algodón con estampado",
-          category: "Textiles",
-          providerName: "Proveedor Ejemplo S.A.",
-          price: 12.00,
-          currency: "USD",
-          stock: 75,
-          images: [],
-          isActive: true,
-          createdAt: "2024-01-16T10:00:00Z"
-        }
-      ])
-      setIsLoading(false)
-    }, 1000)
-  })
+  // Usar hook de productos para datos reales de DynamoDB
+  const { products, isLoading, error, refreshProducts } = useProducts()
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.providerName.toLowerCase().includes(searchTerm.toLowerCase())
+    (product.providerName && product.providerName.toLowerCase().includes(searchTerm.toLowerCase()))
   )
+
+  // Recargar datos cuando se regrese de crear un producto
+  useEffect(() => {
+    refreshProducts()
+  }, [])
 
   if (isLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">Error al cargar productos: {error}</p>
+            <Button onClick={refreshProducts}>Reintentar</Button>
+          </div>
         </div>
       </MainLayout>
     )
@@ -167,7 +152,7 @@ export default function ProductsPage() {
                 <DollarSign className="h-8 w-8 text-green-500" />
                 <div>
                   <p className="text-2xl font-bold">
-                    ${products.reduce((sum, p) => sum + p.price, 0).toFixed(2)}
+                    ${products.reduce((sum, p) => sum + (p.price || 0), 0).toFixed(2)}
                   </p>
                   <p className="text-sm text-muted-foreground">Valor Total</p>
                 </div>
@@ -180,7 +165,7 @@ export default function ProductsPage() {
                 <BarChart3 className="h-8 w-8 text-purple-500" />
                 <div>
                   <p className="text-2xl font-bold">
-                    {products.reduce((sum, p) => sum + p.stock, 0)}
+                    {products.reduce((sum, p) => sum + (p.stock || 0), 0)}
                   </p>
                   <p className="text-sm text-muted-foreground">Stock Total</p>
                 </div>
@@ -193,7 +178,7 @@ export default function ProductsPage() {
                 <Package className="h-8 w-8 text-orange-500" />
                 <div>
                   <p className="text-2xl font-bold">
-                    {products.filter(p => p.stock < 10).length}
+                    {products.filter(p => (p.stock || 0) < 10).length}
                   </p>
                   <p className="text-sm text-muted-foreground">Stock Bajo</p>
                 </div>
@@ -216,8 +201,8 @@ export default function ProductsPage() {
                       <CardTitle className="text-lg">{product.name}</CardTitle>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline">{product.category}</Badge>
-                        <Badge variant={product.isActive ? "default" : "secondary"}>
-                          {product.isActive ? "Activo" : "Inactivo"}
+                        <Badge variant={product.status === "active" ? "default" : "secondary"}>
+                          {product.status === "active" ? "Activo" : "Inactivo"}
                         </Badge>
                       </div>
                     </div>
@@ -230,20 +215,24 @@ export default function ProductsPage() {
                 </CardDescription>
                 
                 <div className="space-y-2 mb-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Proveedor:</span>
-                    <span className="font-medium">{product.providerName}</span>
-                  </div>
+                  {product.providerName && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Proveedor:</span>
+                      <span className="font-medium">{product.providerName}</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Precio:</span>
-                    <span className="font-medium">${product.price} {product.currency}</span>
+                    <span className="font-medium">${product.price} {product.currency || 'USD'}</span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Stock:</span>
-                    <span className={`font-medium ${product.stock < 10 ? 'text-red-500' : 'text-green-500'}`}>
-                      {product.stock} unidades
-                    </span>
-                  </div>
+                  {product.stock !== undefined && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Stock:</span>
+                      <span className={`font-medium ${product.stock < 10 ? 'text-red-500' : 'text-green-500'}`}>
+                        {product.stock} unidades
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-2">

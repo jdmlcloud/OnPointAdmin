@@ -27,27 +27,33 @@ import {
   MapPin
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useTags } from "@/hooks/use-tags"
+import { TagSelector } from "@/components/ui/tag-selector"
 
 const providerSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   description: z.string().optional(),
-  email: z.string().email("Email inválido"),
-  phone: z.string().optional(),
-  website: z.string().url("URL inválida").optional().or(z.literal("")),
+  email: z.string().email("Email inválido").optional().or(z.literal("")),
+  phone: z.string().min(1, "El teléfono es requerido"),
+  website: z.string().optional().or(z.literal("")),
   address: z.object({
-    street: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    zipCode: z.string().optional(),
-    country: z.string().optional(),
+    street: z.string().min(1, "La calle es requerida"),
+    city: z.string().min(1, "La ciudad es requerida"),
+    state: z.string().min(1, "El estado es requerido"),
+    zipCode: z.string().min(1, "El código postal es requerido"),
+    country: z.string().min(1, "El país es requerido"),
   }),
   contacts: z.array(z.object({
     name: z.string().min(1, "Nombre del contacto requerido"),
     position: z.string().min(1, "Posición requerida"),
     email: z.string().email("Email inválido"),
-    phone: z.string().optional(),
+    phone: z.string().min(1, "El teléfono es requerido"),
     isPrimary: z.boolean(),
   })).min(1, "Al menos un contacto es requerido"),
+  company: z.string().min(1, "La empresa es requerida"),
+  logo: z.string().optional(),
+  notes: z.string().optional(),
+  tags: z.array(z.string()).optional(),
   isActive: z.boolean(),
 })
 
@@ -58,6 +64,7 @@ export default function NewProviderPage() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
 
   const {
     register,
@@ -95,6 +102,82 @@ export default function NewProviderPage() {
   })
 
   const contacts = watch("contacts")
+  const [tags, setTags] = useState<string[]>([])
+  const [logoUrl, setLogoUrl] = useState("")
+  const { tags: availableTags } = useTags()
+
+  // Función para comprimir imagen (reutilizada de providers/page.tsx)
+  const compressImage = (file: File, maxWidth: number = 400, quality: number = 0.8): Promise<string> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      const img = new Image()
+      
+      img.onload = () => {
+        // Calcular nuevas dimensiones manteniendo proporción
+        let { width, height } = img
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width
+          width = maxWidth
+        }
+        
+        canvas.width = width
+        canvas.height = height
+        
+        // Dibujar imagen redimensionada
+        ctx?.drawImage(img, 0, 0, width, height)
+        
+        // Convertir a base64 con compresión
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality)
+        resolve(compressedDataUrl)
+      }
+      
+      img.src = URL.createObjectURL(file)
+    })
+  }
+
+  // Función para manejar la subida del logo
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      // Validar tamaño del archivo (máximo 5MB antes de compresión)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "El archivo es demasiado grande. Máximo 5MB permitido.",
+          variant: "destructive"
+        })
+        return
+      }
+      
+      setLogoFile(file)
+      
+      try {
+        // Comprimir la imagen
+        const compressedImage = await compressImage(file, 400, 0.7)
+        setLogoPreview(compressedImage)
+      } catch (error) {
+        console.error('Error comprimiendo imagen:', error)
+        // Fallback a imagen original si falla la compresión
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          setLogoPreview(e.target?.result as string)
+        }
+        reader.readAsDataURL(file)
+      }
+    }
+  }
+
+  // Función para eliminar el logo
+  const handleLogoDelete = () => {
+    setLogoFile(null)
+    setLogoPreview(null)
+    // Limpiar el input file
+    const fileInput = document.getElementById('logo-input') as HTMLInputElement
+    if (fileInput) {
+      fileInput.value = ''
+    }
+  }
 
   const addContact = () => {
     const newContacts = [...contacts, {
@@ -105,6 +188,10 @@ export default function NewProviderPage() {
       isPrimary: false,
     }]
     setValue("contacts", newContacts)
+  }
+
+  const handleTagsChange = (newTags: string[]) => {
+    setTags(newTags)
   }
 
   const removeContact = (index: number) => {
@@ -135,8 +222,9 @@ export default function NewProviderPage() {
         website: data.website,
         address: data.address,
         contacts: data.contacts,
+        tags: tags,
         status: data.isActive ? 'active' : 'inactive',
-        logo: logoFile ? logoFile.name : undefined,
+        logo: logoPreview || null,
         notes: ''
       }
 
@@ -174,26 +262,30 @@ export default function NewProviderPage() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.back()}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Volver
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">Nuevo Proveedor</h1>
-            <p className="text-muted-foreground">
-              Agrega un nuevo proveedor al sistema
-            </p>
+      <div className="h-full flex flex-col">
+        {/* Header - Fijo */}
+        <div className="flex-shrink-0 mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Volver
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Nuevo Proveedor</h1>
+              <p className="text-muted-foreground">
+                Agrega un nuevo proveedor al sistema
+              </p>
+            </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Formulario - Con scroll invisible */}
+        <div className="flex-1 overflow-auto scrollbar-hide">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Información Principal */}
             <div className="lg:col-span-2 space-y-6">
@@ -210,7 +302,7 @@ export default function NewProviderPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Nombre *</Label>
+                      <Label htmlFor="name">Nombre <span className="text-red-500">*</span></Label>
                       <Input
                         id="name"
                         {...register("name")}
@@ -221,7 +313,7 @@ export default function NewProviderPage() {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         type="email"
@@ -232,6 +324,18 @@ export default function NewProviderPage() {
                         <p className="text-sm text-destructive">{errors.email.message}</p>
                       )}
                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="company">Empresa <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="company"
+                      {...register("company")}
+                      placeholder="Nombre de la empresa"
+                    />
+                    {errors.company && (
+                      <p className="text-sm text-destructive">{errors.company.message}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -246,25 +350,30 @@ export default function NewProviderPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Teléfono</Label>
+                      <Label htmlFor="phone">Teléfono <span className="text-red-500">*</span></Label>
                       <Input
                         id="phone"
                         {...register("phone")}
                         placeholder="+52 55 1234 5678"
+                        defaultValue="+52"
                       />
+                      {errors.phone && (
+                        <p className="text-sm text-destructive">{errors.phone.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="website">Sitio Web</Label>
                       <Input
                         id="website"
                         {...register("website")}
-                        placeholder="https://proveedor.com"
+                        placeholder="www.proveedor.com"
                       />
                       {errors.website && (
                         <p className="text-sm text-destructive">{errors.website.message}</p>
                       )}
                     </div>
                   </div>
+
                 </CardContent>
               </Card>
 
@@ -278,41 +387,53 @@ export default function NewProviderPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="street">Calle</Label>
+                    <Label htmlFor="street">Calle <span className="text-red-500">*</span></Label>
                     <Input
                       id="street"
                       {...register("address.street")}
                       placeholder="Calle y número"
                     />
+                    {errors.address?.street && (
+                      <p className="text-sm text-destructive">{errors.address.street.message}</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="city">Ciudad</Label>
+                      <Label htmlFor="city">Ciudad <span className="text-red-500">*</span></Label>
                       <Input
                         id="city"
                         {...register("address.city")}
                         placeholder="Ciudad"
                       />
+                      {errors.address?.city && (
+                        <p className="text-sm text-destructive">{errors.address.city.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="state">Estado</Label>
+                      <Label htmlFor="state">Estado <span className="text-red-500">*</span></Label>
                       <Input
                         id="state"
                         {...register("address.state")}
                         placeholder="Estado"
                       />
+                      {errors.address?.state && (
+                        <p className="text-sm text-destructive">{errors.address.state.message}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="zipCode">Código Postal</Label>
+                      <Label htmlFor="zipCode">Código Postal <span className="text-red-500">*</span></Label>
                       <Input
                         id="zipCode"
                         {...register("address.zipCode")}
                         placeholder="12345"
                       />
+                      {errors.address?.zipCode && (
+                        <p className="text-sm text-destructive">{errors.address.zipCode.message}</p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="country">País</Label>
+                    <Label htmlFor="country">País <span className="text-red-500">*</span></Label>
                     <Select
                       value={watch("address.country")}
                       onValueChange={(value) => setValue("address.country", value)}
@@ -378,35 +499,48 @@ export default function NewProviderPage() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Nombre *</Label>
+                          <Label>Nombre <span className="text-red-500">*</span></Label>
                           <Input
                             {...register(`contacts.${index}.name`)}
                             placeholder="Nombre del contacto"
                           />
+                          {errors.contacts?.[index]?.name && (
+                            <p className="text-sm text-destructive">{errors.contacts[index]?.name?.message}</p>
+                          )}
                         </div>
                         <div className="space-y-2">
-                          <Label>Posición *</Label>
+                          <Label>Posición <span className="text-red-500">*</span></Label>
                           <Input
                             {...register(`contacts.${index}.position`)}
                             placeholder="Gerente de Ventas"
                           />
+                          {errors.contacts?.[index]?.position && (
+                            <p className="text-sm text-destructive">{errors.contacts[index]?.position?.message}</p>
+                          )}
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Email *</Label>
+                          <Label>Email <span className="text-red-500">*</span></Label>
                           <Input
                             type="email"
                             {...register(`contacts.${index}.email`)}
                             placeholder="contacto@proveedor.com"
                           />
+                          {errors.contacts?.[index]?.email && (
+                            <p className="text-sm text-destructive">{errors.contacts[index]?.email?.message}</p>
+                          )}
                         </div>
                         <div className="space-y-2">
-                          <Label>Teléfono</Label>
+                          <Label>Teléfono <span className="text-red-500">*</span></Label>
                           <Input
                             {...register(`contacts.${index}.phone`)}
                             placeholder="+52 55 1234 5678"
+                            defaultValue="+52"
                           />
+                          {errors.contacts?.[index]?.phone && (
+                            <p className="text-sm text-destructive">{errors.contacts[index]?.phone?.message}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -426,20 +560,71 @@ export default function NewProviderPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Arrastra y suelta el logo aquí
-                    </p>
-                    <Button variant="outline" size="sm">
-                      Seleccionar Archivo
-                    </Button>
+                  {/* Preview del logo */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+                      {logoPreview ? (
+                        <img 
+                          src={logoPreview} 
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Building2 className="w-8 h-8 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        id="logo-input"
+                        onChange={handleLogoUpload}
+                      />
+                      <label
+                        htmlFor="logo-input"
+                        className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 cursor-pointer"
+                      >
+                        {logoFile ? 'Cambiar' : 'Subir'}
+                      </label>
+                      {logoFile && (
+                        <button
+                          type="button"
+                          onClick={handleLogoDelete}
+                          className="px-3 py-1 text-xs bg-destructive text-destructive-foreground rounded hover:bg-destructive/90"
+                        >
+                          Borrar
+                        </button>
+                      )}
+                    </div>
                   </div>
+                  
                   {logoFile && (
                     <div className="text-sm text-muted-foreground">
                       Archivo seleccionado: {logoFile.name}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+
+              {/* Etiquetas */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Etiquetas</CardTitle>
+                  <CardDescription>
+                    Agrega etiquetas para categorizar y filtrar proveedores
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <TagSelector
+                    selectedTags={tags}
+                    onTagsChange={handleTagsChange}
+                    availableTags={availableTags}
+                    placeholder="Buscar o crear etiqueta..."
+                  />
+                  <div className="text-sm text-muted-foreground">
+                    Usa #etiqueta en la búsqueda para filtrar por etiquetas
+                  </div>
                 </CardContent>
               </Card>
 
@@ -463,41 +648,41 @@ export default function NewProviderPage() {
                 </CardContent>
               </Card>
 
-              {/* Acciones */}
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-2">
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="h-4 w-4 mr-2" />
-                          Guardar Proveedor
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => router.back()}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
-        </form>
+          </form>
+        </div>
+
+        {/* Botones de Acción - Fijos */}
+        <div className="flex-shrink-0 mt-6 pt-6 border-t bg-background">
+          <div className="flex justify-end gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              disabled={isLoading}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              onClick={handleSubmit(onSubmit)}
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Guardando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  Guardar Proveedor
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
     </MainLayout>
   )

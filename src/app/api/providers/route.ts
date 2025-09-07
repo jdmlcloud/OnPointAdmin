@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
       contacts,
       status, 
       logo,
-      notes 
+      notes,
+      tags
     } = body
 
     if (!name || !email || !company || !phone) {
@@ -80,7 +81,8 @@ export async function POST(request: NextRequest) {
       contacts: contacts || [],
       status: status || 'active',
       logo,
-      notes
+      notes,
+      tags: tags || []
     })
 
     return NextResponse.json({

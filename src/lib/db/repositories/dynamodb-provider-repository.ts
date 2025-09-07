@@ -1,4 +1,4 @@
-import { DynamoDBBaseRepository } from './dynamodb-base-repository'
+import { DynamoDBBaseRepository, BaseEntity } from './dynamodb-base-repository'
 import { TABLE_NAMES } from '@/lib/aws/dynamodb'
 
 export interface Provider extends BaseEntity {
@@ -25,6 +25,7 @@ export interface Provider extends BaseEntity {
   status: 'active' | 'inactive' | 'pending'
   logo?: string
   notes?: string
+  tags?: string[]
 }
 
 export class DynamoDBProviderRepository extends DynamoDBBaseRepository<Provider> {

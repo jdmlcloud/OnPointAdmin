@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Provider } from '@/lib/db/models'
+import { Provider } from '@/lib/db/repositories/dynamodb-provider-repository'
 
 interface UseProvidersReturn {
   providers: Provider[]
@@ -82,7 +82,8 @@ export function useProviders(): UseProvidersReturn {
         throw new Error(errorData.error || `Error ${response.status}`)
       }
       
-      const updatedProvider = await response.json()
+      const data = await response.json()
+      const updatedProvider = data.provider
       setProviders(prev => prev.map(provider => provider.id === id ? updatedProvider : provider))
       return updatedProvider
     } catch (err) {

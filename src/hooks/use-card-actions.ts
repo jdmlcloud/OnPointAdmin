@@ -150,6 +150,7 @@ export function useCardActions() {
 
   return {
     modals,
+    setModals,
     handleView,
     handleEdit,
     handleDelete,

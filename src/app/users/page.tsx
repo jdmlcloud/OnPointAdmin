@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import { AnimatedButton } from "@/components/ui/animated-button"
 import { ActionModal } from "@/components/ui/action-modal"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
 import { useCardActions } from "@/hooks/use-card-actions"
+import { useUsers } from "@/hooks/use-users"
 import { 
   Users, 
   Plus, 
@@ -57,8 +58,8 @@ interface User {
   position?: string
   lastLogin?: string
   createdAt: string
-  updatedAt: string
-  permissions: {
+  updatedAt?: string
+  permissions?: {
     canManageUsers: boolean
     canManageProviders: boolean
     canManageProducts: boolean
@@ -73,7 +74,7 @@ interface User {
     canViewReports: boolean
     canManageIntegrations: boolean
   }
-  stats: {
+  stats?: {
     quotationsCreated: number
     proposalsGenerated: number
     messagesProcessed: number
@@ -95,186 +96,18 @@ export default function UsersPage() {
     closeModal
   } = useCardActions()
   
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: "1",
-      name: "María González",
-      email: "maria@onpoint.com",
-      phone: "+52 55 1234 5678",
-      role: 'admin',
-      status: 'active',
-      avatar: "/api/placeholder/40/40",
-      department: "Administración",
-      position: "Administradora General",
-      lastLogin: "2024-01-20T14:30:00Z",
-      createdAt: "2024-01-01T00:00:00Z",
-      updatedAt: "2024-01-20T14:30:00Z",
-      permissions: {
-        canManageUsers: true,
-        canManageProviders: true,
-        canManageProducts: true,
-        canManageQuotations: true,
-        canManageProposals: true,
-        canManageWhatsApp: true,
-        canManageSettings: true,
-        canViewAnalytics: true,
-        canManageSystem: true,
-        canGeneratePDFs: true,
-        canManageTemplates: true,
-        canViewReports: true,
-        canManageIntegrations: true
-      },
-      stats: {
-        quotationsCreated: 45,
-        proposalsGenerated: 32,
-        messagesProcessed: 156,
-        lastActivity: "2024-01-20T14:30:00Z"
-      }
-    },
-    {
-      id: "2",
-      name: "Carlos Rodríguez",
-      email: "carlos@onpoint.com",
-      phone: "+52 55 2345 6789",
-      role: 'ejecutivo',
-      status: 'active',
-      avatar: "/api/placeholder/40/40",
-      department: "Ventas",
-      position: "Ejecutivo Senior",
-      lastLogin: "2024-01-20T10:15:00Z",
-      createdAt: "2024-01-05T00:00:00Z",
-      updatedAt: "2024-01-20T10:15:00Z",
-      permissions: {
-        canManageUsers: false,
-        canManageProviders: true,
-        canManageProducts: true,
-        canManageQuotations: true,
-        canManageProposals: true,
-        canManageWhatsApp: true,
-        canManageSettings: false,
-        canViewAnalytics: true,
-        canManageSystem: false,
-        canGeneratePDFs: true,
-        canManageTemplates: false,
-        canViewReports: true,
-        canManageIntegrations: false
-      },
-      stats: {
-        quotationsCreated: 28,
-        proposalsGenerated: 22,
-        messagesProcessed: 89,
-        lastActivity: "2024-01-20T10:15:00Z"
-      }
-    },
-    {
-      id: "3",
-      name: "Ana Martínez",
-      email: "ana@onpoint.com",
-      phone: "+52 55 3456 7890",
-      role: 'ejecutivo',
-      status: 'active',
-      avatar: "/api/placeholder/40/40",
-      department: "Ventas",
-      position: "Ejecutiva Junior",
-      lastLogin: "2024-01-19T16:45:00Z",
-      createdAt: "2024-01-10T00:00:00Z",
-      updatedAt: "2024-01-19T16:45:00Z",
-      permissions: {
-        canManageUsers: false,
-        canManageProviders: true,
-        canManageProducts: true,
-        canManageQuotations: true,
-        canManageProposals: true,
-        canManageWhatsApp: true,
-        canManageSettings: false,
-        canViewAnalytics: true,
-        canManageSystem: false,
-        canGeneratePDFs: true,
-        canManageTemplates: false,
-        canViewReports: true,
-        canManageIntegrations: false
-      },
-      stats: {
-        quotationsCreated: 15,
-        proposalsGenerated: 12,
-        messagesProcessed: 45,
-        lastActivity: "2024-01-19T16:45:00Z"
-      }
-    },
-    {
-      id: "4",
-      name: "Luis Fernández",
-      email: "luis@empresa.com",
-      role: 'cliente',
-      status: 'active',
-      avatar: "/api/placeholder/40/40",
-      department: "Compras",
-      position: "Gerente de Compras",
-      lastLogin: "2024-01-18T11:30:00Z",
-      createdAt: "2024-01-15T00:00:00Z",
-      updatedAt: "2024-01-18T11:30:00Z",
-      permissions: {
-        canManageUsers: false,
-        canManageProviders: false,
-        canManageProducts: false,
-        canManageQuotations: false,
-        canManageProposals: true,
-        canManageWhatsApp: false,
-        canManageSettings: false,
-        canViewAnalytics: false,
-        canManageSystem: false,
-        canGeneratePDFs: false,
-        canManageTemplates: false,
-        canViewReports: false,
-        canManageIntegrations: false
-      },
-      stats: {
-        quotationsCreated: 0,
-        proposalsGenerated: 3,
-        messagesProcessed: 0,
-        lastActivity: "2024-01-18T11:30:00Z"
-      }
-    },
-    {
-      id: "5",
-      name: "Roberto Silva",
-      email: "roberto@onpoint.com",
-      phone: "+52 55 4567 8901",
-      role: 'ejecutivo',
-      status: 'pending',
-      avatar: "/api/placeholder/40/40",
-      department: "Ventas",
-      position: "Ejecutivo",
-      createdAt: "2024-01-20T09:00:00Z",
-      updatedAt: "2024-01-20T09:00:00Z",
-      permissions: {
-        canManageUsers: false,
-        canManageProviders: true,
-        canManageProducts: true,
-        canManageQuotations: true,
-        canManageProposals: true,
-        canManageWhatsApp: true,
-        canManageSettings: false,
-        canViewAnalytics: true,
-        canManageSystem: false,
-        canGeneratePDFs: true,
-        canManageTemplates: false,
-        canViewReports: true,
-        canManageIntegrations: false
-      },
-      stats: {
-        quotationsCreated: 0,
-        proposalsGenerated: 0,
-        messagesProcessed: 0,
-        lastActivity: "2024-01-20T09:00:00Z"
-      }
-    }
-  ])
+  // Usar hook de usuarios para datos reales de DynamoDB
+  const { users, isLoading: usersLoading, error, refreshUsers } = useUsers()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedRole, setSelectedRole] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedDepartment, setSelectedDepartment] = useState("all")
+
+  // Recargar datos cuando se regrese de crear un usuario
+  useEffect(() => {
+    refreshUsers()
+  }, [])
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -285,6 +118,29 @@ export default function UsersPage() {
     const matchesDepartment = selectedDepartment === "all" || user.department === selectedDepartment
     return matchesSearch && matchesRole && matchesStatus && matchesDepartment
   })
+
+  if (usersLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">Error al cargar usuarios: {error}</p>
+            <Button onClick={refreshUsers}>Reintentar</Button>
+          </div>
+        </div>
+      </MainLayout>
+    )
+  }
 
   const getStatusColor = (status: User['status']) => {
     switch (status) {
@@ -744,41 +600,43 @@ export default function UsersPage() {
                   <div className="space-y-2">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Cotizaciones Creadas</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats.quotationsCreated}</p>
+                      <p className="text-sm font-semibold">{modals.view.data.stats?.quotationsCreated || 0}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Propuestas Generadas</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats.proposalsGenerated}</p>
+                      <p className="text-sm font-semibold">{modals.view.data.stats?.proposalsGenerated || 0}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Mensajes Procesados</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats.messagesProcessed}</p>
+                      <p className="text-sm font-semibold">{modals.view.data.stats?.messagesProcessed || 0}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Última Actividad</label>
-                      <p className="text-sm">{new Date(modals.view.data.stats.lastActivity).toLocaleString()}</p>
+                      <p className="text-sm">{modals.view.data.stats ? new Date(modals.view.data.stats.lastActivity).toLocaleString() : 'N/A'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <h4 className="font-medium">Permisos</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(modals.view.data.permissions).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-2">
-                      {value ? (
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-red-500" />
-                      )}
-                      <span className="text-sm">
-                        {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                    </div>
-                  ))}
+              {modals.view.data.permissions && (
+                <div className="space-y-4">
+                  <h4 className="font-medium">Permisos</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(modals.view.data.permissions).map(([key, value]) => (
+                      <div key={key} className="flex items-center gap-2">
+                        {value ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <XCircle className="h-4 w-4 text-red-500" />
+                        )}
+                        <span className="text-sm">
+                          {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </ActionModal>
@@ -871,22 +729,24 @@ export default function UsersPage() {
                 </Select>
               </div>
 
-              <div className="space-y-4">
-                <h4 className="font-medium">Permisos</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(modals.edit.data.permissions).map(([key, value]) => (
-                    <div key={key} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={key}
-                        defaultChecked={Boolean(value)}
-                      />
-                      <Label htmlFor={key} className="text-sm">
-                        {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
-                      </Label>
-                    </div>
-                  ))}
+              {modals.edit.data.permissions && (
+                <div className="space-y-4">
+                  <h4 className="font-medium">Permisos</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(modals.edit.data.permissions).map(([key, value]) => (
+                      <div key={key} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={key}
+                          defaultChecked={Boolean(value)}
+                        />
+                        <Label htmlFor={key} className="text-sm">
+                          {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </ActionModal>
