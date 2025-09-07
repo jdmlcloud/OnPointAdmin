@@ -45,7 +45,7 @@ export async function PUT(
     const updateSchema = z.object({
       name: z.string().min(1).optional(),
       email: z.string().email().optional(),
-      role: z.enum(['admin', 'ejecutivo', 'cliente']).optional(),
+      role: z.enum(['admin', 'user', 'manager']).optional(),
       status: z.enum(['active', 'inactive', 'pending']).optional(),
       avatar: z.string().url().optional(),
     })
