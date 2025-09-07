@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptionsDev } from '@/lib/auth-dev'
-import { ProviderRepository } from '@/lib/db/repositories/provider.repository'
-import { ProviderSchema, CreateProvider } from '@/lib/db/models'
+import DynamoDBProviderRepositoryHybrid from '@/lib/db/repositories/dynamodb-provider-repository-hybrid'
 import { z } from 'zod'
 
-const providerRepository = new ProviderRepository()
+const providerRepository = DynamoDBProviderRepositoryHybrid.getInstance()
 
 // GET /api/providers - Listar proveedores
 export async function GET(request: NextRequest) {
@@ -23,17 +22,8 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
     const search = searchParams.get('search')
 
-    let providers
-    if (category) {
-      providers = await providerRepository.getByCategory(category)
-    } else if (status) {
-      providers = await providerRepository.search({ status })
-    } else if (search) {
-      providers = await providerRepository.searchByName(search)
-    } else {
-      const result = await providerRepository.listAll(limit * page)
-      providers = result.items
-    }
+    // Obtener todos los proveedores usando el repositorio híbrido
+    const providers = await providerRepository.listAll()
 
     // Paginación manual
     const startIndex = (page - 1) * limit
@@ -48,6 +38,7 @@ export async function GET(request: NextRequest) {
         total: providers.length,
         totalPages: Math.ceil(providers.length / limit),
       },
+      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     })
   } catch (error) {
     console.error('Error al obtener proveedores:', error)
@@ -74,20 +65,29 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     
-    // Validar datos de entrada
-    const validatedData = ProviderSchema.omit({ 
-      id: true, 
-      createdAt: true, 
-      updatedAt: true,
-      PK: true,
-      SK: true,
-      GSI1PK: true,
-      GSI1SK: true
-    }).parse(body)
+    // Validar datos básicos
+    const { name, email, company, phone, address, status = 'pending' } = body
 
-    const newProvider = await providerRepository.createProvider(validatedData)
+    if (!name || !email || !company) {
+      return NextResponse.json(
+        { error: 'Nombre, email y empresa son requeridos' },
+        { status: 400 }
+      )
+    }
 
-    return NextResponse.json(newProvider, { status: 201 })
+    const newProvider = await providerRepository.create({
+      name,
+      email,
+      company,
+      phone: phone || '',
+      address: address || '',
+      status,
+    })
+
+    return NextResponse.json({
+      ...newProvider,
+      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+    }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
