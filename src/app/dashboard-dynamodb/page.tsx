@@ -100,9 +100,13 @@ export default function DashboardDynamoDBPage() {
       setLoading(true);
       setError(null);
       
+      // Forzar modo real en producción
+      const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('amplifyapp.com');
+      const forceReal = isProduction ? '?forceReal=true' : '';
+      
       const [statsResponse, productsResponse] = await Promise.all([
-        fetch('/api/dynamodb/stats'),
-        fetch('/api/dynamodb/products')
+        fetch(`/api/dynamodb/stats${forceReal}`),
+        fetch(`/api/dynamodb/products${forceReal}`)
       ]);
       
       const statsData = await statsResponse.json();

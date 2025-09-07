@@ -26,7 +26,7 @@ export default function CognitoRealDashboardPage() {
     try {
       setIsLoggingOut(true)
       await signOut()
-      router.push('/auth/cognito-real')
+      router.push('/dashboard-selector')
     } catch (err) {
       console.error('Error al cerrar sesión:', err)
     } finally {

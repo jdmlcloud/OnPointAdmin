@@ -13,6 +13,12 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type');
+    const forceReal = searchParams.get('forceReal') === 'true';
+    
+    // Forzar modo real en producción si se solicita
+    if (forceReal) {
+      process.env.DYNAMODB_CONFIGURED = 'true';
+    }
 
     if (type === 'status') {
       // Obtener estado de conexión DynamoDB

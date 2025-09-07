@@ -11,6 +11,10 @@ export default function DashboardSelectorPage() {
   const [selectedDashboard, setSelectedDashboard] = useState<string | null>(null)
   const router = useRouter()
 
+  // Detectar si estamos en producción
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                      (typeof window !== 'undefined' && window.location.hostname.includes('amplifyapp.com'))
+
   const dashboards = [
     {
       id: 'cognito',
@@ -27,26 +31,27 @@ export default function DashboardSelectorPage() {
         'Datos persistentes',
         'Listo para producción'
       ],
-      href: '/dashboard-cognito'
+      href: '/auth/cognito-real'
     },
     {
       id: 'dynamodb',
       title: 'Dashboard con AWS DynamoDB',
       description: 'Base de datos real con AWS DynamoDB, datos persistentes y APIs reales',
       icon: HardDrive,
-      status: 'En Desarrollo',
+      status: isProduction ? 'Listo para Producción' : 'En Desarrollo',
       color: 'bg-purple-500',
-      badgeColor: 'bg-blue-100 text-blue-800',
+      badgeColor: isProduction ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800',
       features: [
         'Base de datos AWS DynamoDB real',
         'APIs REST completas',
         'Datos persistentes',
         'Estadísticas en tiempo real',
-        'Modo simulación disponible'
+        ...(isProduction ? ['Modo producción activo'] : ['Modo simulación disponible'])
       ],
       href: '/dashboard-dynamodb'
     },
-    {
+    // Solo mostrar demo en desarrollo
+    ...(isProduction ? [] : [{
       id: 'original',
       title: 'Dashboard Original (Demo)',
       description: 'Sistema de demostración con autenticación simulada y datos de prueba',
@@ -62,7 +67,7 @@ export default function DashboardSelectorPage() {
         'No persistente'
       ],
       href: '/dashboard'
-    }
+    }])
   ]
 
   const handleSelectDashboard = (dashboardId: string) => {

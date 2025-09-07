@@ -13,6 +13,12 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
+    const forceReal = searchParams.get('forceReal') === 'true';
+    
+    // Forzar modo real en producción si se solicita
+    if (forceReal) {
+      process.env.DYNAMODB_CONFIGURED = 'true';
+    }
 
     let products;
 
