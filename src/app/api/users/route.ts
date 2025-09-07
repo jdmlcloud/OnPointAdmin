@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptionsDev } from '@/lib/auth-dev'
-import DynamoDBUserRepositoryProduction from '@/lib/db/repositories/dynamodb-user-repository-production'
 import { z } from 'zod'
 
-const userRepository = DynamoDBUserRepositoryProduction.getInstance()
+// TODO: Implementar repositorio de usuarios cuando se configure DynamoDB
 
 // GET /api/users - Listar usuarios
 export async function GET(request: NextRequest) {
@@ -26,23 +25,16 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get('role')
     const status = searchParams.get('status')
 
-    // Obtener todos los usuarios usando el repositorio híbrido
-    const users = await userRepository.listAll()
-
-    // Paginación manual
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
-    const paginatedUsers = users.slice(startIndex, endIndex)
-
+    // TODO: Implementar cuando se configure DynamoDB
     return NextResponse.json({
-      users: paginatedUsers,
+      users: [],
       pagination: {
         page,
         limit,
-        total: users.length,
-        totalPages: Math.ceil(users.length / limit),
+        total: 0,
+        totalPages: 0,
       },
-      source: 'DynamoDB (Producción - Solo Real)',
+      message: 'DynamoDB no configurado - Solo Cognito activo',
     })
   } catch (error) {
     console.error('Error al obtener usuarios:', error)

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptionsDev } from '@/lib/auth-dev'
-import DynamoDBProviderRepositoryProduction from '@/lib/db/repositories/dynamodb-provider-repository-production'
 import { z } from 'zod'
 
-const providerRepository = DynamoDBProviderRepositoryProduction.getInstance()
+// TODO: Implementar repositorio de proveedores cuando se configure DynamoDB
 
 // GET /api/providers - Listar proveedores
 export async function GET(request: NextRequest) {
@@ -22,23 +21,16 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status')
     const search = searchParams.get('search')
 
-    // Obtener todos los proveedores usando el repositorio híbrido
-    const providers = await providerRepository.listAll()
-
-    // Paginación manual
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
-    const paginatedProviders = providers.slice(startIndex, endIndex)
-
+    // TODO: Implementar cuando se configure DynamoDB
     return NextResponse.json({
-      providers: paginatedProviders,
+      providers: [],
       pagination: {
         page,
         limit,
-        total: providers.length,
-        totalPages: Math.ceil(providers.length / limit),
+        total: 0,
+        totalPages: 0,
       },
-      source: 'DynamoDB (Producción - Solo Real)',
+      message: 'DynamoDB no configurado - Solo Cognito activo',
     })
   } catch (error) {
     console.error('Error al obtener proveedores:', error)

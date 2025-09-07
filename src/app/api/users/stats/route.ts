@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptionsDev } from '@/lib/auth-dev'
-import { UserRepository } from '@/lib/db/repositories/user.repository'
 
-const userRepository = new UserRepository()
+// TODO: Implementar repositorio de usuarios cuando se configure DynamoDB
 
 // GET /api/users/stats - Obtener estadísticas de usuarios
 export async function GET(request: NextRequest) {
@@ -19,9 +18,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
     }
 
-    const stats = await userRepository.getUserStats()
-
-    return NextResponse.json(stats)
+    // TODO: Implementar cuando se configure DynamoDB
+    return NextResponse.json({
+      totalUsers: 0,
+      activeUsers: 0,
+      pendingUsers: 0,
+      message: 'DynamoDB no configurado - Solo Cognito activo',
+    })
   } catch (error) {
     console.error('Error al obtener estadísticas de usuarios:', error)
     return NextResponse.json(
