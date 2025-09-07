@@ -5,19 +5,28 @@ const providerRepository = new DynamoDBProviderRepository()
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 Debug: Iniciando GET /api/providers...')
+    
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const status = searchParams.get('status')
 
+    console.log('🔍 Parámetros:', { page, limit, status })
+
     let providers
     
     if (status) {
+      console.log('🔍 Buscando por status:', status)
       providers = await providerRepository.findByStatus(status as any)
     } else {
+      console.log('🔍 Obteniendo todos los providers...')
       const result = await providerRepository.findAll({ page, limit })
       providers = result.items
+      console.log('🔍 Resultado findAll:', { itemsCount: providers.length, result })
     }
+    
+    console.log('🔍 Providers obtenidos:', providers.length)
     
     return NextResponse.json({
       success: true,
@@ -26,6 +35,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('❌ Error obteniendo proveedores:', error)
+    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
     return NextResponse.json({
       success: false,
       error: 'Error al obtener proveedores',
