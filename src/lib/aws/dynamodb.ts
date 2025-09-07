@@ -128,10 +128,10 @@ export const checkDynamoDBStatus = async (): Promise<DynamoDBStatus> => {
       NODE_ENV: process.env.NODE_ENV
     });
 
-    // Forzar modo real en producción
-    const isProduction = process.env.NODE_ENV === 'production' || 
-                        process.env.VERCEL === '1' ||
-                        (typeof window !== 'undefined' && window.location.hostname.includes('amplifyapp.com'));
+          // Forzar modo real en producción
+          const isProduction = process.env.NODE_ENV === 'production' || 
+                              process.env.VERCEL === '1' ||
+                              process.env.NEXTAUTH_URL?.includes('amplifyapp.com');
     
     if (isProduction) {
       console.log('🔧 Modo producción detectado - Forzando DynamoDB real');

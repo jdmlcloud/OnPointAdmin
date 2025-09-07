@@ -25,7 +25,7 @@ export class DynamoDBUserRepositoryHybrid {
     // Forzar modo real en producción
     const isProduction = process.env.NODE_ENV === 'production' || 
                         process.env.VERCEL === '1' ||
-                        (typeof window !== 'undefined' && window.location.hostname.includes('amplifyapp.com'));
+                        process.env.NEXTAUTH_URL?.includes('amplifyapp.com');
     
     if (isProduction) {
       console.log('🔧 Modo producción detectado - Forzando DynamoDB real');
