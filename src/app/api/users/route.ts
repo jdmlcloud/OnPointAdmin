@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         total: users.length,
         totalPages: Math.ceil(users.length / limit),
       },
-      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     })
   } catch (error) {
     console.error('Error al obtener usuarios:', error)
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ...newUser,
-      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {

@@ -42,7 +42,7 @@ export class DynamoDBProductRepositoryProduction {
   }
 
   // Actualizar producto - SOLO datos reales
-  async update(id: string, productData: Partial<DynamoDBProduct>): Promise<DynamoDBProduct> {
+  async update(id: string, productData: Partial<DynamoDBProduct>): Promise<DynamoDBProduct | null> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.update(id, productData);
   }
@@ -54,7 +54,14 @@ export class DynamoDBProductRepositoryProduction {
   }
 
   // Obtener estadísticas - SOLO datos reales
-  async getStats(): Promise<{ total: number; active: number; inactive: number }> {
+  async getStats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    outOfStock: number;
+    byCategory: Record<string, number>;
+    totalValue: number;
+  }> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.getStats();
   }
@@ -72,9 +79,21 @@ export class DynamoDBProductRepositoryProduction {
   }
 
   // Obtener productos por estado - SOLO datos reales
-  async findByStatus(status: string): Promise<DynamoDBProduct[]> {
+  async findByStatus(status: 'active' | 'inactive' | 'out_of_stock'): Promise<DynamoDBProduct[]> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.findByStatus(status);
+  }
+
+  // Obtener productos por rango de precio - SOLO datos reales
+  async findByPriceRange(minPrice: number, maxPrice: number): Promise<DynamoDBProduct[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.findByPriceRange(minPrice, maxPrice);
+  }
+
+  // Obtener productos activos - SOLO datos reales
+  async getActiveProducts(): Promise<DynamoDBProduct[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.getActiveProducts();
   }
 }
 

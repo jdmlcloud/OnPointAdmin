@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: providers,
       count: providers.length,
-      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     });
   } catch (error) {
     console.error('Error al obtener proveedores DynamoDB:', error);
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newProvider,
       message: 'Proveedor creado exitosamente',
-      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     }, { status: 201 });
   } catch (error) {
     console.error('Error al crear proveedor DynamoDB:', error);

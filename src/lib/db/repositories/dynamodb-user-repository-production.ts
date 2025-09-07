@@ -42,7 +42,7 @@ export class DynamoDBUserRepositoryProduction {
   }
 
   // Actualizar usuario - SOLO datos reales
-  async update(id: string, userData: Partial<DynamoDBUser>): Promise<DynamoDBUser> {
+  async update(id: string, userData: Partial<DynamoDBUser>): Promise<DynamoDBUser | null> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.update(id, userData);
   }
@@ -54,7 +54,17 @@ export class DynamoDBUserRepositoryProduction {
   }
 
   // Obtener estadísticas - SOLO datos reales
-  async getStats(): Promise<{ total: number; active: number; inactive: number }> {
+  async getStats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    pending: number;
+    byRole: {
+      admin: number;
+      user: number;
+      provider: number;
+    };
+  }> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.getStats();
   }
@@ -63,6 +73,12 @@ export class DynamoDBUserRepositoryProduction {
   async search(query: string): Promise<DynamoDBUser[]> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.search(query);
+  }
+
+  // Obtener usuarios por rol - SOLO datos reales
+  async findByRole(role: 'admin' | 'user' | 'provider'): Promise<DynamoDBUser[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.findByRole(role);
   }
 }
 

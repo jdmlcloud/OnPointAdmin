@@ -42,7 +42,7 @@ export class DynamoDBProviderRepositoryProduction {
   }
 
   // Actualizar proveedor - SOLO datos reales
-  async update(id: string, providerData: Partial<DynamoDBProvider>): Promise<DynamoDBProvider> {
+  async update(id: string, providerData: Partial<DynamoDBProvider>): Promise<DynamoDBProvider | null> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.update(id, providerData);
   }
@@ -54,7 +54,12 @@ export class DynamoDBProviderRepositoryProduction {
   }
 
   // Obtener estadísticas - SOLO datos reales
-  async getStats(): Promise<{ total: number; active: number; inactive: number; pending: number }> {
+  async getStats(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+    pending: number;
+  }> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.getStats();
   }
@@ -66,9 +71,15 @@ export class DynamoDBProviderRepositoryProduction {
   }
 
   // Obtener proveedores por estado - SOLO datos reales
-  async findByStatus(status: string): Promise<DynamoDBProvider[]> {
+  async findByStatus(status: 'active' | 'inactive' | 'pending'): Promise<DynamoDBProvider[]> {
     console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
     return await this.realRepository.findByStatus(status);
+  }
+
+  // Obtener proveedores activos - SOLO datos reales
+  async getActiveProviders(): Promise<DynamoDBProvider[]> {
+    console.log('🚀 Producción: Usando SOLO datos reales de DynamoDB');
+    return await this.realRepository.getActiveProviders();
   }
 }
 

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: users,
       count: users.length,
-      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     });
   } catch (error) {
     console.error('Error al obtener usuarios DynamoDB:', error);
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newUser,
       message: 'Usuario creado exitosamente',
-      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     }, { status: 201 });
   } catch (error) {
     console.error('Error al crear usuario DynamoDB:', error);

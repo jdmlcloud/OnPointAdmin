@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: products,
       count: products.length,
-      source: `DynamoDB (${productRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     });
   } catch (error) {
     console.error('Error al obtener productos DynamoDB:', error);
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newProduct,
       message: 'Producto creado exitosamente',
-      source: `DynamoDB (${productRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     }, { status: 201 });
   } catch (error) {
     console.error('Error al crear producto DynamoDB:', error);

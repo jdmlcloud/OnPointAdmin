@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
         total: providers.length,
         totalPages: Math.ceil(providers.length / limit),
       },
-      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     })
   } catch (error) {
     console.error('Error al obtener proveedores:', error)
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       ...newProvider,
-      source: `DynamoDB (${providerRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {

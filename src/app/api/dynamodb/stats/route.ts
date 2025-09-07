@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: stats,
-        source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+        source: 'DynamoDB (Producción - Solo Real)',
       });
     }
 
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: generalStats,
-      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
+      source: 'DynamoDB (Producción - Solo Real)',
     });
   } catch (error) {
     console.error('Error al obtener estadísticas DynamoDB:', error);
