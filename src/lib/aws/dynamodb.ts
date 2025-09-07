@@ -117,6 +117,27 @@ export interface DynamoDBStatus {
 // Función para verificar estado de DynamoDB
 export const checkDynamoDBStatus = async (): Promise<DynamoDBStatus> => {
   try {
+    // Log para debug
+    console.log('🔍 Verificando estado de DynamoDB...');
+    console.log('🔑 Variables de entorno:', {
+      DYNAMODB_CONFIGURED: process.env.DYNAMODB_CONFIGURED,
+      DYNAMODB_REGION: process.env.DYNAMODB_REGION,
+      AWS_REGION: process.env.AWS_REGION,
+      DYNAMODB_ACCESS_KEY_ID: process.env.DYNAMODB_ACCESS_KEY_ID ? '***' : 'undefined',
+      AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID ? '***' : 'undefined',
+      NODE_ENV: process.env.NODE_ENV
+    });
+
+    // Forzar modo real en producción
+    const isProduction = process.env.NODE_ENV === 'production' || 
+                        process.env.VERCEL === '1' ||
+                        (typeof window !== 'undefined' && window.location.hostname.includes('amplifyapp.com'));
+    
+    if (isProduction) {
+      console.log('🔧 Modo producción detectado - Forzando DynamoDB real');
+      process.env.DYNAMODB_CONFIGURED = 'true';
+    }
+
     // Verificar si DynamoDB está configurado
     if (!process.env.DYNAMODB_CONFIGURED || process.env.DYNAMODB_CONFIGURED !== 'true') {
       return {

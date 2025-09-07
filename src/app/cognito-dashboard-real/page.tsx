@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { LogOut, User, Mail, Shield, CheckCircle, Loader2, Database, Cloud } from 'lucide-react'
+import { LogOut, User, Mail, Shield, CheckCircle, Loader2, Database, Cloud, ArrowRight } from 'lucide-react'
 import { useCognitoReal } from '@/hooks/use-cognito-real'
 
 export default function CognitoRealDashboardPage() {
@@ -228,16 +228,34 @@ export default function CognitoRealDashboardPage() {
         {/* Success Message */}
         <Card className="mt-6 border-blue-200 bg-blue-50 dark:bg-blue-900/20">
           <CardContent className="pt-6">
-            <div className="flex items-center">
-              <CheckCircle className="h-6 w-6 text-blue-600 mr-3" />
-              <div>
-                <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">
-                  ¡Autenticación Real con AWS Cognito Exitosa!
-                </h3>
-                <p className="text-blue-700 dark:text-blue-300">
-                  Has iniciado sesión correctamente con AWS Cognito real.
-                  Los tokens JWT han sido obtenidos directamente de AWS y validados exitosamente.
-                </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <CheckCircle className="h-6 w-6 text-blue-600 mr-3" />
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-200">
+                    ¡Autenticación Real con AWS Cognito Exitosa!
+                  </h3>
+                  <p className="text-blue-700 dark:text-blue-300">
+                    Has iniciado sesión correctamente con AWS Cognito real.
+                    Los tokens JWT han sido obtenidos directamente de AWS y validados exitosamente.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => router.push('/dashboard-dynamodb')}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  <Database className="h-4 w-4 mr-2" />
+                  Ir a DynamoDB
+                </Button>
+                <Button 
+                  onClick={() => router.push('/dashboard-selector')}
+                  variant="outline"
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Dashboard Selector
+                </Button>
               </div>
             </div>
           </CardContent>
