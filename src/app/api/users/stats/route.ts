@@ -1,35 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptionsDev } from '@/lib/auth-dev'
-
-// TODO: Implementar repositorio de usuarios cuando se configure DynamoDB
+import { DynamoDBUserRepository } from '@/lib/db/repositories/dynamodb-user-repository'
 
 // GET /api/users/stats - Obtener estadísticas de usuarios
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptionsDev)
+    const userRepository = new DynamoDBUserRepository()
     
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Solo admin puede ver estadísticas
-    if (session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
-    }
-
-    // TODO: Implementar cuando se configure DynamoDB
+    // Obtener estadísticas desde DynamoDB
+    const stats = await userRepository.getStats()
+    
     return NextResponse.json({
-      totalUsers: 0,
-      activeUsers: 0,
-      pendingUsers: 0,
-      message: 'DynamoDB no configurado - Solo Cognito activo',
+      success: true,
+      stats,
+      message: 'Estadísticas de usuarios obtenidas exitosamente desde DynamoDB'
     })
   } catch (error) {
     console.error('Error al obtener estadísticas de usuarios:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({
+      success: false,
+      error: 'Error al obtener estadísticas de usuarios',
+      message: error instanceof Error ? error.message : 'Error desconocido'
+    }, { status: 500 })
   }
 }
