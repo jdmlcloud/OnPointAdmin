@@ -16,15 +16,7 @@ export default function CognitoDirectPage() {
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
   
-  const { signIn, loading, error, clearError, user, isAuthenticated } = useCognitoDirect()
-
-  // Redirigir si ya está autenticado
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      console.log('Usuario ya autenticado, redirigiendo...', user)
-      router.push('/cognito-dashboard-direct')
-    }
-  }, [isAuthenticated, user, router])
+  const { signIn, loading, error, clearError } = useCognitoDirect()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,7 +25,8 @@ export default function CognitoDirectPage() {
     try {
       const user = await signIn({ email, password })
       console.log('Usuario autenticado:', user)
-      // La redirección se manejará automáticamente por el useEffect
+      // Redirigir inmediatamente después del login exitoso
+      router.push('/cognito-dashboard-direct')
     } catch (err) {
       console.error('Error en login:', err)
     }

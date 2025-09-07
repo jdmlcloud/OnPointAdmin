@@ -7,9 +7,12 @@ export const useCognitoDirect = () => {
   const [user, setUser] = useState<CognitoUser | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [initialized, setInitialized] = useState(false)
 
-  // Verificar autenticación al cargar
+  // Verificar autenticación solo una vez al cargar
   useEffect(() => {
+    if (initialized) return
+
     const checkAuth = async () => {
       try {
         setLoading(true)
@@ -20,11 +23,12 @@ export const useCognitoDirect = () => {
         setUser(null)
       } finally {
         setLoading(false)
+        setInitialized(true)
       }
     }
 
     checkAuth()
-  }, [])
+  }, [initialized])
 
   const signIn = async (credentials: LoginCredentials) => {
     try {
