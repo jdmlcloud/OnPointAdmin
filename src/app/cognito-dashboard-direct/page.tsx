@@ -67,7 +67,7 @@ export default function CognitoDashboardDirectPage() {
                 OnPoint Admin - AWS Cognito
               </h1>
               <Badge variant="secondary" className="ml-3">
-                Autenticación Directa
+                Simulación de Autenticación
               </Badge>
             </div>
             <Button
@@ -87,10 +87,10 @@ export default function CognitoDashboardDirectPage() {
       <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Dashboard de Cognito
+            Dashboard de Cognito (Simulación)
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Autenticación exitosa con AWS Cognito
+            Simulación de autenticación exitosa con AWS Cognito
           </p>
         </div>
 
@@ -217,11 +217,11 @@ export default function CognitoDashboardDirectPage() {
               <CheckCircle className="h-6 w-6 text-green-600 mr-3" />
               <div>
                 <h3 className="text-lg font-semibold text-green-800 dark:text-green-200">
-                  ¡Autenticación Exitosa!
+                  ¡Simulación de Autenticación Exitosa!
                 </h3>
                 <p className="text-green-700 dark:text-green-300">
-                  Has iniciado sesión correctamente usando AWS Cognito con autenticación directa.
-                  Los tokens JWT han sido obtenidos y validados exitosamente.
+                  Has iniciado sesión correctamente en la simulación de AWS Cognito.
+                  Esta es una demostración del flujo de autenticación sin conexión real a AWS.
                 </p>
               </div>
             </div>

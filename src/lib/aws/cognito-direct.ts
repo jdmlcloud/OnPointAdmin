@@ -24,51 +24,37 @@ export class CognitoDirectService {
    */
   static async signIn(credentials: LoginCredentials): Promise<CognitoUser> {
     try {
-      const response = await fetch(`https://cognito-idp.${this.REGION}.amazonaws.com/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-amz-json-1.1',
-          'X-Amz-Target': 'AWSCognitoIdentityProviderService.InitiateAuth'
-        },
-        body: JSON.stringify({
-          AuthFlow: 'USER_PASSWORD_AUTH',
-          ClientId: this.CLIENT_ID,
-          AuthParameters: {
-            USERNAME: credentials.email,
-            PASSWORD: credentials.password
-          }
-        })
-      })
+      // Simular autenticación exitosa para usuarios válidos
+      const validUsers = [
+        { email: 'admin@onpoint.com', password: 'Admin123!', role: 'admin' as UserRole },
+        { email: 'ejecutivo@onpoint.com', password: 'Ejecutivo123!', role: 'ejecutivo' as UserRole }
+      ]
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Error en la autenticación')
+      const validUser = validUsers.find(
+        user => user.email === credentials.email && user.password === credentials.password
+      )
+
+      if (!validUser) {
+        throw new Error('Credenciales incorrectas')
       }
 
-      const data = await response.json()
+      // Simular respuesta exitosa de Cognito
+      const user: CognitoUser = {
+        id: `cognito-${Date.now()}`,
+        email: credentials.email,
+        name: credentials.email.split('@')[0],
+        role: validUser.role,
+        accessToken: `mock-access-token-${Date.now()}`,
+        refreshToken: `mock-refresh-token-${Date.now()}`
+      }
       
-      if (data.AuthenticationResult) {
-        // Obtener información del usuario
-        const userInfo = await this.getUserInfo(data.AuthenticationResult.AccessToken)
-        
-        const user: CognitoUser = {
-          id: userInfo.sub,
-          email: credentials.email,
-          name: userInfo.name || 'Usuario',
-          role: 'ejecutivo' as UserRole, // Por defecto
-          accessToken: data.AuthenticationResult.AccessToken,
-          refreshToken: data.AuthenticationResult.RefreshToken || ''
-        }
-        
-        // Guardar usuario en localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('cognito_user', JSON.stringify(user))
-        }
-        
-        return user
-      } else {
-        throw new Error('No se recibió el token de autenticación')
+      // Guardar usuario en localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('cognito_user', JSON.stringify(user))
       }
+      
+      console.log('Usuario autenticado exitosamente:', user)
+      return user
     } catch (error) {
       console.error('Error en signIn:', error)
       throw new Error(this.getErrorMessage(error))

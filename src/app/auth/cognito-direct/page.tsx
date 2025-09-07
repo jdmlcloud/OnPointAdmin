@@ -36,9 +36,9 @@ export default function CognitoDirectPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Iniciar Sesión</CardTitle>
+          <CardTitle className="text-2xl font-bold">Iniciar Sesión (Simulación)</CardTitle>
           <CardDescription>
-            Accede con tus credenciales de AWS Cognito
+            Simulación de autenticación con AWS Cognito
           </CardDescription>
         </CardHeader>
         <CardContent>
