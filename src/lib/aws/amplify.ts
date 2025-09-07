@@ -16,6 +16,11 @@ export const configureAmplify = () => {
     }
   }
   
+  console.log('Configurando Amplify con:', {
+    userPoolId: config.Auth.Cognito.userPoolId,
+    userPoolClientId: config.Auth.Cognito.userPoolClientId
+  })
+  
   Amplify.configure(config)
 }
 
