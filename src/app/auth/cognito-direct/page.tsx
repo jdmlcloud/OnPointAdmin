@@ -25,8 +25,14 @@ export default function CognitoDirectPage() {
     try {
       const user = await signIn({ email, password })
       console.log('Usuario autenticado:', user)
-      // Redirigir inmediatamente después del login exitoso
-      router.push('/cognito-dashboard-direct')
+      
+      // Limpiar campos
+      setEmail('')
+      setPassword('')
+      
+      // Redirigir usando window.location para asegurar la navegación
+      console.log('Redirigiendo a dashboard...')
+      window.location.href = '/cognito-dashboard-direct'
     } catch (err) {
       console.error('Error en login:', err)
     }
