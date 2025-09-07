@@ -1,5 +1,6 @@
 import { signIn, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth'
 import { UserRole } from '@/hooks/use-roles'
+import crypto from 'crypto'
 
 export interface CognitoUser {
   id: string
@@ -24,13 +25,38 @@ export interface SignUpData {
 
 export class CognitoAuthService {
   /**
+   * Generar SECRET_HASH para autenticación con App Client que tiene secret
+   */
+  private static generateSecretHash(username: string): string {
+    const clientId = process.env.NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID || ''
+    const clientSecret = process.env.AWS_COGNITO_CLIENT_SECRET || ''
+    
+    if (!clientSecret) {
+      throw new Error('AWS_COGNITO_CLIENT_SECRET no está configurado')
+    }
+    
+    return crypto
+      .createHmac('sha256', clientSecret)
+      .update(username + clientId)
+      .digest('base64')
+  }
+
+  /**
    * Iniciar sesión con email y password
    */
   static async signIn(credentials: LoginCredentials): Promise<CognitoUser> {
     try {
+      const secretHash = this.generateSecretHash(credentials.email)
+      
       const result = await signIn({
         username: credentials.email,
-        password: credentials.password
+        password: credentials.password,
+        options: {
+          authFlowType: 'USER_PASSWORD_AUTH',
+          clientMetadata: {
+            SECRET_HASH: secretHash
+          }
+        }
       })
       
       if (result.isSignedIn) {
