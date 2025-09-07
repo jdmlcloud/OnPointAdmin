@@ -1,93 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptionsDev } from '@/lib/auth-dev'
-import { z } from 'zod'
+import { DynamoDBUserRepository } from '@/lib/db/repositories/dynamodb-user-repository'
 
-// TODO: Implementar repositorio de usuarios cuando se configure DynamoDB
+const userRepository = new DynamoDBUserRepository()
 
-// GET /api/users - Listar usuarios
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptionsDev)
-    
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Verificar permisos de administrador
-    if (session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
-    }
-
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
-    const role = searchParams.get('role')
-    const status = searchParams.get('status')
 
-    // TODO: Implementar cuando se configure DynamoDB
+    const result = await userRepository.findAll({ page, limit })
+    
     return NextResponse.json({
-      users: [],
-      pagination: {
-        page,
-        limit,
-        total: 0,
-        totalPages: 0,
-      },
-      message: 'DynamoDB no configurado - Solo Cognito activo',
+      success: true,
+      users: result.items,
+      pagination: result.pagination,
+      message: 'Usuarios obtenidos exitosamente desde DynamoDB'
     })
   } catch (error) {
-    console.error('Error al obtener usuarios:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    console.error('❌ Error obteniendo usuarios:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Error al obtener usuarios',
+      message: error instanceof Error ? error.message : 'Error desconocido'
+    }, { status: 500 })
   }
 }
 
-// POST /api/users - Crear usuario
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptionsDev)
-    
-    if (!session) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-
-    // Verificar permisos de administrador
-    if (session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Sin permisos' }, { status: 403 })
-    }
-
     const body = await request.json()
-    
-    // Validar datos básicos
-    const { name, email, role = 'user', status = 'active' } = body
+    const { name, email, role, status } = body
 
-    if (!name || !email) {
-      return NextResponse.json(
-        { error: 'Nombre y email son requeridos' },
-        { status: 400 }
-      )
+    if (!name || !email || !role) {
+      return NextResponse.json({
+        success: false,
+        error: 'Faltan campos requeridos',
+        message: 'name, email y role son obligatorios'
+      }, { status: 400 })
     }
 
-    // TODO: Implementar cuando se configure DynamoDB
+    // Verificar si el email ya existe
+    const existingUser = await userRepository.findByEmail(email)
+    if (existingUser) {
+      return NextResponse.json({
+        success: false,
+        error: 'Email ya existe',
+        message: 'Ya existe un usuario con este email'
+      }, { status: 409 })
+    }
+
+    const newUser = await userRepository.create({
+      name,
+      email,
+      role: role || 'user',
+      status: status || 'active'
+    })
+
     return NextResponse.json({
-      message: 'DynamoDB no configurado - Solo Cognito activo',
-      data: { name, email, role, status },
+      success: true,
+      user: newUser,
+      message: 'Usuario creado exitosamente'
     }, { status: 201 })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Datos inválidos', details: error.errors },
-        { status: 400 }
-      )
-    }
-
-    console.error('Error al crear usuario:', error)
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    )
+    console.error('❌ Error creando usuario:', error)
+    return NextResponse.json({
+      success: false,
+      error: 'Error al crear usuario',
+      message: error instanceof Error ? error.message : 'Error desconocido'
+    }, { status: 500 })
   }
 }
