@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { LogOut, User, Mail, Shield, CheckCircle } from 'lucide-react'
+import { LogOut, User, Mail, Shield, CheckCircle, Loader2 } from 'lucide-react'
 import { useCognitoDirect } from '@/hooks/use-cognito-direct'
 
 export default function CognitoDashboardDirectPage() {
