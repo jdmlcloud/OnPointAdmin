@@ -116,34 +116,86 @@ export interface DynamoDBStatus {
 // Función para verificar estado de DynamoDB
 export const checkDynamoDBStatus = async (): Promise<DynamoDBStatus> => {
   try {
-    // En modo simulación, siempre retornamos éxito
-    if (process.env.NODE_ENV === 'development' && !process.env.AWS_ACCESS_KEY_ID) {
+    // Verificar si DynamoDB está configurado
+    if (!process.env.DYNAMODB_CONFIGURED || process.env.DYNAMODB_CONFIGURED !== 'true') {
       return {
-        connected: true,
+        connected: false,
         region: process.env.AWS_REGION || 'us-east-1',
         tables: {
-          users: true,
-          providers: true,
-          products: true,
-          orders: true,
+          users: false,
+          providers: false,
+          products: false,
+          orders: false,
         },
         lastChecked: new Date().toISOString(),
+        error: 'DynamoDB no está configurado. Ejecuta el script de configuración.',
       };
     }
 
     // En modo real, verificar conexión
     const client = createDynamoDBClient();
     
-    // Verificar cada tabla
+    // Verificar cada tabla usando AWS SDK
+    const { DynamoDBClient, DescribeTableCommand } = await import('@aws-sdk/client-dynamodb');
+    const dynamoClient = new DynamoDBClient({
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+      },
+    });
+
     const tables = {
-      users: true,
-      providers: true,
-      products: true,
-      orders: true,
+      users: false,
+      providers: false,
+      products: false,
+      orders: false,
     };
 
+    // Verificar tabla de usuarios
+    try {
+      await dynamoClient.send(new DescribeTableCommand({
+        TableName: process.env.DYNAMODB_USERS_TABLE || 'onpoint-admin-users-dev'
+      }));
+      tables.users = true;
+    } catch (error) {
+      console.error('Error verificando tabla users:', error);
+    }
+
+    // Verificar tabla de proveedores
+    try {
+      await dynamoClient.send(new DescribeTableCommand({
+        TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'onpoint-admin-providers-dev'
+      }));
+      tables.providers = true;
+    } catch (error) {
+      console.error('Error verificando tabla providers:', error);
+    }
+
+    // Verificar tabla de productos
+    try {
+      await dynamoClient.send(new DescribeTableCommand({
+        TableName: process.env.DYNAMODB_PRODUCTS_TABLE || 'onpoint-admin-products-dev'
+      }));
+      tables.products = true;
+    } catch (error) {
+      console.error('Error verificando tabla products:', error);
+    }
+
+    // Verificar tabla de órdenes
+    try {
+      await dynamoClient.send(new DescribeTableCommand({
+        TableName: process.env.DYNAMODB_ORDERS_TABLE || 'onpoint-admin-orders-dev'
+      }));
+      tables.orders = true;
+    } catch (error) {
+      console.error('Error verificando tabla orders:', error);
+    }
+
+    const allTablesConnected = Object.values(tables).every(status => status);
+
     return {
-      connected: true,
+      connected: allTablesConnected,
       region: process.env.AWS_REGION || 'us-east-1',
       tables,
       lastChecked: new Date().toISOString(),

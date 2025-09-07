@@ -444,7 +444,9 @@ export default function DashboardDynamoDBPage() {
         <CardContent className="pt-6">
           <div className="flex items-center justify-between text-sm text-gray-600">
             <span>Última actualización: {new Date(stats.database.lastChecked).toLocaleString()}</span>
-            <Badge variant="outline">Modo Simulación</Badge>
+            <Badge variant={stats.database.connected ? "default" : "outline"}>
+              {stats.database.connected ? "Modo Real AWS" : "Modo Simulación"}
+            </Badge>
           </div>
         </CardContent>
       </Card>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import DynamoDBUserRepository from '@/lib/db/repositories/dynamodb-user-repository';
+import DynamoDBUserRepositoryHybrid from '@/lib/db/repositories/dynamodb-user-repository-hybrid';
 
-const userRepository = DynamoDBUserRepository.getInstance();
+const userRepository = DynamoDBUserRepositoryHybrid.getInstance();
 
 // GET /api/dynamodb/users - Obtener todos los usuarios
 export async function GET(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: users,
       count: users.length,
-      source: 'DynamoDB (Simulado)',
+      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     });
   } catch (error) {
     console.error('Error al obtener usuarios DynamoDB:', error);
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newUser,
       message: 'Usuario creado exitosamente',
-      source: 'DynamoDB (Simulado)',
+      source: `DynamoDB (${userRepository.getMode() === 'real' ? 'Real' : 'Simulado'})`,
     }, { status: 201 });
   } catch (error) {
     console.error('Error al crear usuario DynamoDB:', error);
