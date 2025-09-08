@@ -8,8 +8,8 @@ const dynamodb = DynamoDBDocumentClient.from(client);
 
 // Detectar entorno dinámicamente
 const detectEnvironment = () => {
-  const stage = process.env.STAGE || 'local';
-  return stage === 'prod' ? 'prod' : 'sandbox';
+  const environment = process.env.ENVIRONMENT || 'local';
+  return environment;
 };
 
 const getTableName = (tableType, environment) => {
@@ -143,15 +143,18 @@ async function handleCreateRole(event, environment) {
     const rolesTable = getTableName('Roles', environment);
     const checkParams = {
       TableName: rolesTable,
-      FilterExpression: 'name = :name',
+      FilterExpression: '#name = :name',
+      ExpressionAttributeNames: {
+        '#name': 'name'
+      },
       ExpressionAttributeValues: {
         ':name': name
       }
     };
 
-    const existingRole = await dynamodb.send(new GetCommand(checkParams));
+    const existingRole = await dynamodb.send(new ScanCommand(checkParams));
     
-    if (existingRole.Item) {
+    if (existingRole.Items && existingRole.Items.length > 0) {
       return createResponse(400, { 
         success: false, 
         message: 'El rol ya existe' 

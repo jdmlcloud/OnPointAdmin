@@ -9,8 +9,8 @@ const dynamodb = DynamoDBDocumentClient.from(client);
 
 // Detectar entorno dinámicamente
 const detectEnvironment = () => {
-  const stage = process.env.STAGE || 'local';
-  return stage === 'prod' ? 'prod' : 'sandbox';
+  const environment = process.env.ENVIRONMENT || 'sandbox';
+  return environment;
 };
 
 const getTableName = (tableType, environment) => {
@@ -161,9 +161,9 @@ async function handleCreateUser(event, environment) {
       }
     };
 
-    const existingUser = await dynamodb.send(new GetCommand(checkParams));
+    const existingUser = await dynamodb.send(new ScanCommand(checkParams));
     
-    if (existingUser.Item) {
+    if (existingUser.Items && existingUser.Items.length > 0) {
       return createResponse(400, { 
         success: false, 
         message: 'El usuario ya existe' 
@@ -178,6 +178,7 @@ async function handleCreateUser(event, environment) {
 
     // Crear usuario
     const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    console.log('🆔 Generated User ID:', userId);
     const newUser = {
       id: userId,
       email,
@@ -194,6 +195,7 @@ async function handleCreateUser(event, environment) {
       createdBy: 'system' // En producción sería el ID del usuario que lo crea
     };
 
+    console.log('📝 New User Object:', JSON.stringify(newUser, null, 2));
     const putParams = {
       TableName: usersTable,
       Item: newUser

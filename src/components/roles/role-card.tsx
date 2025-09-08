@@ -59,31 +59,54 @@ export const RoleCard: React.FC<RoleCardProps> = ({
     }
   }
 
-  const getPermissionIcon = (permission: string) => {
-    if (permission.includes('users')) return <Users className="h-3 w-3" />
-    if (permission.includes('roles') || permission.includes('permissions')) return <Shield className="h-3 w-3" />
-    if (permission.includes('settings')) return <Settings className="h-3 w-3" />
+  const getPermissionIcon = (permission: any) => {
+    const permissionStr = typeof permission === 'string' ? permission : permission.name || permission.resource || ''
+    if (permissionStr.includes('users')) return <Users className="h-3 w-3" />
+    if (permissionStr.includes('roles') || permissionStr.includes('permissions')) return <Shield className="h-3 w-3" />
+    if (permissionStr.includes('settings')) return <Settings className="h-3 w-3" />
     return <Shield className="h-3 w-3" />
   }
 
-  const getPermissionName = (permission: string) => {
-    const [resource, action] = permission.split(':')
-    const resourceNames: Record<string, string> = {
-      'users': 'Usuarios',
-      'roles': 'Roles',
-      'permissions': 'Permisos',
-      'providers': 'Proveedores',
-      'products': 'Productos',
-      'reports': 'Reportes',
-      'settings': 'Configuración'
+  const getPermissionName = (permission: any) => {
+    if (typeof permission === 'string') {
+      const [resource, action] = permission.split(':')
+      const resourceNames: Record<string, string> = {
+        'users': 'Usuarios',
+        'roles': 'Roles',
+        'permissions': 'Permisos',
+        'providers': 'Proveedores',
+        'products': 'Productos',
+        'reports': 'Reportes',
+        'settings': 'Configuración'
+      }
+      const actionNames: Record<string, string> = {
+        'read': 'Ver',
+        'write': 'Editar',
+        'manage': 'Gestionar',
+        'view': 'Ver'
+      }
+      return `${actionNames[action] || action} ${resourceNames[resource] || resource}`
+    } else {
+      // Es un objeto Permission
+      const resourceNames: Record<string, string> = {
+        'users': 'Usuarios',
+        'roles': 'Roles',
+        'permissions': 'Permisos',
+        'providers': 'Proveedores',
+        'products': 'Productos',
+        'reports': 'Reportes',
+        'settings': 'Configuración'
+      }
+      const actionNames: Record<string, string> = {
+        'read': 'Ver',
+        'write': 'Editar',
+        'manage': 'Gestionar',
+        'view': 'Ver'
+      }
+      const resource = permission.resource || ''
+      const action = permission.action || ''
+      return `${actionNames[action] || action} ${resourceNames[resource] || resource}`
     }
-    const actionNames: Record<string, string> = {
-      'read': 'Ver',
-      'write': 'Editar',
-      'manage': 'Gestionar',
-      'view': 'Ver'
-    }
-    return `${actionNames[action] || action} ${resourceNames[resource] || resource}`
   }
 
   return (
@@ -146,28 +169,36 @@ export const RoleCard: React.FC<RoleCardProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Tipo:</span>
-            <Badge className={role.isSystem ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}>
-              {role.isSystem ? 'Sistema' : 'Personalizado'}
+            <Badge className={role.level === 1 ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}>
+              {role.level === 1 ? 'Sistema' : 'Personalizado'}
             </Badge>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Permisos:</span>
-            <span className="text-sm font-medium">{role.permissions.length}</span>
+            <span className="text-sm font-medium">{Array.isArray(role.permissions) ? role.permissions.length : 0}</span>
           </div>
           
           {/* Permisos */}
           <div className="mt-4">
             <h4 className="text-sm font-medium text-gray-700 mb-2">Permisos incluidos:</h4>
             <div className="space-y-1">
-              {role.permissions.slice(0, 3).map((permission, index) => (
-                <div key={index} className="flex items-center space-x-2 text-xs text-gray-600">
-                  {getPermissionIcon(permission)}
-                  <span>{getPermissionName(permission)}</span>
-                </div>
-              ))}
-              {role.permissions.length > 3 && (
+              {Array.isArray(role.permissions) && role.permissions.length > 0 ? (
+                <>
+                  {role.permissions.slice(0, 3).map((permission, index) => (
+                    <div key={index} className="flex items-center space-x-2 text-xs text-gray-600">
+                      {getPermissionIcon(permission)}
+                      <span>{getPermissionName(permission)}</span>
+                    </div>
+                  ))}
+                  {role.permissions.length > 3 && (
+                    <div className="text-xs text-gray-500">
+                      +{role.permissions.length - 3} permisos más...
+                    </div>
+                  )}
+                </>
+              ) : (
                 <div className="text-xs text-gray-500">
-                  +{role.permissions.length - 3} permisos más...
+                  Sin permisos asignados
                 </div>
               )}
             </div>

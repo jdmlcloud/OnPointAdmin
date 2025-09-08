@@ -94,11 +94,11 @@ export function Header() {
           <div className="flex items-center gap-3 pl-4 border-l">
             <div className="text-right">
               <p className="text-sm font-medium">
-                {user?.name || "Usuario"}
+                {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Usuario"}
               </p>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {user?.role || "usuario"}
+                  {typeof user?.role === 'string' ? user.role : user?.role?.name || "usuario"}
                 </Badge>
                 <Badge variant="secondary" className="text-xs">
                   {getVersionString()}
@@ -108,7 +108,7 @@ export function Header() {
             <Avatar className="h-8 w-8">
               <AvatarImage src="" />
               <AvatarFallback>
-                {user?.name?.charAt(0).toUpperCase() || "U"}
+                {(user?.firstName?.charAt(0) || user?.lastName?.charAt(0) || "U").toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <Button

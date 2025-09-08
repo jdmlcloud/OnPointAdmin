@@ -13,8 +13,9 @@ export function useUsersApi() {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<User[]>('/users')
-      return response
+      const response = await apiRequest<{success: boolean, users: User[], count: number}>('/users')
+      console.log('🔍 Respuesta de API usuarios:', response)
+      return response.users || []
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar usuarios'
       setError(errorMessage)
@@ -29,11 +30,11 @@ export function useUsersApi() {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<User>('/users', {
+      const response = await apiRequest<{success: boolean, user: User, message: string}>('/users', {
         method: 'POST',
         body: JSON.stringify(userData)
       })
-      return response
+      return response.user
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al crear usuario'
       setError(errorMessage)
@@ -48,11 +49,11 @@ export function useUsersApi() {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<User>(`/users/${id}`, {
+      const response = await apiRequest<{success: boolean, user: User, message: string}>(`/users/${id}`, {
         method: 'PUT',
         body: JSON.stringify(userData)
       })
-      return response
+      return response.user
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al actualizar usuario'
       setError(errorMessage)

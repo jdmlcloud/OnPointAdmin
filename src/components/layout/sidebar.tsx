@@ -243,19 +243,19 @@ export function Sidebar() {
           <Avatar className="h-8 w-8">
             <AvatarImage src="" />
             <AvatarFallback>
-              {user?.name?.charAt(0).toUpperCase() || "U"}
+              {(user?.firstName?.charAt(0) || user?.lastName?.charAt(0) || "U").toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {user?.name || "Usuario"}
+                {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Usuario"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {user?.email || "usuario@onpoint.com"}
               </p>
               <Badge variant="outline" className="text-xs mt-1">
-                {user?.role || "usuario"}
+                {typeof user?.role === 'string' ? user.role : user?.role?.name || "usuario"}
               </Badge>
             </div>
           )}

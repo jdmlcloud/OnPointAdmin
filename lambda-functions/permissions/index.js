@@ -8,8 +8,8 @@ const dynamodb = DynamoDBDocumentClient.from(client);
 
 // Detectar entorno dinámicamente
 const detectEnvironment = () => {
-  const stage = process.env.STAGE || 'local';
-  return stage === 'prod' ? 'prod' : 'sandbox';
+  const environment = process.env.ENVIRONMENT || 'local';
+  return environment;
 };
 
 const getTableName = (tableType, environment) => {
@@ -143,15 +143,18 @@ async function handleCreatePermission(event, environment) {
     const permissionsTable = getTableName('Permissions', environment);
     const checkParams = {
       TableName: permissionsTable,
-      FilterExpression: 'name = :name',
+      FilterExpression: '#name = :name',
+      ExpressionAttributeNames: {
+        '#name': 'name'
+      },
       ExpressionAttributeValues: {
         ':name': name
       }
     };
 
-    const existingPermission = await dynamodb.send(new GetCommand(checkParams));
+    const existingPermission = await dynamodb.send(new ScanCommand(checkParams));
     
-    if (existingPermission.Item) {
+    if (existingPermission.Items && existingPermission.Items.length > 0) {
       return createResponse(400, { 
         success: false, 
         message: 'El permiso ya existe' 
