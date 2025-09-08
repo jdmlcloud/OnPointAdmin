@@ -223,29 +223,29 @@ create_integrations() {
     
     echo -e "${BLUE}🔗 Creando integraciones para $env...${NC}"
     
-    # Obtener ARN de Lambda functions
+    # Obtener ARN de Lambda functions (usar nombres existentes)
     PROVIDERS_LAMBDA_ARN=$(aws lambda get-function \
-        --function-name "OnPointAdmin-Providers-$env" \
+        --function-name "onpoint-admin-providers" \
         --query 'Configuration.FunctionArn' \
         --output text 2>/dev/null || echo "")
     
     PRODUCTS_LAMBDA_ARN=$(aws lambda get-function \
-        --function-name "OnPointAdmin-Products-$env" \
+        --function-name "onpoint-products-api" \
         --query 'Configuration.FunctionArn' \
         --output text 2>/dev/null || echo "")
     
     USERS_LAMBDA_ARN=$(aws lambda get-function \
-        --function-name "OnPointAdmin-Users-$env" \
+        --function-name "onpoint-admin-users" \
         --query 'Configuration.FunctionArn' \
         --output text 2>/dev/null || echo "")
     
     STATS_LAMBDA_ARN=$(aws lambda get-function \
-        --function-name "OnPointAdmin-Stats-$env" \
+        --function-name "onpoint-admin-stats" \
         --query 'Configuration.FunctionArn' \
         --output text 2>/dev/null || echo "")
     
     TAGS_LAMBDA_ARN=$(aws lambda get-function \
-        --function-name "OnPointAdmin-Tags-$env" \
+        --function-name "onpoint-admin-tags" \
         --query 'Configuration.FunctionArn' \
         --output text 2>/dev/null || echo "")
     
