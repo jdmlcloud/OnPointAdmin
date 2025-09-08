@@ -5,30 +5,29 @@ import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface Stats {
   users: {
-    totalUsers: number
-    activeUsers: number
-    pendingUsers: number
-    inactiveUsers: number
+    total: number
+    active: number
+    inactive: number
+    pending: number
   }
   products: {
-    totalProducts: number
-    activeProducts: number
-    lowStockProducts: number
-    totalCategories: number
+    total: number
+    active: number
+    inactive: number
   }
   providers: {
-    totalProviders: number
-    activeProviders: number
-    pendingProviders: number
-    inactiveProviders: number
+    total: number
+    active: number
+    inactive: number
+    pending: number
   }
-  summary: {
+  overview: {
     totalUsers: number
-    totalProducts: number
     totalProviders: number
-    activeUsers: number
-    activeProducts: number
-    activeProviders: number
+    totalProducts: number
+    totalActiveUsers: number
+    totalActiveProviders: number
+    totalActiveProducts: number
   }
 }
 

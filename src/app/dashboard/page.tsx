@@ -142,12 +142,12 @@ export default function DashboardPage() {
                   <Users className="h-8 w-8 text-blue-500" />
                   <div>
                     <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.summary.totalUsers || 0}
+                      {statsLoading ? '...' : stats?.overview.totalUsers || 0}
                     </p>
                     <p className="text-sm text-muted-foreground">Usuarios</p>
                     {stats && (
                       <p className="text-xs text-green-600">
-                        {stats.summary.activeUsers} activos
+                        {stats.overview.totalActiveUsers} activos
                       </p>
                     )}
                   </div>
@@ -160,12 +160,12 @@ export default function DashboardPage() {
                   <Package className="h-8 w-8 text-green-500" />
                   <div>
                     <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.summary.totalProducts || 0}
+                      {statsLoading ? '...' : stats?.overview.totalProducts || 0}
                     </p>
                     <p className="text-sm text-muted-foreground">Productos</p>
                     {stats && (
                       <p className="text-xs text-green-600">
-                        {stats.summary.activeProducts} activos
+                        {stats.overview.totalActiveProducts} activos
                       </p>
                     )}
                   </div>
@@ -178,12 +178,12 @@ export default function DashboardPage() {
                   <Users className="h-8 w-8 text-purple-500" />
                   <div>
                     <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.summary.totalProviders || 0}
+                      {statsLoading ? '...' : stats?.overview.totalProviders || 0}
                     </p>
                     <p className="text-sm text-muted-foreground">Proveedores</p>
                     {stats && (
                       <p className="text-xs text-green-600">
-                        {stats.summary.activeProviders} activos
+                        {stats.overview.totalActiveProviders} activos
                       </p>
                     )}
                   </div>
@@ -196,12 +196,12 @@ export default function DashboardPage() {
                   <TrendingUp className="h-8 w-8 text-yellow-500" />
                   <div>
                     <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : (stats?.products.lowStockProducts || 0)}
+                      {statsLoading ? '...' : (stats?.products.total || 0)}
                     </p>
-                    <p className="text-sm text-muted-foreground">Stock Bajo</p>
+                    <p className="text-sm text-muted-foreground">Total Productos</p>
                     {stats && (
                       <p className="text-xs text-orange-600">
-                        {stats.products.totalCategories} categorías
+                        {stats.products.active} activos
                       </p>
                     )}
                   </div>
