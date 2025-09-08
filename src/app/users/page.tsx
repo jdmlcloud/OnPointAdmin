@@ -1,792 +1,492 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { MainLayout } from "@/components/layout/main-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { AnimatedButton } from "@/components/ui/animated-button"
-import { ActionModal } from "@/components/ui/action-modal"
-import { useMicrointeractions } from "@/hooks/use-microinteractions"
-import { useCardActions } from "@/hooks/use-card-actions"
-import { useUsers } from "@/hooks/use-users"
-import { 
-  Users, 
-  Plus, 
-  Search, 
-  Filter,
-  Eye,
-  Edit,
-  Trash2,
-  Shield,
-  User,
-  Mail,
-  Phone,
-  Calendar,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  MoreHorizontal,
-  Download,
-  Upload,
-  RefreshCw,
-  Settings,
-  Key,
-  Lock,
-  Unlock,
-  UserPlus,
-  UserMinus,
-  Activity,
-  BarChart3
-} from "lucide-react"
+import React, { useState, useEffect } from 'react'
+import { useAuthContext } from '@/lib/auth/auth-context'
+import ProtectedRoute from '@/components/auth/protected-route'
+import { User, UserRoleType } from '@/types/users'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Plus, Search, Edit, Trash2, Eye, Users } from 'lucide-react'
+import { getVersionString } from '@/lib/version'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  phone?: string
-  role: 'admin' | 'ejecutivo' | 'cliente'
-  status: 'active' | 'inactive' | 'pending' | 'suspended'
-  avatar?: string
-  department?: string
-  position?: string
-  lastLogin?: string
-  createdAt: string
-  updatedAt?: string
-  permissions?: {
-    canManageUsers: boolean
-    canManageProviders: boolean
-    canManageProducts: boolean
-    canManageQuotations: boolean
-    canManageProposals: boolean
-    canManageWhatsApp: boolean
-    canManageSettings: boolean
-    canViewAnalytics: boolean
-    canManageSystem: boolean
-    canGeneratePDFs: boolean
-    canManageTemplates: boolean
-    canViewReports: boolean
-    canManageIntegrations: boolean
-  }
-  stats?: {
-    quotationsCreated: number
-    proposalsGenerated: number
-    messagesProcessed: number
-    lastActivity: string
-  }
-}
+const UsersPage: React.FC = () => {
+  const { user: currentUser, hasPermission } = useAuthContext()
+  const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [error, setError] = useState('')
 
-export default function UsersPage() {
-  const { isLoading, simulateAction } = useMicrointeractions()
-  const {
-    modals,
-    handleView,
-    handleEdit,
-    handleDelete,
-    handleSave,
-    handleDeleteConfirm,
-    handleDownload,
-    handleShare,
-    closeModal
-  } = useCardActions()
-  
-  // Usar hook de usuarios para datos reales de DynamoDB
-  const { users, loading: usersLoading, error, refreshUsers } = useUsers()
+  // Datos de prueba para desarrollo local
+  const testUsers: User[] = [
+    {
+      id: 'user-super-admin',
+      email: 'superadmin@onpoint.com',
+      firstName: 'Super',
+      lastName: 'Administrador',
+      phone: '+525512345678',
+      role: 'SUPER_ADMIN',
+      department: 'Tecnología',
+      position: 'Super Administrador',
+      status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
+      updatedAt: '2024-12-19T00:00:00.000Z',
+      createdBy: 'system'
+    },
+    {
+      id: 'user-admin',
+      email: 'admin@onpoint.com',
+      firstName: 'Admin',
+      lastName: 'Usuario',
+      phone: '+525512345679',
+      role: 'ADMIN',
+      department: 'Administración',
+      position: 'Administrador',
+      status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
+      updatedAt: '2024-12-19T00:00:00.000Z',
+      createdBy: 'system'
+    },
+    {
+      id: 'user-executive',
+      email: 'ejecutivo@onpoint.com',
+      firstName: 'Ejecutivo',
+      lastName: 'Usuario',
+      phone: '+525512345680',
+      role: 'EXECUTIVE',
+      department: 'Ventas',
+      position: 'Ejecutivo',
+      status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
+      updatedAt: '2024-12-19T00:00:00.000Z',
+      createdBy: 'system'
+    }
+  ]
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedRole, setSelectedRole] = useState("all")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedDepartment, setSelectedDepartment] = useState("all")
-
-  // Recargar datos cuando se regrese de crear un usuario
+  // Cargar usuarios
   useEffect(() => {
-    refreshUsers()
+    const loadUsers = async () => {
+      try {
+        setIsLoading(true)
+        // Simular carga de usuarios
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        setUsers(testUsers)
+        setFilteredUsers(testUsers)
+      } catch (error) {
+        setError('Error al cargar usuarios')
+        console.error('Error loading users:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadUsers()
   }, [])
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole = selectedRole === "all" || user.role === selectedRole
-    const matchesStatus = selectedStatus === "all" || user.status === selectedStatus
-    const matchesDepartment = selectedDepartment === "all" || (user as any).department === selectedDepartment
-    return matchesSearch && matchesRole && matchesStatus && matchesDepartment
-  })
-
-  if (usersLoading) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
-      </MainLayout>
+  // Filtrar usuarios
+  useEffect(() => {
+    const filtered = users.filter(user =>
+      user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.department.toLowerCase().includes(searchTerm.toLowerCase())
     )
+    setFilteredUsers(filtered)
+  }, [searchTerm, users])
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'Super Administrador'
+      case 'ADMIN':
+        return 'Administrador'
+      case 'EXECUTIVE':
+        return 'Ejecutivo'
+      default:
+        return role
+    }
   }
 
-  if (error) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-red-500 mb-4">Error al cargar usuarios: {error}</p>
-            <Button onClick={refreshUsers}>Reintentar</Button>
-          </div>
-        </div>
-      </MainLayout>
-    )
-  }
-
-  const getStatusColor = (status: User['status']) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-      case 'suspended':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'bg-red-100 text-red-800'
+      case 'ADMIN':
+        return 'bg-blue-100 text-blue-800'
+      case 'EXECUTIVE':
+        return 'bg-green-100 text-green-800'
       default:
         return 'bg-gray-100 text-gray-800'
     }
   }
 
-  const getStatusText = (status: User['status']) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'Activo'
+        return 'bg-green-100 text-green-800'
       case 'inactive':
-        return 'Inactivo'
-      case 'pending':
-        return 'Pendiente'
+        return 'bg-gray-100 text-gray-800'
       case 'suspended':
-        return 'Suspendido'
-      default:
-        return 'Desconocido'
-    }
-  }
-
-  const getStatusIcon = (status: User['status']) => {
-    switch (status) {
-      case 'active':
-        return <CheckCircle className="h-4 w-4" />
-      case 'inactive':
-        return <XCircle className="h-4 w-4" />
+        return 'bg-red-100 text-red-800'
       case 'pending':
-        return <Clock className="h-4 w-4" />
-      case 'suspended':
-        return <AlertCircle className="h-4 w-4" />
+        return 'bg-yellow-100 text-yellow-800'
       default:
-        return <User className="h-4 w-4" />
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
-  const getRoleIcon = (role: User['role']) => {
-    switch (role) {
-      case 'admin':
-        return <Shield className="h-4 w-4" />
-      case 'ejecutivo':
-        return <User className="h-4 w-4" />
-      case 'cliente':
-        return <Users className="h-4 w-4" />
-      default:
-        return <User className="h-4 w-4" />
+  const handleCreateUser = () => {
+    setIsCreateDialogOpen(true)
+  }
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user)
+    setIsEditDialogOpen(true)
+  }
+
+  const handleDeleteUser = (user: User) => {
+    if (confirm(`¿Estás seguro de que quieres eliminar a ${user.firstName} ${user.lastName}?`)) {
+      // Implementar eliminación
+      console.log('Eliminar usuario:', user.id)
     }
   }
 
-  const getRoleText = (role: User['role']) => {
-    switch (role) {
-      case 'admin':
-        return 'Administrador'
-      case 'ejecutivo':
-        return 'Ejecutivo'
-      case 'cliente':
-        return 'Cliente'
-      default:
-        return 'Usuario'
-    }
-  }
-
-  const handleCreateUser = async () => {
-    await simulateAction(
-      'create-user',
-      async () => {
-        // Simular creación de usuario
-        await new Promise(resolve => setTimeout(resolve, 2000))
-      },
-      {
-        successMessage: "Usuario creado exitosamente",
-        notification: {
-          type: 'success',
-          title: 'Usuario Creado',
-          message: 'El nuevo usuario ha sido creado y se ha enviado un email de bienvenida'
-        }
-      }
-    )
-  }
-
-  const handleToggleUserStatus = async (userId: string, currentStatus: User['status']) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
-    await simulateAction(
-      `toggle-user-${userId}`,
-      async () => {
-        // Simular cambio de estado
-        await new Promise(resolve => setTimeout(resolve, 1500))
-      },
-      {
-        successMessage: `Usuario ${newStatus === 'active' ? 'activado' : 'desactivado'} exitosamente`,
-        notification: {
-          type: 'success',
-          title: 'Estado Actualizado',
-          message: `El usuario ha sido ${newStatus === 'active' ? 'activado' : 'desactivado'}`
-        }
-      }
-    )
-  }
-
-  const handleResetPassword = async (userId: string) => {
-    await simulateAction(
-      `reset-password-${userId}`,
-      async () => {
-        // Simular reset de contraseña
-        await new Promise(resolve => setTimeout(resolve, 1500))
-      },
-      {
-        successMessage: "Contraseña reseteada exitosamente",
-        notification: {
-          type: 'success',
-          title: 'Contraseña Reseteada',
-          message: 'Se ha enviado un email con las instrucciones para crear una nueva contraseña'
-        }
-      }
-    )
-  }
-
-  const handleExportUsers = async (format: 'csv' | 'excel') => {
-    await simulateAction(
-      'export-users',
-      async () => {
-        // Simular exportación
-        await new Promise(resolve => setTimeout(resolve, 2000))
-      },
-      {
-        successMessage: `Lista de usuarios exportada como ${format.toUpperCase()}`,
-        notification: {
-          type: 'success',
-          title: 'Exportación Completada',
-          message: `El archivo ${format.toUpperCase()} se está descargando`
-        }
-      }
-    )
-  }
+  const canManageUsers = hasPermission('users', 'manage')
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
+    <ProtectedRoute requiredPermission={{ resource: 'users', action: 'read' }}>
+      <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Gestión de Usuarios</h1>
-            <p className="text-muted-foreground">
-              Administra usuarios internos, roles y permisos del sistema
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <AnimatedButton 
-              variant="outline"
-              loading={isLoading('export-users')}
-              loadingText="Exportando..."
-              onClick={() => handleExportUsers('csv')}
-              animation="pulse"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar
-            </AnimatedButton>
-            <AnimatedButton 
-              loading={isLoading('create-user')}
-              loadingText="Creando..."
-              onClick={handleCreateUser}
-              animation="pulse"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Nuevo Usuario
-            </AnimatedButton>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-blue-500" />
-                <div>
-                  <p className="text-2xl font-bold">{users.length}</p>
-                  <p className="text-sm text-muted-foreground">Total Usuarios</p>
+        <header className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Users className="h-8 w-8 text-blue-600" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.status === 'active').length}
+                <div className="ml-4">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Gestión de Usuarios
+                  </h1>
+                  <p className="text-sm text-gray-500">
+                    Administra usuarios, roles y permisos del sistema
                   </p>
-                  <p className="text-sm text-muted-foreground">Activos</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Shield className="h-8 w-8 text-purple-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.role === 'admin').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Administradores</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Clock className="h-8 w-8 text-orange-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.status === 'pending').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Pendientes</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Buscar usuarios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={selectedRole} onValueChange={setSelectedRole}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Rol" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los roles</SelectItem>
-              <SelectItem value="admin">Administrador</SelectItem>
-              <SelectItem value="ejecutivo">Ejecutivo</SelectItem>
-              <SelectItem value="cliente">Cliente</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="active">Activo</SelectItem>
-              <SelectItem value="inactive">Inactivo</SelectItem>
-              <SelectItem value="pending">Pendiente</SelectItem>
-              <SelectItem value="suspended">Suspendido</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
-          </Button>
-        </div>
-
-        {/* Users List */}
-        <div className="space-y-4">
-          {filteredUsers.map((user) => (
-            <Card key={user.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      {user.avatar ? (
-                        <img 
-                          src={user.avatar} 
-                          alt={user.name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-6 w-6 text-primary" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{user.name}</h3>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          {getRoleIcon(user.role)}
-                          {getRoleText(user.role)}
-                        </span>
-                        {(user as any).department && (
-                          <span>{(user as any).department}</span>
-                        )}
-                        {(user as any).position && (
-                          <span>{(user as any).position}</span>
-                        )}
-                        <span>Último acceso: {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Nunca'}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <Badge className={getStatusColor(user.status)}>
-                      <div className="flex items-center gap-1">
-                        {getStatusIcon(user.status)}
-                        {getStatusText(user.status)}
-                      </div>
-                    </Badge>
-                    
-                    <div className="flex gap-2">
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        animation="pulse"
-                        onClick={() => handleView(user)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Ver
-                      </AnimatedButton>
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        animation="pulse"
-                        onClick={() => handleEdit(user)}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </AnimatedButton>
-                      {user.status === 'active' ? (
-                        <AnimatedButton 
-                          variant="outline" 
-                          size="sm"
-                          loading={isLoading(`toggle-user-${user.id}`)}
-                          loadingText="Desactivando..."
-                          onClick={() => handleToggleUserStatus(user.id, user.status)}
-                          animation="pulse"
-                        >
-                          <UserMinus className="h-4 w-4 mr-2" />
-                          Desactivar
-                        </AnimatedButton>
-                      ) : (
-                        <AnimatedButton 
-                          size="sm"
-                          loading={isLoading(`toggle-user-${user.id}`)}
-                          loadingText="Activando..."
-                          onClick={() => handleToggleUserStatus(user.id, user.status)}
-                          animation="pulse"
-                        >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Activar
-                        </AnimatedButton>
-                      )}
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        loading={isLoading(`reset-password-${user.id}`)}
-                        loadingText="Reseteando..."
-                        onClick={() => handleResetPassword(user.id)}
-                        animation="pulse"
-                      >
-                        <Key className="h-4 w-4 mr-2" />
-                        Reset Password
-                      </AnimatedButton>
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        animation="pulse"
-                        onClick={() => handleDelete(user)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Eliminar
-                      </AnimatedButton>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Modales */}
-        <ActionModal
-          isOpen={modals.view.isOpen}
-          onClose={() => closeModal('view')}
-          title="Detalles del Usuario"
-          description="Información completa del usuario"
-          type="view"
-        >
-          {modals.view.data && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  {modals.view.data.avatar ? (
-                    <img 
-                      src={modals.view.data.avatar} 
-                      alt={modals.view.data.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <User className="h-8 w-8 text-primary" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold">{modals.view.data.name}</h3>
-                  <p className="text-muted-foreground">{modals.view.data.email}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge className={getStatusColor(modals.view.data.status)}>
-                      {getStatusText(modals.view.data.status)}
-                    </Badge>
-                    <Badge variant="outline">
-                      {getRoleText(modals.view.data.role)}
-                    </Badge>
-                  </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Información Personal</h4>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Email</label>
-                      <p className="text-sm">{modals.view.data.email}</p>
-                    </div>
-                    {modals.view.data.phone && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Teléfono</label>
-                        <p className="text-sm">{modals.view.data.phone}</p>
-                      </div>
-                    )}
-                    {modals.view.data.department && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Departamento</label>
-                        <p className="text-sm">{modals.view.data.department}</p>
-                      </div>
-                    )}
-                    {modals.view.data.position && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Posición</label>
-                        <p className="text-sm">{modals.view.data.position}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <h4 className="font-medium">Estadísticas</h4>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Cotizaciones Creadas</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats?.quotationsCreated || 0}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Propuestas Generadas</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats?.proposalsGenerated || 0}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Mensajes Procesados</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats?.messagesProcessed || 0}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Última Actividad</label>
-                      <p className="text-sm">{modals.view.data.stats ? new Date(modals.view.data.stats.lastActivity).toLocaleString() : 'N/A'}</p>
-                    </div>
+              <div className="flex items-center space-x-4">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {getVersionString()}
+                </span>
+                {canManageUsers && (
+                  <Button onClick={handleCreateUser} className="flex items-center">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nuevo Usuario
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="px-4 py-6 sm:px-0">
+            {/* Search and Filters */}
+            <div className="mb-6">
+              <div className="flex items-center space-x-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Buscar usuarios por nombre, email o departamento..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
                 </div>
               </div>
-
-              {modals.view.data.permissions && (
-                <div className="space-y-4">
-                  <h4 className="font-medium">Permisos</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(modals.view.data.permissions).map(([key, value]) => (
-                      <div key={key} className="flex items-center gap-2">
-                        {value ? (
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        )}
-                        <span className="text-sm">
-                          {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
-          )}
-        </ActionModal>
 
-        <ActionModal
-          isOpen={modals.edit.isOpen}
-          onClose={() => closeModal('edit')}
-          title="Editar Usuario"
-          description="Modifica la información del usuario"
-          type="edit"
-          onConfirm={() => handleSave(modals.edit.data)}
-        >
-          {modals.edit.data && (
+            {/* Users Grid */}
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Cargando usuarios...</p>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12">
+                <div className="text-red-600">
+                  <p className="text-lg font-medium">Error al cargar usuarios</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredUsers.map((user) => (
+                  <Card key={user.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                            <span className="text-blue-600 font-semibold text-sm">
+                              {user.firstName[0]}{user.lastName[0]}
+                            </span>
+                          </div>
+                          <div>
+                            <CardTitle className="text-lg">
+                              {user.firstName} {user.lastName}
+                            </CardTitle>
+                            <CardDescription className="text-sm">
+                              {user.email}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex space-x-1">
+                          {canManageUsers && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditUser(user)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteUser(user)}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-500">Rol:</span>
+                          <Badge className={getRoleColor(user.role)}>
+                            {getRoleDisplayName(user.role)}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-500">Estado:</span>
+                          <Badge className={getStatusColor(user.status)}>
+                            {user.status}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-500">Departamento:</span>
+                          <span className="text-sm font-medium">{user.department}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-500">Posición:</span>
+                          <span className="text-sm font-medium">{user.position}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-500">Teléfono:</span>
+                          <span className="text-sm font-medium">{user.phone}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!isLoading && !error && filteredUsers.length === 0 && (
+              <div className="text-center py-12">
+                <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No se encontraron usuarios
+                </h3>
+                <p className="text-gray-500">
+                  {searchTerm ? 'Intenta con otros términos de búsqueda' : 'No hay usuarios registrados'}
+                </p>
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* Create User Dialog */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Crear Nuevo Usuario</DialogTitle>
+              <DialogDescription>
+                Completa la información para crear un nuevo usuario en el sistema.
+              </DialogDescription>
+            </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="name">Nombre</Label>
-                  <Input 
-                    id="name" 
-                    defaultValue={modals.edit.data.name}
-                    placeholder="Nombre completo"
-                  />
+                  <Label htmlFor="firstName">Nombre</Label>
+                  <Input id="firstName" placeholder="Nombre" />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email"
-                    defaultValue={modals.edit.data.email}
-                    placeholder="email@ejemplo.com"
-                  />
+                  <Label htmlFor="lastName">Apellido</Label>
+                  <Input id="lastName" placeholder="Apellido" />
                 </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="phone">Teléfono</Label>
-                  <Input 
-                    id="phone" 
-                    defaultValue={modals.edit.data.phone || ''}
-                    placeholder="+52 55 1234 5678"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="role">Rol</Label>
-                  <Select defaultValue={modals.edit.data.role}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                      <SelectItem value="ejecutivo">Ejecutivo</SelectItem>
-                      <SelectItem value="cliente">Cliente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="department">Departamento</Label>
-                  <Input 
-                    id="department" 
-                    defaultValue={modals.edit.data.department || ''}
-                    placeholder="Departamento"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="position">Posición</Label>
-                  <Input 
-                    id="position" 
-                    defaultValue={modals.edit.data.position || ''}
-                    placeholder="Posición"
-                  />
-                </div>
-              </div>
-
               <div>
-                <Label htmlFor="status">Estado</Label>
-                <Select defaultValue={modals.edit.data.status}>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" placeholder="usuario@empresa.com" />
+              </div>
+              <div>
+                <Label htmlFor="phone">Teléfono</Label>
+                <Input id="phone" placeholder="+52XXXXXXXXXX" />
+              </div>
+              <div>
+                <Label htmlFor="role">Rol</Label>
+                <Select>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Seleccionar rol" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="inactive">Inactivo</SelectItem>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="suspended">Suspendido</SelectItem>
+                    <SelectItem value="EXECUTIVE">Ejecutivo</SelectItem>
+                    <SelectItem value="ADMIN">Administrador</SelectItem>
+                    {currentUser?.role === 'SUPER_ADMIN' && (
+                      <SelectItem value="SUPER_ADMIN">Super Administrador</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label htmlFor="department">Departamento</Label>
+                <Input id="department" placeholder="Departamento" />
+              </div>
+              <div>
+                <Label htmlFor="position">Posición</Label>
+                <Input id="position" placeholder="Posición" />
+              </div>
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={() => {
+                  // Implementar creación
+                  console.log('Crear usuario')
+                  setIsCreateDialogOpen(false)
+                }}>
+                  Crear Usuario
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
-              {modals.edit.data.permissions && (
-                <div className="space-y-4">
-                  <h4 className="font-medium">Permisos</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(modals.edit.data.permissions).map(([key, value]) => (
-                      <div key={key} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={key}
-                          defaultChecked={Boolean(value)}
-                        />
-                        <Label htmlFor={key} className="text-sm">
-                          {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
-                        </Label>
-                      </div>
-                    ))}
+        {/* Edit User Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Editar Usuario</DialogTitle>
+              <DialogDescription>
+                Modifica la información del usuario seleccionado.
+              </DialogDescription>
+            </DialogHeader>
+            {selectedUser && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="editFirstName">Nombre</Label>
+                    <Input 
+                      id="editFirstName" 
+                      defaultValue={selectedUser.firstName}
+                      placeholder="Nombre" 
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editLastName">Apellido</Label>
+                    <Input 
+                      id="editLastName" 
+                      defaultValue={selectedUser.lastName}
+                      placeholder="Apellido" 
+                    />
                   </div>
                 </div>
-              )}
-            </div>
-          )}
-        </ActionModal>
-
-        <ActionModal
-          isOpen={modals.delete.isOpen}
-          onClose={() => closeModal('delete')}
-          title="Eliminar Usuario"
-          description="¿Estás seguro de que quieres eliminar este usuario?"
-          type="delete"
-          onConfirm={() => handleDeleteConfirm(modals.delete.data)}
-        >
-          {modals.delete.data && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-red-600" />
                 <div>
-                  <p className="font-medium text-red-900 dark:text-red-100">
-                    Esta acción no se puede deshacer
-                  </p>
-                  <p className="text-sm text-red-700 dark:text-red-300">
-                    Se eliminará permanentemente el usuario <strong>{modals.delete.data.name}</strong> y todos sus datos asociados.
-                  </p>
+                  <Label htmlFor="editEmail">Email</Label>
+                  <Input 
+                    id="editEmail" 
+                    type="email" 
+                    defaultValue={selectedUser.email}
+                    placeholder="usuario@empresa.com" 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editPhone">Teléfono</Label>
+                  <Input 
+                    id="editPhone" 
+                    defaultValue={selectedUser.phone}
+                    placeholder="+52XXXXXXXXXX" 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editRole">Rol</Label>
+                  <Select defaultValue={selectedUser.role}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar rol" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="EXECUTIVE">Ejecutivo</SelectItem>
+                      <SelectItem value="ADMIN">Administrador</SelectItem>
+                      {currentUser?.role === 'SUPER_ADMIN' && (
+                        <SelectItem value="SUPER_ADMIN">Super Administrador</SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="editDepartment">Departamento</Label>
+                  <Input 
+                    id="editDepartment" 
+                    defaultValue={selectedUser.department}
+                    placeholder="Departamento" 
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="editPosition">Posición</Label>
+                  <Input 
+                    id="editPosition" 
+                    defaultValue={selectedUser.position}
+                    placeholder="Posición" 
+                  />
+                </div>
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={() => {
+                    // Implementar edición
+                    console.log('Editar usuario:', selectedUser.id)
+                    setIsEditDialogOpen(false)
+                  }}>
+                    Guardar Cambios
+                  </Button>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Email:</strong> {modals.delete.data.email}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Rol:</strong> {getRoleText(modals.delete.data.role)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Estado:</strong> {getStatusText(modals.delete.data.status)}
-                </p>
-              </div>
-            </div>
-          )}
-        </ActionModal>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-    </MainLayout>
+    </ProtectedRoute>
   )
 }
+
+export default UsersPage
