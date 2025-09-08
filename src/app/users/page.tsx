@@ -1,25 +1,63 @@
-'use client'
+"use client"
 
-import React, { useState, useEffect } from 'react'
-import { useAuthContext } from '@/lib/auth/auth-context'
-import ProtectedRoute from '@/components/auth/protected-route'
-import { User, Role, Permission, UserRoleType } from '@/types/users'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Plus, Search, Edit, Trash2, Shield, Users, Settings, Eye, UserPlus, ShieldCheck } from 'lucide-react'
-import { getVersionString } from '@/lib/version'
-import { UserForm } from '@/components/users/user-form'
-import { RoleForm } from '@/components/roles/role-form'
-import { PermissionForm } from '@/components/permissions/permission-form'
-import { UserCard } from '@/components/users/user-card'
-import { RoleCard } from '@/components/roles/role-card'
-import { PermissionCard } from '@/components/permissions/permission-card'
-import { UserStats } from '@/components/users/user-stats'
+import { useState, useEffect } from "react"
+import { MainLayout } from "@/components/layout/main-layout"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AnimatedButton } from "@/components/ui/animated-button"
+import { ActionModal } from "@/components/ui/action-modal"
+import { useMicrointeractions } from "@/hooks/use-microinteractions"
+import { useCardActions } from "@/hooks/use-card-actions"
+import { useAuthContext } from "@/lib/auth/auth-context"
+import { User, Role, Permission, UserRoleType } from "@/types/users"
+import { UserForm } from "@/components/users/user-form"
+import { RoleForm } from "@/components/roles/role-form"
+import { PermissionForm } from "@/components/permissions/permission-form"
+import { UserCard } from "@/components/users/user-card"
+import { RoleCard } from "@/components/roles/role-card"
+import { PermissionCard } from "@/components/permissions/permission-card"
+import { UserStats } from "@/components/users/user-stats"
+import { 
+  Users, 
+  Plus, 
+  Search, 
+  Filter,
+  Eye,
+  Edit,
+  Trash2,
+  Shield,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  MoreHorizontal,
+  Download,
+  Upload,
+  RefreshCw,
+  Settings,
+  Key,
+  Lock,
+  Unlock,
+  UserPlus,
+  UserMinus,
+  Activity,
+  BarChart3,
+  ShieldCheck
+} from "lucide-react"
 
-const UsersPage: React.FC = () => {
+export default function UsersPage() {
+  const { isLoading, simulateAction } = useMicrointeractions()
   const { user: currentUser, hasPermission } = useAuthContext()
   const [activeTab, setActiveTab] = useState('users')
   
@@ -48,7 +86,7 @@ const UsersPage: React.FC = () => {
   const [isEditPermissionDialogOpen, setIsEditPermissionDialogOpen] = useState(false)
   const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null)
   
-  const [isLoading, setIsLoading] = useState(true)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   // Datos de prueba para desarrollo local
@@ -193,7 +231,7 @@ const UsersPage: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        setIsLoading(true)
+        setLoading(true)
         await new Promise(resolve => setTimeout(resolve, 1000))
         setUsers(testUsers)
         setFilteredUsers(testUsers)
@@ -205,7 +243,7 @@ const UsersPage: React.FC = () => {
         setError('Error al cargar datos')
         console.error('Error loading data:', error)
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
 
@@ -246,47 +284,6 @@ const UsersPage: React.FC = () => {
 
     setFilteredPermissions(filtered)
   }, [permissionSearchTerm, selectedPermissionCategory, permissions])
-
-  const getRoleDisplayName = (role: string) => {
-    switch (role) {
-      case 'SUPER_ADMIN':
-        return 'Super Administrador'
-      case 'ADMIN':
-        return 'Administrador'
-      case 'EXECUTIVE':
-        return 'Ejecutivo'
-      default:
-        return role
-    }
-  }
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'SUPER_ADMIN':
-        return 'bg-red-100 text-red-800'
-      case 'ADMIN':
-        return 'bg-blue-100 text-blue-800'
-      case 'EXECUTIVE':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800'
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800'
-      case 'suspended':
-        return 'bg-red-100 text-red-800'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
 
   // Handlers para usuarios
   const handleCreateUser = () => setIsCreateUserDialogOpen(true)
@@ -445,190 +442,195 @@ const UsersPage: React.FC = () => {
   const canManagePermissions = hasPermission('permissions', 'manage')
 
   return (
-    <ProtectedRoute requiredPermission={{ resource: 'users', action: 'read' }}>
-      <div className="min-h-screen bg-gray-50">
+    <MainLayout>
+      <div className="space-y-8">
         {/* Header */}
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <UserPlus className="h-8 w-8 text-blue-600" />
-                </div>
-                <div className="ml-4">
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Centro de Gestión de Usuarios
-                  </h1>
-                  <p className="text-sm text-gray-500">
-                    Administra usuarios, roles y permisos del sistema
-                  </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Gestión de Usuarios</h1>
+            <p className="text-muted-foreground">
+              Administra usuarios, roles y permisos del sistema
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <AnimatedButton
+              onClick={() => setActiveTab('users')}
+              variant={activeTab === 'users' ? 'default' : 'outline'}
+              size="sm"
+            >
+              <Users className="h-4 w-4 mr-2" />
+              Usuarios ({users.length})
+            </AnimatedButton>
+            <AnimatedButton
+              onClick={() => setActiveTab('roles')}
+              variant={activeTab === 'roles' ? 'default' : 'outline'}
+              size="sm"
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Roles ({roles.length})
+            </AnimatedButton>
+            <AnimatedButton
+              onClick={() => setActiveTab('permissions')}
+              variant={activeTab === 'permissions' ? 'default' : 'outline'}
+              size="sm"
+            >
+              <ShieldCheck className="h-4 w-4 mr-2" />
+              Permisos ({permissions.length})
+            </AnimatedButton>
+          </div>
+        </div>
+
+        {/* Estadísticas */}
+        <UserStats users={users} roles={roles} permissions={permissions} />
+
+        {/* Contenido principal */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="users" className="flex items-center space-x-2">
+              <Users className="h-4 w-4" />
+              <span>Usuarios ({users.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="roles" className="flex items-center space-x-2">
+              <Shield className="h-4 w-4" />
+              <span>Roles ({roles.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="permissions" className="flex items-center space-x-2">
+              <ShieldCheck className="h-4 w-4" />
+              <span>Permisos ({permissions.length})</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Tab de Usuarios */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar usuarios..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
               </div>
-              
-              <div className="flex items-center space-x-4">
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {getVersionString()}
-                </span>
-              </div>
+              {canManageUsers && (
+                <AnimatedButton onClick={handleCreateUser}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo Usuario
+                </AnimatedButton>
+              )}
             </div>
-          </div>
-        </header>
 
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            {/* Estadísticas */}
-            <UserStats users={users} roles={roles} permissions={permissions} />
-            
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="users" className="flex items-center space-x-2">
-                  <Users className="h-4 w-4" />
-                  <span>Usuarios ({users.length})</span>
-                </TabsTrigger>
-                <TabsTrigger value="roles" className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4" />
-                  <span>Roles ({roles.length})</span>
-                </TabsTrigger>
-                <TabsTrigger value="permissions" className="flex items-center space-x-2">
-                  <ShieldCheck className="h-4 w-4" />
-                  <span>Permisos ({permissions.length})</span>
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Tab de Usuarios */}
-              <TabsContent value="users" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div className="flex-1 max-w-md">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Buscar usuarios..."
-                        value={userSearchTerm}
-                        onChange={(e) => setUserSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  {canManageUsers && (
-                    <Button onClick={handleCreateUser} className="flex items-center">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nuevo Usuario
-                    </Button>
-                  )}
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Cargando usuarios...</p>
                 </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredUsers.map((user) => (
+                  <UserCard
+                    key={user.id}
+                    user={user}
+                    onEdit={handleEditUser}
+                    onDelete={handleDeleteUser}
+                    canManage={canManageUsers}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                      <p className="mt-4 text-gray-600">Cargando usuarios...</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredUsers.map((user) => (
-                      <UserCard
-                        key={user.id}
-                        user={user}
-                        onEdit={handleEditUser}
-                        onDelete={handleDeleteUser}
-                        canManage={canManageUsers}
-                      />
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* Tab de Roles */}
-              <TabsContent value="roles" className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <div className="flex-1 max-w-md">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Buscar roles..."
-                        value={roleSearchTerm}
-                        onChange={(e) => setRoleSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  {canManageRoles && (
-                    <Button onClick={handleCreateRole} className="flex items-center">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nuevo Rol
-                    </Button>
-                  )}
+          {/* Tab de Roles */}
+          <TabsContent value="roles" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar roles..."
+                    value={roleSearchTerm}
+                    onChange={(e) => setRoleSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
+              </div>
+              {canManageRoles && (
+                <AnimatedButton onClick={handleCreateRole}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo Rol
+                </AnimatedButton>
+              )}
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredRoles.map((role) => (
-                    <RoleCard
-                      key={role.id}
-                      role={role}
-                      onEdit={handleEditRole}
-                      onDelete={handleDeleteRole}
-                      canManage={canManageRoles}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredRoles.map((role) => (
+                <RoleCard
+                  key={role.id}
+                  role={role}
+                  onEdit={handleEditRole}
+                  onDelete={handleDeleteRole}
+                  canManage={canManageRoles}
+                />
+              ))}
+            </div>
+          </TabsContent>
 
-              {/* Tab de Permisos */}
-              <TabsContent value="permissions" className="space-y-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1 max-w-md">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Buscar permisos..."
-                        value={permissionSearchTerm}
-                        onChange={(e) => setPermissionSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-2 overflow-x-auto">
-                    {categories.map((category) => {
-                      const IconComponent = category.icon
-                      return (
-                        <Button
-                          key={category.id}
-                          variant={selectedPermissionCategory === category.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedPermissionCategory(category.id)}
-                          className="flex items-center space-x-2 whitespace-nowrap"
-                        >
-                          <IconComponent className="h-4 w-4" />
-                          <span>{category.name}</span>
-                        </Button>
-                      )
-                    })}
-                  </div>
-                  {canManagePermissions && (
-                    <Button onClick={handleCreatePermission} className="flex items-center">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Nuevo Permiso
-                    </Button>
-                  )}
+          {/* Tab de Permisos */}
+          <TabsContent value="permissions" className="space-y-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar permisos..."
+                    value={permissionSearchTerm}
+                    onChange={(e) => setPermissionSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
+              </div>
+              <div className="flex gap-2 overflow-x-auto">
+                {categories.map((category) => {
+                  const IconComponent = category.icon
+                  return (
+                    <AnimatedButton
+                      key={category.id}
+                      variant={selectedPermissionCategory === category.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedPermissionCategory(category.id)}
+                      className="flex items-center space-x-2 whitespace-nowrap"
+                    >
+                      <IconComponent className="h-4 w-4" />
+                      <span>{category.name}</span>
+                    </AnimatedButton>
+                  )
+                })}
+              </div>
+              {canManagePermissions && (
+                <AnimatedButton onClick={handleCreatePermission}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo Permiso
+                </AnimatedButton>
+              )}
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {filteredPermissions.map((permission) => (
-                    <PermissionCard
-                      key={permission.id}
-                      permission={permission}
-                      onEdit={handleEditPermission}
-                      onDelete={handleDeletePermission}
-                      canManage={canManagePermissions}
-                    />
-                  ))}
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredPermissions.map((permission) => (
+                <PermissionCard
+                  key={permission.id}
+                  permission={permission}
+                  onEdit={handleEditPermission}
+                  onDelete={handleDeletePermission}
+                  canManage={canManagePermissions}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Dialogs */}
         <UserForm
@@ -683,8 +685,6 @@ const UsersPage: React.FC = () => {
           permission={selectedPermission}
         />
       </div>
-    </ProtectedRoute>
+    </MainLayout>
   )
 }
-
-export default UsersPage
