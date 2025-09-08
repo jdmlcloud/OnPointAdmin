@@ -12,10 +12,18 @@ export default function SignInPage() {
   const handleSignIn = async () => {
     setIsLoading(true)
     try {
-      console.log('🚀 Intentando navegar al dashboard...')
-      // Redirigir directamente al dashboard sin autenticación
-      await router.push('/dashboard')
-      console.log('✅ Navegación exitosa al dashboard')
+      console.log('🚀 Limpiando cookies de NextAuth...')
+      
+      // Limpiar todas las cookies de NextAuth
+      document.cookie = 'next-auth.csrf-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+      document.cookie = 'next-auth.callback-url=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+      document.cookie = 'next-auth.session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+      
+      console.log('🧹 Cookies limpiadas, navegando al dashboard...')
+      
+      // Usar window.location para forzar navegación completa
+      window.location.href = '/dashboard'
+      
     } catch (error) {
       console.error('❌ Error navigating to dashboard:', error)
       // Fallback: usar window.location
@@ -45,12 +53,18 @@ export default function SignInPage() {
           </Button>
           
           <Button 
-            onClick={() => window.location.href = '/dashboard'}
+            onClick={() => {
+              // Limpiar cookies y navegar
+              document.cookie = 'next-auth.csrf-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+              document.cookie = 'next-auth.callback-url=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+              document.cookie = 'next-auth.session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+              window.location.href = '/dashboard'
+            }}
             variant="outline"
             className="w-full"
             size="lg"
           >
-            Acceso Directo (Fallback)
+            Acceso Directo (Sin Cookies)
           </Button>
           
           <div className="text-center text-sm text-muted-foreground">
