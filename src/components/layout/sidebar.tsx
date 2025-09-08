@@ -28,7 +28,6 @@ import {
 } from "lucide-react"
 import { useAuthContext } from "@/lib/auth/auth-context"
 import { useState } from "react"
-import { useRoles } from "@/hooks/use-roles"
 
 const navigation = [
   {
@@ -146,10 +145,9 @@ const navigation = [
 ]
 
 export function Sidebar() {
-  const { user, logout } = useAuthContext()
+  const { user, logout, hasPermission } = useAuthContext()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
-  const { hasPermission } = useRoles()
 
   const handleSignOut = async () => {
     logout()
@@ -182,7 +180,28 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navigation.filter(item => hasPermission(item.permission as any)).map((item) => {
+        {navigation.filter(item => {
+          // Mapear permisos del sidebar a nuestro sistema
+          const permissionMap: { [key: string]: { resource: string; action: string } } = {
+            'canViewDashboard': { resource: 'dashboard', action: 'read' },
+            'canManageProviders': { resource: 'providers', action: 'read' },
+            'canManageProducts': { resource: 'products', action: 'read' },
+            'canManageWhatsApp': { resource: 'whatsapp', action: 'read' },
+            'canManageQuotations': { resource: 'quotations', action: 'read' },
+            'canManageProposals': { resource: 'proposals', action: 'read' },
+            'canViewAnalytics': { resource: 'analytics', action: 'read' },
+            'canViewReports': { resource: 'reports', action: 'read' },
+            'canManageUsers': { resource: 'users', action: 'read' },
+            'canManageIntegrations': { resource: 'integrations', action: 'read' },
+            'canManageSystem': { resource: 'system', action: 'read' },
+            'canManageSettings': { resource: 'settings', action: 'read' }
+          }
+          
+          const mappedPermission = permissionMap[item.permission]
+          if (!mappedPermission) return true // Si no hay mapeo, permitir acceso
+          
+          return hasPermission(mappedPermission.resource, mappedPermission.action)
+        }).map((item) => {
           const isActive = pathname === item.href
           const Icon = item.icon
           

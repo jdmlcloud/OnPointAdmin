@@ -35,26 +35,8 @@ export function MainLayout({ children }: MainLayoutProps) {
     )
   }
 
-  // Mostrar error si hay problema de autenticación
-  if (error) {
-    return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600">Error de autenticación</h2>
-          <p className="text-muted-foreground mt-2">{error}</p>
-          <button 
-            onClick={() => router.push('/auth/signin')}
-            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Volver al login
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   // Si no hay usuario, no renderizar nada (se redirigirá)
-  if (!user) {
+  if (!user || !isAuthenticated) {
     return null
   }
 
