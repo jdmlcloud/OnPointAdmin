@@ -345,7 +345,7 @@ print_info "   DYNAMODB_ORDERS_TABLE=$ORDERS_TABLE"
 print_info "3. Reinicia tu aplicación para cargar las nuevas configuraciones"
 
 print_info "4. Prueba el dashboard DynamoDB en:"
-print_info "   http://localhost:3000/dashboard-dynamodb"
+print_info "   https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/dashboard-dynamodb"
 
 print_success "¡Configuración de DynamoDB completada exitosamente!"
 

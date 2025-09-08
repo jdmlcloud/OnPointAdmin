@@ -160,7 +160,7 @@ export function Sidebar() {
   const { hasPermission } = useRoles()
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/auth/signin' })
+    signOut({ callbackUrl: 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin' })
   }
 
   return (

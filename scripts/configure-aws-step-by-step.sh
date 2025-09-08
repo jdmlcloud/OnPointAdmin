@@ -129,8 +129,8 @@ CLIENT_ID=$(aws cognito-idp create-user-pool-client \
     --generate-secret \
     --explicit-auth-flows ALLOW_USER_PASSWORD_AUTH ALLOW_USER_SRP_AUTH \
     --supported-identity-providers COGNITO \
-    --callback-urls "http://localhost:3000/auth/callback" \
-    --logout-urls "http://localhost:3000/auth/signin" \
+    --callback-urls "https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/callback" \
+    --logout-urls "https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin" \
     --allowed-o-auth-flows implicit code \
     --allowed-o-auth-scopes email openid profile \
     --allowed-o-auth-flows-user-pool-client \
@@ -201,7 +201,7 @@ NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID=$USER_POOL_ID
 NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID=$CLIENT_ID
 
 # NextAuth Configuration (temporal)
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 NEXTAUTH_SECRET=dev-secret-key-for-development-only-not-for-production
 NODE_ENV=development
 EOF
@@ -228,7 +228,7 @@ echo "  User Pool: https://console.aws.amazon.com/cognito/users/?region=$AWS_REG
 echo ""
 echo "📝 Próximos pasos:"
 echo "  1. Reiniciar el servidor de desarrollo: npm run dev"
-echo "  2. Ir a: http://localhost:3000/auth/cognito-signin"
+echo "  2. Ir a: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/cognito-signin"
 echo "  3. Probar login con los usuarios creados"
 echo "  4. Verificar en AWS Console que los usuarios existen"
 echo ""

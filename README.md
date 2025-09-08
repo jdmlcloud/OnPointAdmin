@@ -140,7 +140,7 @@ S3_REGION=us-east-1
 CLOUDFRONT_DOMAIN=your_cloudfront_domain
 
 # Authentication
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 NEXTAUTH_SECRET=your_nextauth_secret_here
 COGNITO_CLIENT_ID=your_cognito_client_id
 COGNITO_CLIENT_SECRET=your_cognito_client_secret

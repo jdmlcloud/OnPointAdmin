@@ -1,7 +1,7 @@
 // Configuración de entorno para desarrollo
 export const envDev = {
   // NextAuth
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com',
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'dev-secret-key-for-development-only-not-for-production',
   
   // Database

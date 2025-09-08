@@ -46,7 +46,7 @@ S3_REGION=us-east-1
 CLOUDFRONT_DOMAIN=your_cloudfront_domain
 
 # Authentication
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 NEXTAUTH_SECRET=your_nextauth_secret_here
 COGNITO_CLIENT_ID=your_cognito_client_id
 COGNITO_CLIENT_SECRET=your_cognito_client_secret
@@ -102,7 +102,7 @@ echo "1. Edita .env.local con tus credenciales AWS, OpenAI, etc."
 echo "2. Configura tu base de datos DynamoDB"
 echo "3. Ejecuta 'npm run dev' para iniciar el servidor de desarrollo"
 echo ""
-echo "🌐 La aplicación estará disponible en: http://localhost:3000"
+echo "🌐 La aplicación estará disponible en: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com"
 echo ""
 echo "📚 Documentación: README.md"
 echo "🔧 Scripts disponibles:"

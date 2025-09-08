@@ -11,12 +11,12 @@ export default withAuth(
 
     // Redirect authenticated users away from auth pages
     if (isAuth && isAuthPage) {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
+      return NextResponse.redirect(new URL('/dashboard', 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com'))
     }
 
     // Redirect unauthenticated users to sign in
     if (!isAuth && !isAuthPage && !isApiRoute) {
-      return NextResponse.redirect(new URL('/auth/signin', req.url))
+      return NextResponse.redirect(new URL('/auth/signin', 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com'))
     }
 
     // Role-based access control
@@ -26,13 +26,13 @@ export default withAuth(
 
       // Admin only routes
       if (path.startsWith('/admin') && userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/dashboard', req.url))
+        return NextResponse.redirect(new URL('/dashboard', 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com'))
       }
 
       // Executivo and Admin only routes
       if ((path.startsWith('/providers') || path.startsWith('/products')) && 
           !['admin', 'ejecutivo'].includes(userRole)) {
-        return NextResponse.redirect(new URL('/dashboard', req.url))
+        return NextResponse.redirect(new URL('/dashboard', 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com'))
       }
     }
 

@@ -2,7 +2,7 @@
 
 ## ✅ Estado Actual
 - ✅ **Frontend 100% completo** - Todas las pantallas implementadas
-- ✅ **Servidor funcionando** - http://localhost:3000
+- ✅ **Servidor funcionando** - https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 - ✅ **Autenticación demo** - Login funcional
 - ✅ **Navegación completa** - Todos los módulos accesibles
 
@@ -23,7 +23,7 @@ Agrega el siguiente contenido:
 
 ```env
 # NextAuth Configuration
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 NEXTAUTH_SECRET=dev-secret-key-for-development-only-not-for-production
 
 # Database (Optional for frontend)
@@ -43,7 +43,7 @@ NODE_ENV=development
 
 ### 1. Acceder a la Aplicación
 ```
-http://localhost:3000
+https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 ```
 
 ### 2. Iniciar Sesión (Modo Demo)
@@ -128,7 +128,7 @@ npm run type-check   # Verificación de tipos TypeScript
 
 ### Error de Autenticación
 Si ves errores de autenticación:
-1. Verifica que el servidor esté corriendo en http://localhost:3000
+1. Verifica que el servidor esté corriendo en https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 2. Usa las credenciales demo: admin@onpoint.com / password
 3. Si persiste, reinicia el servidor: `Ctrl+C` y `npm run dev`
 

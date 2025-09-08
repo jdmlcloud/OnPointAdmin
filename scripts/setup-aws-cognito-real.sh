@@ -91,7 +91,7 @@ NEXT_PUBLIC_AWS_ACCESS_KEY_ID=$ACCESS_KEY_ID
 NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY=$SECRET_ACCESS_KEY
 
 # NextAuth Configuration
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
 NEXTAUTH_SECRET=dev-secret-key-for-development-only-not-for-production
 
 # Database Configuration
@@ -150,7 +150,7 @@ echo "   Account ID: $ACCOUNT_ID"
 echo ""
 echo "🚀 Próximos pasos:"
 echo "   1. Ejecuta: npm run dev"
-echo "   2. Ve a: http://localhost:3000/auth/cognito-real"
+echo "   2. Ve a: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/cognito-real"
 echo "   3. Usa las credenciales de los usuarios existentes"
 echo ""
 echo "⚠️  IMPORTANTE:"
@@ -159,7 +159,7 @@ echo "   - Este es un entorno de desarrollo"
 echo "   - Para producción, usa IAM roles en lugar de credenciales"
 echo ""
 echo "🔐 URLs de prueba:"
-echo "   - Login real: http://localhost:3000/auth/cognito-real"
-echo "   - Dashboard real: http://localhost:3000/cognito-dashboard-real"
-echo "   - Login simulación: http://localhost:3000/auth/cognito-direct"
-echo "   - Dashboard simulación: http://localhost:3000/cognito-dashboard-direct"
+echo "   - Login real: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/cognito-real"
+echo "   - Dashboard real: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/cognito-dashboard-real"
+echo "   - Login simulación: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/cognito-direct"
+echo "   - Dashboard simulación: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/cognito-dashboard-direct"

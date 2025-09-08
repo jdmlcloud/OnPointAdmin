@@ -24,7 +24,7 @@ export function Header() {
   const { theme, setTheme } = useTheme()
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: '/auth/signin' })
+    signOut({ callbackUrl: 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin' })
   }
 
   const toggleTheme = () => {
