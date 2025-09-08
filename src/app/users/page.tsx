@@ -19,7 +19,7 @@ import { useAuthContext } from "@/lib/auth/auth-context"
 import { useUsersApi } from "@/hooks/use-users-api"
 import { useRolesApi } from "@/hooks/use-roles-api"
 import { usePermissionsApi } from "@/hooks/use-permissions-api"
-import { User, Role, Permission, UserRoleType } from "@/types/users"
+import { User, UserRole, Permission, UserRoleType } from "@/types/users"
 import { UserForm } from "@/components/users/user-form"
 import { RoleForm } from "@/components/roles/role-form"
 import { PermissionForm } from "@/components/permissions/permission-form"
@@ -36,7 +36,7 @@ import {
   Edit,
   Trash2,
   Shield,
-  User,
+  User as UserIcon,
   Mail,
   Phone,
   Calendar,
@@ -79,13 +79,13 @@ export default function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   
   // Estados para roles
-  const [roles, setRoles] = useState<Role[]>([])
-  const [filteredRoles, setFilteredRoles] = useState<Role[]>([])
+  const [roles, setRoles] = useState<UserRole[]>([])
+  const [filteredRoles, setFilteredRoles] = useState<UserRole[]>([])
   const [roleSearchTerm, setRoleSearchTerm] = useState('')
   const [isCreateRoleDialogOpen, setIsCreateRoleDialogOpen] = useState(false)
   const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = useState(false)
   const [isDeleteRoleDialogOpen, setIsDeleteRoleDialogOpen] = useState(false)
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null)
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
   
   // Estados para permisos
   const [permissions, setPermissions] = useState<Permission[]>([])
@@ -100,132 +100,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Datos de prueba para desarrollo local
-  const testUsers: User[] = [
-    {
-      id: 'user-super-admin',
-      email: 'superadmin@onpoint.com',
-      firstName: 'Super',
-      lastName: 'Administrador',
-      phone: '+525512345678',
-      role: 'SUPER_ADMIN',
-      department: 'Tecnología',
-      position: 'Super Administrador',
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    },
-    {
-      id: 'user-admin',
-      email: 'admin@onpoint.com',
-      firstName: 'Admin',
-      lastName: 'Usuario',
-      phone: '+525512345679',
-      role: 'ADMIN',
-      department: 'Administración',
-      position: 'Administrador',
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    },
-    {
-      id: 'user-executive',
-      email: 'ejecutivo@onpoint.com',
-      firstName: 'Ejecutivo',
-      lastName: 'Usuario',
-      phone: '+525512345680',
-      role: 'EXECUTIVE',
-      department: 'Ventas',
-      position: 'Ejecutivo',
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    }
-  ]
-
-  const testRoles: Role[] = [
-    {
-      id: 'role-super-admin',
-      name: 'Super Administrador',
-      description: 'Acceso total al sistema, puede gestionar todo incluyendo otros administradores',
-      permissions: ['users:manage', 'roles:manage', 'permissions:manage', 'providers:manage', 'products:manage', 'reports:view', 'settings:manage'],
-      level: 1,
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    },
-    {
-      id: 'role-admin',
-      name: 'Administrador',
-      description: 'Puede gestionar usuarios, proveedores y productos del sistema',
-      permissions: ['users:manage', 'providers:manage', 'products:manage', 'reports:view'],
-      level: 2,
-      isSystem: false,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    },
-    {
-      id: 'role-executive',
-      name: 'Ejecutivo',
-      description: 'Puede ver y gestionar proveedores y productos asignados',
-      permissions: ['providers:read', 'products:read', 'reports:view'],
-      level: 3,
-      isSystem: false,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    }
-  ]
-
-  const testPermissions: Permission[] = [
-    {
-      id: 'permission-users-read',
-      name: 'users:read',
-      description: 'Ver usuarios',
-      resource: 'users',
-      action: 'read',
-      category: 'Usuarios',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    },
-    {
-      id: 'permission-users-manage',
-      name: 'users:manage',
-      description: 'Gestionar usuarios',
-      resource: 'users',
-      action: 'manage',
-      category: 'Usuarios',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    },
-    {
-      id: 'permission-roles-manage',
-      name: 'roles:manage',
-      description: 'Gestionar roles',
-      resource: 'roles',
-      action: 'manage',
-      category: 'Roles',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
-    }
-  ]
+  // Solo datos de AWS - no más datos de prueba
 
   const categories = [
     { id: 'all', name: 'Todas', icon: Shield },
@@ -245,30 +120,25 @@ export default function UsersPage() {
         setLoading(true)
         setError('')
         
-        // Intentar cargar desde AWS, si falla usar datos de prueba
-        try {
-          const [usersData, rolesData, permissionsData] = await Promise.all([
-            usersApi.fetchUsers(),
-            rolesApi.fetchRoles(),
-            permissionsApi.fetchPermissions()
-          ])
-          
-          setUsers(usersData)
-          setFilteredUsers(usersData)
-          setRoles(rolesData)
-          setFilteredRoles(rolesData)
-          setPermissions(permissionsData)
-          setFilteredPermissions(permissionsData)
-        } catch (apiError) {
-          console.warn('API no disponible, usando datos de prueba:', apiError)
-          // Fallback a datos de prueba
-          setUsers(testUsers)
-          setFilteredUsers(testUsers)
-          setRoles(testRoles)
-          setFilteredRoles(testRoles)
-          setPermissions(testPermissions)
-          setFilteredPermissions(testPermissions)
-        }
+        // Cargar usuarios desde API
+        const usersData = await usersApi.fetchUsers()
+        setUsers(usersData)
+        setFilteredUsers(usersData)
+        console.log('✅ Usuarios cargados desde API:', usersData.length)
+        
+        // Cargar roles desde API
+        const rolesData = await rolesApi.fetchRoles()
+        setRoles(rolesData)
+        setFilteredRoles(rolesData)
+        console.log('✅ Roles cargados desde API:', rolesData.length)
+        console.log('📋 Roles cargados:', rolesData.map(r => ({ id: r.id, name: r.name })))
+        
+        // Cargar permissions desde API
+        const permissionsData = await permissionsApi.fetchPermissions()
+        setPermissions(permissionsData)
+        setFilteredPermissions(permissionsData)
+        console.log('✅ Permissions cargados desde API:', permissionsData.length)
+        console.log('📋 Permissions cargados:', permissionsData.map(p => ({ id: p.id, name: p.name })))
       } catch (error) {
         setError('Error al cargar datos')
         console.error('Error loading data:', error)
@@ -282,12 +152,16 @@ export default function UsersPage() {
 
   // Filtrar usuarios
   useEffect(() => {
-    const filtered = users.filter(user =>
-      user.firstName.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-      user.department.toLowerCase().includes(userSearchTerm.toLowerCase())
-    )
+    const filtered = users.filter(user => {
+      const searchTerm = userSearchTerm.toLowerCase()
+      return (
+        (user.firstName || '').toLowerCase().includes(searchTerm) ||
+        (user.lastName || '').toLowerCase().includes(searchTerm) ||
+        (user.firstName || '').toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm) ||
+        (user.department || '').toLowerCase().includes(searchTerm)
+      )
+    })
     setFilteredUsers(filtered)
   }, [userSearchTerm, users])
 
@@ -309,7 +183,7 @@ export default function UsersPage() {
     )
 
     if (selectedPermissionCategory !== 'all') {
-      filtered = filtered.filter(permission => permission.category === selectedPermissionCategory)
+      filtered = filtered.filter(permission => permission.resource === selectedPermissionCategory)
     }
 
     setFilteredPermissions(filtered)
@@ -340,6 +214,20 @@ export default function UsersPage() {
       return true
     } catch (error) {
       console.error('Error creating user:', error)
+      
+      // Mostrar mensaje de error específico
+      if (error instanceof Error) {
+        if (error.message.includes('El usuario ya existe')) {
+          alert('Error: Ya existe un usuario con este email. Por favor, usa un email diferente.')
+        } else if (error.message.includes('Todos los campos son requeridos')) {
+          alert('Error: Por favor, completa todos los campos requeridos.')
+        } else {
+          alert(`Error al crear usuario: ${error.message}`)
+        }
+      } else {
+        alert('Error inesperado al crear usuario. Por favor, intenta de nuevo.')
+      }
+      
       return false
     }
   }
@@ -360,6 +248,20 @@ export default function UsersPage() {
         return true
       } catch (error) {
         console.error('Error updating user:', error)
+        
+        // Mostrar mensaje de error específico
+        if (error instanceof Error) {
+          if (error.message.includes('El usuario ya existe')) {
+            alert('Error: Ya existe un usuario con este email. Por favor, usa un email diferente.')
+          } else if (error.message.includes('Todos los campos son requeridos')) {
+            alert('Error: Por favor, completa todos los campos requeridos.')
+          } else {
+            alert(`Error al actualizar usuario: ${error.message}`)
+          }
+        } else {
+          alert('Error inesperado al actualizar usuario. Por favor, intenta de nuevo.')
+        }
+        
         return false
       }
     }
@@ -383,12 +285,13 @@ export default function UsersPage() {
 
   // Handlers para roles
   const handleCreateRole = () => setIsCreateRoleDialogOpen(true)
-  const handleEditRole = (role: Role) => {
+  const handleEditRole = (role: UserRole) => {
     setSelectedRole(role)
     setIsEditRoleDialogOpen(true)
   }
-  const handleDeleteRole = (role: Role) => {
-    if (role.isSystem) {
+  const handleDeleteRole = (role: UserRole) => {
+    // Los roles del sistema se identifican por level 1
+    if (role.level === 1) {
       alert('No se pueden eliminar roles del sistema')
       return
     }
@@ -397,47 +300,61 @@ export default function UsersPage() {
   }
 
   const handleCreateRoleSubmit = async (roleData: any) => {
-    const newRole: Role = {
-      id: `role-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...roleData,
-      level: 4,
-      isSystem: false,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: 'current-user'
+    try {
+      const newRole = await rolesApi.createRole({
+        name: roleData.name,
+        description: roleData.description,
+        level: 4,
+        permissions: roleData.permissions || []
+      })
+      
+      setRoles(prev => [...prev, newRole])
+      setFilteredRoles(prev => [...prev, newRole])
+      setIsCreateRoleDialogOpen(false)
+      return true
+    } catch (error) {
+      console.error('Error creating role:', error)
+      alert('Error al crear el rol. Verifica los datos e intenta nuevamente.')
+      return false
     }
-    setRoles(prev => [...prev, newRole])
-    setFilteredRoles(prev => [...prev, newRole])
-    setIsCreateRoleDialogOpen(false)
-    return true
   }
 
   const handleEditRoleSubmit = async (roleData: any) => {
     if (selectedRole) {
-      setRoles(prev => prev.map(role => 
-        role.id === selectedRole.id 
-          ? { ...role, ...roleData, updatedAt: new Date().toISOString() }
-          : role
-      ))
-      setFilteredRoles(prev => prev.map(role => 
-        role.id === selectedRole.id 
-          ? { ...role, ...roleData, updatedAt: new Date().toISOString() }
-          : role
-      ))
-      setIsEditRoleDialogOpen(false)
-      setSelectedRole(null)
-      return true
+      try {
+        const updatedRole = await rolesApi.updateRole(selectedRole.id, roleData)
+        
+        setRoles(prev => prev.map(role => 
+          role.id === selectedRole.id ? updatedRole : role
+        ))
+        setFilteredRoles(prev => prev.map(role => 
+          role.id === selectedRole.id ? updatedRole : role
+        ))
+        setIsEditRoleDialogOpen(false)
+        setSelectedRole(null)
+        return true
+      } catch (error) {
+        console.error('Error updating role:', error)
+        alert('Error al actualizar el rol. Verifica los datos e intenta nuevamente.')
+        return false
+      }
     }
     return false
   }
 
   const handleDeleteRoleConfirm = async () => {
     if (selectedRole) {
-      setRoles(prev => prev.filter(r => r.id !== selectedRole.id))
-      setFilteredRoles(prev => prev.filter(r => r.id !== selectedRole.id))
-      setIsDeleteRoleDialogOpen(false)
-      setSelectedRole(null)
+      try {
+        await rolesApi.deleteRole(selectedRole.id)
+        
+        setRoles(prev => prev.filter(r => r.id !== selectedRole.id))
+        setFilteredRoles(prev => prev.filter(r => r.id !== selectedRole.id))
+        setIsDeleteRoleDialogOpen(false)
+        setSelectedRole(null)
+      } catch (error) {
+        console.error('Error deleting role:', error)
+        alert('Error al eliminar el rol. Intenta nuevamente.')
+      }
     }
   }
 
@@ -448,7 +365,8 @@ export default function UsersPage() {
     setIsEditPermissionDialogOpen(true)
   }
   const handleDeletePermission = (permission: Permission) => {
-    if (permission.isSystem) {
+    // Los permisos del sistema se identifican por ser básicos
+    if (permission.resource === 'users' && permission.action === 'read') {
       alert('No se pueden eliminar permisos del sistema')
       return
     }
@@ -457,46 +375,61 @@ export default function UsersPage() {
   }
 
   const handleCreatePermissionSubmit = async (permissionData: any) => {
-    const newPermission: Permission = {
-      id: `permission-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...permissionData,
-      isSystem: false,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: 'current-user'
+    try {
+      const newPermission = await permissionsApi.createPermission({
+        name: permissionData.name,
+        resource: permissionData.resource,
+        action: permissionData.action,
+        description: permissionData.description
+      })
+      
+      setPermissions(prev => [...prev, newPermission])
+      setFilteredPermissions(prev => [...prev, newPermission])
+      setIsCreatePermissionDialogOpen(false)
+      return true
+    } catch (error) {
+      console.error('Error creating permission:', error)
+      alert('Error al crear el permiso. Verifica los datos e intenta nuevamente.')
+      return false
     }
-    setPermissions(prev => [...prev, newPermission])
-    setFilteredPermissions(prev => [...prev, newPermission])
-    setIsCreatePermissionDialogOpen(false)
-    return true
   }
 
   const handleEditPermissionSubmit = async (permissionData: any) => {
     if (selectedPermission) {
-      setPermissions(prev => prev.map(permission => 
-        permission.id === selectedPermission.id 
-          ? { ...permission, ...permissionData, updatedAt: new Date().toISOString() }
-          : permission
-      ))
-      setFilteredPermissions(prev => prev.map(permission => 
-        permission.id === selectedPermission.id 
-          ? { ...permission, ...permissionData, updatedAt: new Date().toISOString() }
-          : permission
-      ))
-      setIsEditPermissionDialogOpen(false)
-      setSelectedPermission(null)
-      return true
+      try {
+        const updatedPermission = await permissionsApi.updatePermission(selectedPermission.id, permissionData)
+        
+        setPermissions(prev => prev.map(permission => 
+          permission.id === selectedPermission.id ? updatedPermission : permission
+        ))
+        setFilteredPermissions(prev => prev.map(permission => 
+          permission.id === selectedPermission.id ? updatedPermission : permission
+        ))
+        setIsEditPermissionDialogOpen(false)
+        setSelectedPermission(null)
+        return true
+      } catch (error) {
+        console.error('Error updating permission:', error)
+        alert('Error al actualizar el permiso. Verifica los datos e intenta nuevamente.')
+        return false
+      }
     }
     return false
   }
 
   const handleDeletePermissionConfirm = async () => {
     if (selectedPermission) {
-      setPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
-      setFilteredPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
-      setIsDeletePermissionDialogOpen(false)
-      setSelectedPermission(null)
+      try {
+        await permissionsApi.deletePermission(selectedPermission.id)
+        
+        setPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
+        setFilteredPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
+        setIsDeletePermissionDialogOpen(false)
+        setSelectedPermission(null)
+      } catch (error) {
+        console.error('Error deleting permission:', error)
+        alert('Error al eliminar el permiso. Intenta nuevamente.')
+      }
     }
   }
 
@@ -700,7 +633,7 @@ export default function UsersPage() {
           isOpen={isCreateUserDialogOpen}
           onClose={() => setIsCreateUserDialogOpen(false)}
           onSubmit={handleCreateUserSubmit}
-          currentUserRole={currentUser?.role}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
         />
 
         <UserForm
@@ -711,14 +644,14 @@ export default function UsersPage() {
           }}
           onSubmit={handleEditUserSubmit}
           user={selectedUser}
-          currentUserRole={currentUser?.role}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
         />
 
         <RoleForm
           isOpen={isCreateRoleDialogOpen}
           onClose={() => setIsCreateRoleDialogOpen(false)}
           onSubmit={handleCreateRoleSubmit}
-          currentUserRole={currentUser?.role}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
         />
 
         <RoleForm
@@ -729,7 +662,7 @@ export default function UsersPage() {
           }}
           onSubmit={handleEditRoleSubmit}
           role={selectedRole}
-          currentUserRole={currentUser?.role}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
         />
 
         <PermissionForm
@@ -843,7 +776,7 @@ export default function UsersPage() {
                     {selectedPermission.name}
                   </h4>
                   <p className="text-sm text-red-700 dark:text-red-300">
-                    {selectedPermission.description} - {selectedPermission.category}
+                    {selectedPermission.description} - {selectedPermission.resource}
                   </p>
                 </div>
               </div>

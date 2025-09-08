@@ -1,20 +1,22 @@
 "use client"
 
 import { useState, useCallback } from 'react'
-import { Role } from '@/types/users'
+import { UserRole } from '@/types/users'
 import { apiRequest } from '@/config/api'
 
 export function useRolesApi() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchRoles = useCallback(async (): Promise<Role[]> => {
+  const fetchRoles = useCallback(async (): Promise<UserRole[]> => {
     try {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<Role[]>('/roles')
-      return response
+      const response = await apiRequest<{success: boolean, roles: UserRole[], count: number}>('/roles')
+      console.log('🔍 Respuesta de API roles:', response)
+      console.log('📊 Roles extraídos:', response.roles?.length || 0)
+      return response.roles || []
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar roles'
       setError(errorMessage)
@@ -24,16 +26,16 @@ export function useRolesApi() {
     }
   }, [])
 
-  const createRole = useCallback(async (roleData: Partial<Role>): Promise<Role> => {
+  const createRole = useCallback(async (roleData: Partial<UserRole>): Promise<UserRole> => {
     try {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<Role>('/roles', {
+      const response = await apiRequest<{success: boolean, role: UserRole, message: string}>('/roles', {
         method: 'POST',
         body: JSON.stringify(roleData)
       })
-      return response
+      return response.role
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al crear rol'
       setError(errorMessage)
@@ -43,16 +45,16 @@ export function useRolesApi() {
     }
   }, [])
 
-  const updateRole = useCallback(async (id: string, roleData: Partial<Role>): Promise<Role> => {
+  const updateRole = useCallback(async (id: string, roleData: Partial<UserRole>): Promise<UserRole> => {
     try {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<Role>(`/roles/${id}`, {
+      const response = await apiRequest<{success: boolean, role: UserRole, message: string}>(`/roles/${id}`, {
         method: 'PUT',
         body: JSON.stringify(roleData)
       })
-      return response
+      return response.role
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al actualizar rol'
       setError(errorMessage)

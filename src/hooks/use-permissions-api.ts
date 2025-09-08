@@ -13,8 +13,10 @@ export function usePermissionsApi() {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<Permission[]>('/permissions')
-      return response
+      const response = await apiRequest<{success: boolean, permissions: Permission[], count: number}>('/permissions')
+      console.log('🔍 Respuesta de API permissions:', response)
+      console.log('📊 Permissions extraídos:', response.permissions?.length || 0)
+      return response.permissions || []
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al cargar permisos'
       setError(errorMessage)
@@ -29,11 +31,11 @@ export function usePermissionsApi() {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<Permission>('/permissions', {
+      const response = await apiRequest<{success: boolean, permission: Permission, message: string}>('/permissions', {
         method: 'POST',
         body: JSON.stringify(permissionData)
       })
-      return response
+      return response.permission
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al crear permiso'
       setError(errorMessage)
@@ -48,11 +50,11 @@ export function usePermissionsApi() {
       setLoading(true)
       setError(null)
       
-      const response = await apiRequest<Permission>(`/permissions/${id}`, {
+      const response = await apiRequest<{success: boolean, permission: Permission, message: string}>(`/permissions/${id}`, {
         method: 'PUT',
         body: JSON.stringify(permissionData)
       })
-      return response
+      return response.permission
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al actualizar permiso'
       setError(errorMessage)
