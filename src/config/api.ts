@@ -29,9 +29,16 @@ export const detectEnvironment = (): 'sandbox' | 'prod' => {
     const hostname = window.location.hostname
     console.log('🔍 Detectando entorno - hostname:', hostname)
     
-    if (hostname.includes('sandbox') || hostname.includes('d3ts6pwgn7uyyh.amplifyapp.com')) {
+    // Detectar sandbox específicamente
+    if (hostname.includes('sandbox')) {
       console.log('✅ Entorno detectado: sandbox')
       return 'sandbox'
+    }
+    
+    // Detectar producción específicamente
+    if (hostname.includes('main') || hostname === 'd3ts6pwgn7uyyh.amplifyapp.com') {
+      console.log('✅ Entorno detectado: prod')
+      return 'prod'
     }
   }
   
