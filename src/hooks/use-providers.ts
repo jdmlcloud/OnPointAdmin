@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Provider } from '@/lib/db/repositories/dynamodb-provider-repository'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface UseProvidersReturn {
   providers: Provider[]
@@ -23,13 +24,18 @@ export function useProviders(): UseProvidersReturn {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/providers')
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
+      const data = await apiRequest<{
+        success: boolean
+        providers: Provider[]
+        pagination: any
+        message: string
+      }>(API_CONFIG.ENDPOINTS.PROVIDERS)
       
-      const data = await response.json()
-      setProviders(data.providers || [])
+      if (data.success) {
+        setProviders(data.providers || [])
+      } else {
+        throw new Error('Error al obtener proveedores desde la API')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
       console.error('Error fetching providers:', err)
@@ -42,22 +48,21 @@ export function useProviders(): UseProvidersReturn {
     try {
       setError(null)
       
-      const response = await fetch('/api/providers', {
+      const data = await apiRequest<{
+        success: boolean
+        provider: Provider
+        message: string
+      }>(API_CONFIG.ENDPOINTS.PROVIDERS, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(providerData),
       })
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Error ${response.status}`)
+      if (data.success) {
+        setProviders(prev => [...prev, data.provider])
+        return data.provider
+      } else {
+        throw new Error('Error al crear proveedor')
       }
-      
-      const newProvider = await response.json()
-      setProviders(prev => [...prev, newProvider])
-      return newProvider
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear proveedor')
       console.error('Error creating provider:', err)
@@ -69,23 +74,21 @@ export function useProviders(): UseProvidersReturn {
     try {
       setError(null)
       
-      const response = await fetch(`/api/providers/${id}`, {
+      const data = await apiRequest<{
+        success: boolean
+        provider: Provider
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.PROVIDERS}/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(providerData),
       })
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Error ${response.status}`)
+      if (data.success) {
+        setProviders(prev => prev.map(provider => provider.id === id ? data.provider : provider))
+        return data.provider
+      } else {
+        throw new Error('Error al actualizar proveedor')
       }
-      
-      const data = await response.json()
-      const updatedProvider = data.provider
-      setProviders(prev => prev.map(provider => provider.id === id ? updatedProvider : provider))
-      return updatedProvider
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar proveedor')
       console.error('Error updating provider:', err)
@@ -97,17 +100,19 @@ export function useProviders(): UseProvidersReturn {
     try {
       setError(null)
       
-      const response = await fetch(`/api/providers/${id}`, {
+      const data = await apiRequest<{
+        success: boolean
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.PROVIDERS}/${id}`, {
         method: 'DELETE',
       })
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Error ${response.status}`)
+      if (data.success) {
+        setProviders(prev => prev.filter(provider => provider.id !== id))
+        return true
+      } else {
+        throw new Error('Error al eliminar proveedor')
       }
-      
-      setProviders(prev => prev.filter(provider => provider.id !== id))
-      return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar proveedor')
       console.error('Error deleting provider:', err)

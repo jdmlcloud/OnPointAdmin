@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { User } from '@/lib/db/models'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface UseUsersReturn {
   users: User[]
@@ -23,13 +24,18 @@ export function useUsers(): UseUsersReturn {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/users')
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
+      const data = await apiRequest<{
+        success: boolean
+        users: User[]
+        pagination: any
+        message: string
+      }>(API_CONFIG.ENDPOINTS.USERS)
       
-      const data = await response.json()
-      setUsers(data.users || [])
+      if (data.success) {
+        setUsers(data.users || [])
+      } else {
+        throw new Error('Error al obtener usuarios desde la API')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
       console.error('Error fetching users:', err)

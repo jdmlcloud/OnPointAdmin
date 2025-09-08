@@ -95,6 +95,7 @@ deploy_function() {
 deploy_function "${FUNCTION_PREFIX}-providers" "lambda-functions/providers"
 deploy_function "${FUNCTION_PREFIX}-users" "lambda-functions/users"
 deploy_function "${FUNCTION_PREFIX}-stats" "lambda-functions/stats"
+deploy_function "${FUNCTION_PREFIX}-tags" "lambda-functions/tags"
 
 # Limpiar directorio temporal
 rm -rf "$TEMP_DIR"

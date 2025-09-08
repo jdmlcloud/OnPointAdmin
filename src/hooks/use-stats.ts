@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface Stats {
   users: {
@@ -48,13 +49,17 @@ export function useStats(): UseStatsReturn {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/stats')
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
+      const data = await apiRequest<{
+        success: boolean
+        stats: Stats
+        message: string
+      }>(API_CONFIG.ENDPOINTS.STATS)
       
-      const data = await response.json()
-      setStats(data.stats)
+      if (data.success) {
+        setStats(data.stats)
+      } else {
+        throw new Error('Error al obtener estadísticas desde la API')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
       console.error('Error fetching stats:', err)

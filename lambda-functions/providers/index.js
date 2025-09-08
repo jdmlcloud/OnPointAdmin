@@ -119,6 +119,110 @@ exports.createProvider = async (event) => {
   }
 };
 
+// PUT /providers/{id}
+exports.updateProvider = async (event) => {
+  try {
+    console.log('🔍 Lambda: Actualizando provider...');
+    
+    const providerId = event.pathParameters?.id;
+    if (!providerId) {
+      return createResponse(400, {
+        success: false,
+        error: 'ID de proveedor requerido',
+        message: 'Se requiere el ID del proveedor en la URL'
+      });
+    }
+    
+    const body = JSON.parse(event.body);
+    const { name, email, company, phone, description, website, address, contacts, status, logo, notes, tags } = body;
+    
+    const updateData = {
+      ...(name && { name }),
+      ...(email && { email }),
+      ...(company && { company }),
+      ...(phone && { phone }),
+      ...(description !== undefined && { description }),
+      ...(website !== undefined && { website }),
+      ...(address && { address }),
+      ...(contacts && { contacts }),
+      ...(status && { status }),
+      ...(logo !== undefined && { logo }),
+      ...(notes !== undefined && { notes }),
+      ...(tags && { tags }),
+      updatedAt: new Date().toISOString()
+    };
+    
+    await docClient.send(new UpdateCommand({
+      TableName: 'onpoint-admin-providers-dev',
+      Key: { id: providerId },
+      UpdateExpression: 'SET ' + Object.keys(updateData).map(key => `#${key} = :${key}`).join(', '),
+      ExpressionAttributeNames: Object.keys(updateData).reduce((acc, key) => {
+        acc[`#${key}`] = key;
+        return acc;
+      }, {}),
+      ExpressionAttributeValues: Object.keys(updateData).reduce((acc, key) => {
+        acc[`:${key}`] = updateData[key];
+        return acc;
+      }, {}),
+      ReturnValues: 'ALL_NEW'
+    }));
+    
+    // Obtener el proveedor actualizado
+    const result = await docClient.send(new GetCommand({
+      TableName: 'onpoint-admin-providers-dev',
+      Key: { id: providerId }
+    }));
+    
+    return createResponse(200, {
+      success: true,
+      provider: result.Item,
+      message: 'Proveedor actualizado exitosamente'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error en updateProvider:', error);
+    return createResponse(500, {
+      success: false,
+      error: 'Error al actualizar proveedor',
+      message: error.message
+    });
+  }
+};
+
+// DELETE /providers/{id}
+exports.deleteProvider = async (event) => {
+  try {
+    console.log('🔍 Lambda: Eliminando provider...');
+    
+    const providerId = event.pathParameters?.id;
+    if (!providerId) {
+      return createResponse(400, {
+        success: false,
+        error: 'ID de proveedor requerido',
+        message: 'Se requiere el ID del proveedor en la URL'
+      });
+    }
+    
+    await docClient.send(new DeleteCommand({
+      TableName: 'onpoint-admin-providers-dev',
+      Key: { id: providerId }
+    }));
+    
+    return createResponse(200, {
+      success: true,
+      message: 'Proveedor eliminado exitosamente'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error en deleteProvider:', error);
+    return createResponse(500, {
+      success: false,
+      error: 'Error al eliminar proveedor',
+      message: error.message
+    });
+  }
+};
+
 // Handler principal
 exports.handler = async (event) => {
   console.log('🔍 Event:', JSON.stringify(event, null, 2));
@@ -129,7 +233,30 @@ exports.handler = async (event) => {
   }
   
   try {
-    switch (event.httpMethod) {
+    const path = event.path;
+    const httpMethod = event.httpMethod;
+    
+    // Rutas con parámetros
+    if (path.includes('/providers/') && path.split('/').length > 2) {
+      const providerId = path.split('/').pop();
+      event.pathParameters = { id: providerId };
+      
+      switch (httpMethod) {
+        case 'PUT':
+          return await exports.updateProvider(event);
+        case 'DELETE':
+          return await exports.deleteProvider(event);
+        default:
+          return createResponse(405, {
+            success: false,
+            error: 'Método no permitido',
+            message: `Método ${httpMethod} no soportado para esta ruta`
+          });
+      }
+    }
+    
+    // Rutas principales
+    switch (httpMethod) {
       case 'GET':
         return await exports.getProviders(event);
       case 'POST':
@@ -138,7 +265,7 @@ exports.handler = async (event) => {
         return createResponse(405, {
           success: false,
           error: 'Método no permitido',
-          message: `Método ${event.httpMethod} no soportado`
+          message: `Método ${httpMethod} no soportado`
         });
     }
   } catch (error) {

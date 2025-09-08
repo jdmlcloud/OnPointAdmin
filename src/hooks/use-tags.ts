@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 export function useTags() {
   const [tags, setTags] = useState<string[]>([])
@@ -12,13 +13,17 @@ export function useTags() {
       setLoading(true)
       setError(null)
       
-      const response = await fetch('/api/tags')
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
+      const data = await apiRequest<{
+        success: boolean
+        tags: string[]
+        message: string
+      }>(API_CONFIG.ENDPOINTS.TAGS)
       
-      const data = await response.json()
-      setTags(data.tags || [])
+      if (data.success) {
+        setTags(data.tags || [])
+      } else {
+        throw new Error('Error al obtener tags desde la API')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
       console.error('Error fetching tags:', err)
