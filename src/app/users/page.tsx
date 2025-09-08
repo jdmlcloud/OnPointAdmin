@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Search, Edit, Trash2, Eye, Users } from 'lucide-react'
 import { getVersionString } from '@/lib/version'
+import { UserForm } from '@/components/users/user-form'
 
 const UsersPage: React.FC = () => {
   const { user: currentUser, hasPermission } = useAuthContext()
@@ -155,8 +156,44 @@ const UsersPage: React.FC = () => {
   const handleDeleteUser = (user: User) => {
     if (confirm(`¿Estás seguro de que quieres eliminar a ${user.firstName} ${user.lastName}?`)) {
       // Implementar eliminación
-      console.log('Eliminar usuario:', user.id)
+      setUsers(prev => prev.filter(u => u.id !== user.id))
+      setFilteredUsers(prev => prev.filter(u => u.id !== user.id))
     }
+  }
+
+  const handleCreateUserSubmit = async (userData: any) => {
+    const newUser: User = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...userData,
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'current-user'
+    }
+
+    setUsers(prev => [...prev, newUser])
+    setFilteredUsers(prev => [...prev, newUser])
+    setIsCreateDialogOpen(false)
+    return true
+  }
+
+  const handleEditUserSubmit = async (userData: any) => {
+    if (selectedUser) {
+      setUsers(prev => prev.map(user => 
+        user.id === selectedUser.id 
+          ? { ...user, ...userData, updatedAt: new Date().toISOString() }
+          : user
+      ))
+      setFilteredUsers(prev => prev.map(user => 
+        user.id === selectedUser.id 
+          ? { ...user, ...userData, updatedAt: new Date().toISOString() }
+          : user
+      ))
+      setIsEditDialogOpen(false)
+      setSelectedUser(null)
+      return true
+    }
+    return false
   }
 
   const canManageUsers = hasPermission('users', 'manage')
@@ -325,165 +362,24 @@ const UsersPage: React.FC = () => {
         </main>
 
         {/* Create User Dialog */}
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Crear Nuevo Usuario</DialogTitle>
-              <DialogDescription>
-                Completa la información para crear un nuevo usuario en el sistema.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">Nombre</Label>
-                  <Input id="firstName" placeholder="Nombre" />
-                </div>
-                <div>
-                  <Label htmlFor="lastName">Apellido</Label>
-                  <Input id="lastName" placeholder="Apellido" />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="usuario@empresa.com" />
-              </div>
-              <div>
-                <Label htmlFor="phone">Teléfono</Label>
-                <Input id="phone" placeholder="+52XXXXXXXXXX" />
-              </div>
-              <div>
-                <Label htmlFor="role">Rol</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar rol" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="EXECUTIVE">Ejecutivo</SelectItem>
-                    <SelectItem value="ADMIN">Administrador</SelectItem>
-                    {currentUser?.role === 'SUPER_ADMIN' && (
-                      <SelectItem value="SUPER_ADMIN">Super Administrador</SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="department">Departamento</Label>
-                <Input id="department" placeholder="Departamento" />
-              </div>
-              <div>
-                <Label htmlFor="position">Posición</Label>
-                <Input id="position" placeholder="Posición" />
-              </div>
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={() => {
-                  // Implementar creación
-                  console.log('Crear usuario')
-                  setIsCreateDialogOpen(false)
-                }}>
-                  Crear Usuario
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <UserForm
+          isOpen={isCreateDialogOpen}
+          onClose={() => setIsCreateDialogOpen(false)}
+          onSubmit={handleCreateUserSubmit}
+          currentUserRole={currentUser?.role}
+        />
 
         {/* Edit User Dialog */}
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Editar Usuario</DialogTitle>
-              <DialogDescription>
-                Modifica la información del usuario seleccionado.
-              </DialogDescription>
-            </DialogHeader>
-            {selectedUser && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="editFirstName">Nombre</Label>
-                    <Input 
-                      id="editFirstName" 
-                      defaultValue={selectedUser.firstName}
-                      placeholder="Nombre" 
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="editLastName">Apellido</Label>
-                    <Input 
-                      id="editLastName" 
-                      defaultValue={selectedUser.lastName}
-                      placeholder="Apellido" 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="editEmail">Email</Label>
-                  <Input 
-                    id="editEmail" 
-                    type="email" 
-                    defaultValue={selectedUser.email}
-                    placeholder="usuario@empresa.com" 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editPhone">Teléfono</Label>
-                  <Input 
-                    id="editPhone" 
-                    defaultValue={selectedUser.phone}
-                    placeholder="+52XXXXXXXXXX" 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editRole">Rol</Label>
-                  <Select defaultValue={selectedUser.role}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar rol" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="EXECUTIVE">Ejecutivo</SelectItem>
-                      <SelectItem value="ADMIN">Administrador</SelectItem>
-                      {currentUser?.role === 'SUPER_ADMIN' && (
-                        <SelectItem value="SUPER_ADMIN">Super Administrador</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="editDepartment">Departamento</Label>
-                  <Input 
-                    id="editDepartment" 
-                    defaultValue={selectedUser.department}
-                    placeholder="Departamento" 
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="editPosition">Posición</Label>
-                  <Input 
-                    id="editPosition" 
-                    defaultValue={selectedUser.position}
-                    placeholder="Posición" 
-                  />
-                </div>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button onClick={() => {
-                    // Implementar edición
-                    console.log('Editar usuario:', selectedUser.id)
-                    setIsEditDialogOpen(false)
-                  }}>
-                    Guardar Cambios
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        <UserForm
+          isOpen={isEditDialogOpen}
+          onClose={() => {
+            setIsEditDialogOpen(false)
+            setSelectedUser(null)
+          }}
+          onSubmit={handleEditUserSubmit}
+          user={selectedUser}
+          currentUserRole={currentUser?.role}
+        />
       </div>
     </ProtectedRoute>
   )
