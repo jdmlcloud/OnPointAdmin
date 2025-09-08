@@ -4,6 +4,7 @@ frontend:
     preBuild:
       commands:
         - npm ci
+        - cp next.config.amplify.js next.config.js
     build:
       commands:
         - npm run build
