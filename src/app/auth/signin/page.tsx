@@ -80,11 +80,15 @@ export default function SignInPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@onpoint.com"
+                placeholder="usuario@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isSubmitting}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
               />
             </div>
             
@@ -99,6 +103,10 @@ export default function SignInPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={isSubmitting}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck="false"
                 />
                 <Button
                   type="button"
@@ -134,14 +142,13 @@ export default function SignInPage() {
             </Button>
           </form>
           
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p className="font-medium">Usuarios de prueba:</p>
+            <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="font-medium">Acceso al sistema:</p>
             <div className="mt-2 space-y-1">
-              <p><strong>Admin:</strong> admin@onpoint.com</p>
-              <p><strong>Ejecutivo:</strong> ejecutivo@onpoint.com</p>
+              <p>Contacta al administrador para obtener credenciales</p>
             </div>
             <p className="text-xs mt-2">
-              Contacta al administrador para obtener las contraseñas
+              Las credenciales se proporcionan de forma segura
             </p>
           </div>
         </CardContent>

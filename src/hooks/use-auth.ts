@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { signIn, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth'
 import { configureAmplify } from '@/lib/aws/amplify'
+import { logger } from '@/lib/logger'
 
 // Configurar Amplify al importar
 configureAmplify()
@@ -27,6 +28,7 @@ export function useAuth(): UseAuthReturn {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastActivity, setLastActivity] = useState<number>(Date.now())
 
   const checkAuthStatus = async () => {
     try {
@@ -53,23 +55,23 @@ export function useAuth(): UseAuthReturn {
           }
           
           setUser(authUser)
-          console.log('✅ Usuario autenticado:', authUser)
+          logger.log('✅ Usuario autenticado:', authUser)
         } else {
           setUser(null)
-          console.log('❌ No se pudo obtener información del usuario')
+          logger.log('❌ No se pudo obtener información del usuario')
         }
       } else {
         setUser(null)
-        console.log('❌ No hay sesión activa')
+        logger.log('❌ No hay sesión activa')
       }
     } catch (err) {
       // Si es error de usuario no autenticado, es normal
       if (err instanceof Error && err.message.includes('User needs to be authenticated')) {
-        console.log('ℹ️ Usuario no autenticado (normal en primera carga)')
+        logger.log('ℹ️ Usuario no autenticado (normal en primera carga)')
         setUser(null)
         setError(null) // No mostrar error para usuarios no autenticados
       } else {
-        console.error('❌ Error verificando autenticación:', err)
+        logger.error('❌ Error verificando autenticación:', err)
         setUser(null)
         setError(err instanceof Error ? err.message : 'Error de autenticación')
       }
@@ -83,7 +85,7 @@ export function useAuth(): UseAuthReturn {
       setLoading(true)
       setError(null)
       
-      console.log('🔐 Intentando login con:', email)
+      logger.log('🔐 Intentando login con:', email)
       
       const result = await signIn({
         username: email,
@@ -91,16 +93,16 @@ export function useAuth(): UseAuthReturn {
       })
       
       if (result.isSignedIn) {
-        console.log('✅ Login exitoso')
+        logger.log('✅ Login exitoso')
         await checkAuthStatus()
         return true
       } else {
-        console.log('❌ Login fallido')
+        logger.log('❌ Login fallido')
         setError('Credenciales inválidas')
         return false
       }
     } catch (err) {
-      console.error('❌ Error en login:', err)
+      logger.error('❌ Error en login:', err)
       setError(err instanceof Error ? err.message : 'Error de autenticación')
       return false
     } finally {
@@ -115,10 +117,21 @@ export function useAuth(): UseAuthReturn {
       
       await signOut()
       setUser(null)
-      console.log('✅ Logout exitoso')
+      logger.log('✅ Logout exitoso')
+      
+      // Forzar redirección al login
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/signin'
+      }
     } catch (err) {
-      console.error('❌ Error en logout:', err)
+      logger.error('❌ Error en logout:', err)
       setError(err instanceof Error ? err.message : 'Error al cerrar sesión')
+      
+      // Aún así, limpiar el estado y redirigir
+      setUser(null)
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/signin'
+      }
     } finally {
       setLoading(false)
     }
@@ -127,6 +140,41 @@ export function useAuth(): UseAuthReturn {
   const refreshUser = async (): Promise<void> => {
     await checkAuthStatus()
   }
+
+  // Función para actualizar la última actividad
+  const updateActivity = () => {
+    setLastActivity(Date.now())
+  }
+
+  // Efecto para manejar el timeout de sesión
+  useEffect(() => {
+    if (!user) return
+
+    const SESSION_TIMEOUT = 60 * 60 * 1000 // 1 hora en milisegundos
+    const checkTimeout = () => {
+      const now = Date.now()
+      if (now - lastActivity > SESSION_TIMEOUT) {
+        logger.log('⏰ Sesión expirada por inactividad')
+        handleSignOut()
+      }
+    }
+
+    // Verificar timeout cada minuto
+    const interval = setInterval(checkTimeout, 60000)
+
+    // Eventos para detectar actividad del usuario
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click']
+    events.forEach(event => {
+      document.addEventListener(event, updateActivity, true)
+    })
+
+    return () => {
+      clearInterval(interval)
+      events.forEach(event => {
+        document.removeEventListener(event, updateActivity, true)
+      })
+    }
+  }, [user, lastActivity])
 
   useEffect(() => {
     checkAuthStatus()

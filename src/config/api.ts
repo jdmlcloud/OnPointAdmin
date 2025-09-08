@@ -43,13 +43,30 @@ export const apiRequest = async <T>(
     const response = await fetch(url, config)
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+      // Intentar obtener el mensaje de error del response
+      let errorMessage = `HTTP error! status: ${response.status}`
+      try {
+        const errorData = await response.json()
+        if (errorData.message) {
+          errorMessage = errorData.message
+        }
+      } catch {
+        // Si no se puede parsear el error, usar el mensaje por defecto
+      }
+      throw new Error(errorMessage)
     }
     
     const data = await response.json()
     return data
   } catch (error) {
-    console.error(`Error en API request a ${endpoint}:`, error)
+    // Mejorar el manejo de errores de red
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      throw new Error('Error de conexión. Verifica tu conexión a internet o contacta al administrador.')
+    }
+    // Solo mostrar logs en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+      console.error(`Error en API request a ${endpoint}:`, error)
+    }
     throw error
   }
 }

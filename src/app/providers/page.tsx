@@ -14,6 +14,7 @@ import { useProviders } from "@/hooks/use-providers"
 import { useTags } from "@/hooks/use-tags"
 import { TagSelector } from "@/components/ui/tag-selector"
 import { TagBadge } from "@/components/ui/tag-badge"
+import { ProviderListSkeleton } from "@/components/ui/provider-skeleton"
 import { Provider } from "@/lib/db/repositories/dynamodb-provider-repository"
 import { 
   Plus, 
@@ -333,8 +334,26 @@ export default function ProvidersPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="h-full flex flex-col space-y-6">
+          {/* Header skeleton */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="h-8 w-48 bg-muted animate-pulse rounded mb-2"></div>
+              <div className="h-4 w-64 bg-muted animate-pulse rounded"></div>
+            </div>
+            <div className="h-10 w-32 bg-muted animate-pulse rounded"></div>
+          </div>
+          
+          {/* Search skeleton */}
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-80 bg-muted animate-pulse rounded"></div>
+            <div className="h-10 w-24 bg-muted animate-pulse rounded"></div>
+          </div>
+          
+          {/* Providers skeleton */}
+          <div className="flex-1 overflow-auto scrollbar-hide">
+            <ProviderListSkeleton count={6} />
+          </div>
         </div>
       </MainLayout>
     )
@@ -951,7 +970,19 @@ export default function ProvidersPage() {
                         phone: "+52",
                         isPrimary: false
                       }
-                      modals.edit.data.contacts = [...modals.edit.data.contacts, newContact]
+                      // Crear una nueva referencia para forzar re-render
+                      const updatedData = {
+                        ...modals.edit.data,
+                        contacts: [...modals.edit.data.contacts, newContact]
+                      }
+                      // Actualizar el estado del modal
+                      setModals(prev => ({
+                        ...prev,
+                        edit: {
+                          ...prev.edit,
+                          data: updatedData
+                        }
+                      }))
                     }}
                     className="text-sm text-blue-600 hover:text-blue-800"
                   >
@@ -978,7 +1009,18 @@ export default function ProvidersPage() {
                             type="button"
                             onClick={() => {
                               // Eliminar contacto
-                              modals.edit.data.contacts = modals.edit.data.contacts.filter((_: any, i: number) => i !== index)
+                              const updatedData = {
+                                ...modals.edit.data,
+                                contacts: modals.edit.data.contacts.filter((_: any, i: number) => i !== index)
+                              }
+                              // Actualizar el estado del modal
+                              setModals(prev => ({
+                                ...prev,
+                                edit: {
+                                  ...prev.edit,
+                                  data: updatedData
+                                }
+                              }))
                             }}
                             className="text-red-600 hover:text-red-800 text-sm"
                           >
@@ -1023,7 +1065,17 @@ export default function ProvidersPage() {
                   selectedTags={modals.edit.data.tags || []}
                   onTagsChange={(newTags) => {
                     // Actualizar el estado local del modal
-                    modals.edit.data.tags = newTags
+                    const updatedData = {
+                      ...modals.edit.data,
+                      tags: newTags
+                    }
+                    setModals(prev => ({
+                      ...prev,
+                      edit: {
+                        ...prev.edit,
+                        data: updatedData
+                      }
+                    }))
                   }}
                   availableTags={availableTags}
                   placeholder="Buscar o crear etiqueta..."

@@ -108,7 +108,12 @@ export function useProviders(): UseProvidersReturn {
       })
       
       if (data.success) {
+        // Actualizar el estado local inmediatamente
         setProviders(prev => prev.filter(provider => provider.id !== id))
+        // También refrescar desde la BD para asegurar consistencia
+        setTimeout(() => {
+          fetchProviders()
+        }, 500)
         return true
       } else {
         throw new Error('Error al eliminar proveedor')
