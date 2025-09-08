@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+// import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,18 +13,19 @@ import {
   Sun,
   Monitor
 } from "lucide-react"
-import { signOut } from "next-auth/react"
+// import { signOut } from "next-auth/react"
 import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
 import { RoleSwitcher } from "@/components/role-switcher"
 
 export function Header() {
-  const { data: session } = useSession()
+  // const { data: session } = useSession()
   const { theme, setTheme } = useTheme()
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin' })
+    // Redirigir al login sin NextAuth
+    window.location.href = 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin'
   }
 
   const toggleTheme = () => {

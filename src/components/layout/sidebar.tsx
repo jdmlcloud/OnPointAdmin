@@ -1,6 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+// import { useSession } from "next-auth/react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -26,7 +26,7 @@ import {
   Zap,
   Cpu
 } from "lucide-react"
-import { signOut } from "next-auth/react"
+// import { signOut } from "next-auth/react"
 import { useState } from "react"
 import { useRoles } from "@/hooks/use-roles"
 
@@ -154,13 +154,14 @@ const navigation = [
 ]
 
 export function Sidebar() {
-  const { data: session } = useSession()
+  // const { data: session } = useSession()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const { hasPermission } = useRoles()
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin' })
+    // Redirigir al login sin NextAuth
+    window.location.href = 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin'
   }
 
   return (
