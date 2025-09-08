@@ -3,13 +3,17 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Installing dependencies..."
+        - echo "🚀 Starting Amplify build process..."
+        - echo "📦 Installing dependencies..."
         - npm ci
+        - echo "✅ Dependencies installed successfully"
     build:
       commands:
-        - echo "Building application..."
+        - echo "🔨 Building application..."
         - npm run build
-        - echo "Build completed successfully"
+        - echo "📁 Build artifacts created:"
+        - ls -la .next/
+        - echo "✅ Build completed successfully!"
   artifacts:
     baseDirectory: .next
     files:
