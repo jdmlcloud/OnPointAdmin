@@ -141,12 +141,15 @@ async function handleCreateUser(event, environment) {
     const { email, password, firstName, lastName, phone, role, department, position } = body;
 
     // Validaciones básicas
-    if (!email || !password || !firstName || !lastName || !phone) {
+    if (!email || !firstName || !lastName || !phone) {
       return createResponse(400, { 
         success: false, 
         message: 'Todos los campos son requeridos' 
       });
     }
+
+    // Usar password por defecto si no se proporciona
+    const userPassword = password || 'password123';
 
     // Verificar si el usuario ya existe
     const usersTable = getTableName('Users', environment);
@@ -168,7 +171,7 @@ async function handleCreateUser(event, environment) {
     }
 
     // Hash de la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
 
     // Formatear teléfono con +52
     const formattedPhone = phone.startsWith('+52') ? phone : `+52${phone}`;
