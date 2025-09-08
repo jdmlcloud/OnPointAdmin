@@ -106,25 +106,10 @@ export default function DashboardDynamoDBPage() {
       const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('amplifyapp.com');
       const forceReal = isProduction ? '?forceReal=true' : '';
       
-      // Obtener información de debugging
-      const [debugResponse, connectionResponse] = await Promise.all([
-        fetch('/api/debug-dynamodb'),
-        fetch('/api/test-dynamodb-connection')
-      ]);
-      
-      if (debugResponse.ok) {
-        const debugData = await debugResponse.json();
-        setDebugInfo(debugData.debug);
-      }
-      
-      if (connectionResponse.ok) {
-        const connectionData = await connectionResponse.json();
-        setConnectionTest(connectionData.testResults);
-      }
-      
+      // Obtener estadísticas desde API Gateway
       const [statsResponse, productsResponse] = await Promise.all([
-        fetch(`/api/dynamodb/stats${forceReal}`),
-        fetch(`/api/dynamodb/products${forceReal}`)
+        fetch('https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod/stats'),
+        fetch('https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod/products')
       ]);
       
       const statsData = await statsResponse.json();

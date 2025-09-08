@@ -126,7 +126,7 @@ export default function SystemPage() {
       level: "INFO",
       service: "API Gateway",
       message: "Request processed successfully",
-      details: "GET /api/proposals - 200ms"
+      details: "GET /prod/providers - 200ms"
     },
     {
       id: 2,

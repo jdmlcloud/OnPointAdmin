@@ -217,7 +217,7 @@ export default function NewProviderPage() {
       // Preparar datos para la API
       const providerData = {
         name: data.name,
-        email: data.email,
+        email: data.email || '',
         company: data.name, // Usar el nombre como compañía por ahora
         phone: data.phone || '',
         description: data.description,
@@ -225,8 +225,8 @@ export default function NewProviderPage() {
         address: data.address,
         contacts: data.contacts,
         tags: tags,
-        status: data.isActive ? 'active' : 'inactive',
-        logo: logoPreview || null,
+        status: data.isActive ? 'active' : 'inactive' as 'active' | 'inactive' | 'pending',
+        logo: logoPreview || undefined,
         notes: ''
       }
 

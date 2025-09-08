@@ -35,11 +35,11 @@ export default function DashboardTestPage() {
       setLoading(true)
       setError(null)
       
-      // Obtener estadísticas de DynamoDB
+      // Obtener estadísticas desde API Gateway
       const [usersRes, providersRes, productsRes] = await Promise.all([
-        fetch('/api/dynamodb/users'),
-        fetch('/api/dynamodb/providers'),
-        fetch('/api/dynamodb/products')
+        fetch('https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod/users'),
+        fetch('https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod/providers'),
+        fetch('https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod/products')
       ])
 
       const [usersData, providersData, productsData] = await Promise.all([
