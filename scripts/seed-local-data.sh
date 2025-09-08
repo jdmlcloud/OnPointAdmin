@@ -176,7 +176,7 @@ cat > data/seed/users.json << 'EOF'
         "Item": {
           "id": {"S": "user-super-admin"},
           "email": {"S": "superadmin@onpoint.com"},
-          "password": {"S": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"},
+          "password": {"S": "cGFzc3dvcmQ="},
           "firstName": {"S": "Super"},
           "lastName": {"S": "Administrador"},
           "phone": {"S": "+525512345678"},
@@ -195,7 +195,7 @@ cat > data/seed/users.json << 'EOF'
         "Item": {
           "id": {"S": "user-admin"},
           "email": {"S": "admin@onpoint.com"},
-          "password": {"S": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"},
+          "password": {"S": "cGFzc3dvcmQ="},
           "firstName": {"S": "Admin"},
           "lastName": {"S": "Usuario"},
           "phone": {"S": "+525512345679"},
@@ -214,7 +214,7 @@ cat > data/seed/users.json << 'EOF'
         "Item": {
           "id": {"S": "user-executive"},
           "email": {"S": "ejecutivo@onpoint.com"},
-          "password": {"S": "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi"},
+          "password": {"S": "cGFzc3dvcmQ="},
           "firstName": {"S": "Ejecutivo"},
           "lastName": {"S": "Usuario"},
           "phone": {"S": "+525512345680"},
