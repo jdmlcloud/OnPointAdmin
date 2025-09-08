@@ -9,6 +9,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Eye, EyeOff } from "lucide-react"
+import { getVersionString } from "@/lib/version"
 
 export default function SignInPage() {
   const router = useRouter()
@@ -143,13 +144,15 @@ export default function SignInPage() {
           </form>
           
             <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p className="font-medium">Acceso al sistema:</p>
             <div className="mt-2 space-y-1">
               <p>Contacta al administrador para obtener credenciales</p>
             </div>
             <p className="text-xs mt-2">
               Las credenciales se proporcionan de forma segura
             </p>
+            <div className="mt-4 pt-2 border-t border-border">
+              <p className="text-xs text-muted-foreground">{getVersionString()} - OnPoint Admin</p>
+            </div>
           </div>
         </CardContent>
       </Card>

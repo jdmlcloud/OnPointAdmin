@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
 import { RoleSwitcher } from "@/components/role-switcher"
 import { useAuth } from "@/hooks/use-auth"
+import { getVersionString } from "@/lib/version"
 
 export function Header() {
   const { user, signOut } = useAuth()
@@ -98,6 +99,9 @@ export function Header() {
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   {user?.role || "usuario"}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {getVersionString()}
                 </Badge>
               </div>
             </div>
