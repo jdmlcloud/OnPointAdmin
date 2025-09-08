@@ -15,7 +15,7 @@ import {
   ArrowRight
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRoles } from "@/hooks/use-roles"
+import { useAuthRoles } from "@/hooks/use-auth-roles"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useStats } from "@/hooks/use-stats"
@@ -24,7 +24,7 @@ import { usePermissions } from "@/hooks/use-permissions"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { currentRole, hasPermission } = useRoles()
+  const { currentRole, hasPermission } = useAuthRoles()
   const { users, loading: usersLoading } = useUsers()
   const { providers, loading: providersLoading } = useProviders()
   const { stats, loading: statsLoading } = useStats()
