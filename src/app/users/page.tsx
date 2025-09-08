@@ -16,6 +16,9 @@ import { ActionModal } from "@/components/ui/action-modal"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
 import { useCardActions } from "@/hooks/use-card-actions"
 import { useAuthContext } from "@/lib/auth/auth-context"
+import { useUsersApi } from "@/hooks/use-users-api"
+import { useRolesApi } from "@/hooks/use-roles-api"
+import { usePermissionsApi } from "@/hooks/use-permissions-api"
 import { User, Role, Permission, UserRoleType } from "@/types/users"
 import { UserForm } from "@/components/users/user-form"
 import { RoleForm } from "@/components/roles/role-form"
@@ -61,12 +64,18 @@ export default function UsersPage() {
   const { user: currentUser, hasPermission } = useAuthContext()
   const [activeTab, setActiveTab] = useState('users')
   
+  // API hooks
+  const usersApi = useUsersApi()
+  const rolesApi = useRolesApi()
+  const permissionsApi = usePermissionsApi()
+  
   // Estados para usuarios
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [userSearchTerm, setUserSearchTerm] = useState('')
   const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false)
   const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false)
+  const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   
   // Estados para roles
@@ -75,6 +84,7 @@ export default function UsersPage() {
   const [roleSearchTerm, setRoleSearchTerm] = useState('')
   const [isCreateRoleDialogOpen, setIsCreateRoleDialogOpen] = useState(false)
   const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = useState(false)
+  const [isDeleteRoleDialogOpen, setIsDeleteRoleDialogOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   
   // Estados para permisos
@@ -84,6 +94,7 @@ export default function UsersPage() {
   const [selectedPermissionCategory, setSelectedPermissionCategory] = useState<string>('all')
   const [isCreatePermissionDialogOpen, setIsCreatePermissionDialogOpen] = useState(false)
   const [isEditPermissionDialogOpen, setIsEditPermissionDialogOpen] = useState(false)
+  const [isDeletePermissionDialogOpen, setIsDeletePermissionDialogOpen] = useState(false)
   const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null)
   
   const [loading, setLoading] = useState(true)
@@ -232,13 +243,32 @@ export default function UsersPage() {
     const loadData = async () => {
       try {
         setLoading(true)
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        setUsers(testUsers)
-        setFilteredUsers(testUsers)
-        setRoles(testRoles)
-        setFilteredRoles(testRoles)
-        setPermissions(testPermissions)
-        setFilteredPermissions(testPermissions)
+        setError('')
+        
+        // Intentar cargar desde AWS, si falla usar datos de prueba
+        try {
+          const [usersData, rolesData, permissionsData] = await Promise.all([
+            usersApi.fetchUsers(),
+            rolesApi.fetchRoles(),
+            permissionsApi.fetchPermissions()
+          ])
+          
+          setUsers(usersData)
+          setFilteredUsers(usersData)
+          setRoles(rolesData)
+          setFilteredRoles(rolesData)
+          setPermissions(permissionsData)
+          setFilteredPermissions(permissionsData)
+        } catch (apiError) {
+          console.warn('API no disponible, usando datos de prueba:', apiError)
+          // Fallback a datos de prueba
+          setUsers(testUsers)
+          setFilteredUsers(testUsers)
+          setRoles(testRoles)
+          setFilteredRoles(testRoles)
+          setPermissions(testPermissions)
+          setFilteredPermissions(testPermissions)
+        }
       } catch (error) {
         setError('Error al cargar datos')
         console.error('Error loading data:', error)
@@ -292,44 +322,63 @@ export default function UsersPage() {
     setIsEditUserDialogOpen(true)
   }
   const handleDeleteUser = (user: User) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar a ${user.firstName} ${user.lastName}?`)) {
-      setUsers(prev => prev.filter(u => u.id !== user.id))
-      setFilteredUsers(prev => prev.filter(u => u.id !== user.id))
-    }
+    setSelectedUser(user)
+    setIsDeleteUserDialogOpen(true)
   }
 
   const handleCreateUserSubmit = async (userData: any) => {
-    const newUser: User = {
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...userData,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      createdBy: 'current-user'
+    try {
+      const newUser = await usersApi.createUser({
+        ...userData,
+        status: 'active',
+        createdBy: currentUser?.id || 'current-user'
+      })
+      
+      setUsers(prev => [...prev, newUser])
+      setFilteredUsers(prev => [...prev, newUser])
+      setIsCreateUserDialogOpen(false)
+      return true
+    } catch (error) {
+      console.error('Error creating user:', error)
+      return false
     }
-    setUsers(prev => [...prev, newUser])
-    setFilteredUsers(prev => [...prev, newUser])
-    setIsCreateUserDialogOpen(false)
-    return true
   }
 
   const handleEditUserSubmit = async (userData: any) => {
     if (selectedUser) {
-      setUsers(prev => prev.map(user => 
-        user.id === selectedUser.id 
-          ? { ...user, ...userData, updatedAt: new Date().toISOString() }
-          : user
-      ))
-      setFilteredUsers(prev => prev.map(user => 
-        user.id === selectedUser.id 
-          ? { ...user, ...userData, updatedAt: new Date().toISOString() }
-          : user
-      ))
-      setIsEditUserDialogOpen(false)
-      setSelectedUser(null)
-      return true
+      try {
+        const updatedUser = await usersApi.updateUser(selectedUser.id, userData)
+        
+        setUsers(prev => prev.map(user => 
+          user.id === selectedUser.id ? updatedUser : user
+        ))
+        setFilteredUsers(prev => prev.map(user => 
+          user.id === selectedUser.id ? updatedUser : user
+        ))
+        setIsEditUserDialogOpen(false)
+        setSelectedUser(null)
+        return true
+      } catch (error) {
+        console.error('Error updating user:', error)
+        return false
+      }
     }
     return false
+  }
+
+  const handleDeleteUserConfirm = async () => {
+    if (selectedUser) {
+      try {
+        await usersApi.deleteUser(selectedUser.id)
+        
+        setUsers(prev => prev.filter(u => u.id !== selectedUser.id))
+        setFilteredUsers(prev => prev.filter(u => u.id !== selectedUser.id))
+        setIsDeleteUserDialogOpen(false)
+        setSelectedUser(null)
+      } catch (error) {
+        console.error('Error deleting user:', error)
+      }
+    }
   }
 
   // Handlers para roles
@@ -343,10 +392,8 @@ export default function UsersPage() {
       alert('No se pueden eliminar roles del sistema')
       return
     }
-    if (confirm(`¿Estás seguro de que quieres eliminar el rol "${role.name}"?`)) {
-      setRoles(prev => prev.filter(r => r.id !== role.id))
-      setFilteredRoles(prev => prev.filter(r => r.id !== role.id))
-    }
+    setSelectedRole(role)
+    setIsDeleteRoleDialogOpen(true)
   }
 
   const handleCreateRoleSubmit = async (roleData: any) => {
@@ -385,6 +432,15 @@ export default function UsersPage() {
     return false
   }
 
+  const handleDeleteRoleConfirm = async () => {
+    if (selectedRole) {
+      setRoles(prev => prev.filter(r => r.id !== selectedRole.id))
+      setFilteredRoles(prev => prev.filter(r => r.id !== selectedRole.id))
+      setIsDeleteRoleDialogOpen(false)
+      setSelectedRole(null)
+    }
+  }
+
   // Handlers para permisos
   const handleCreatePermission = () => setIsCreatePermissionDialogOpen(true)
   const handleEditPermission = (permission: Permission) => {
@@ -396,10 +452,8 @@ export default function UsersPage() {
       alert('No se pueden eliminar permisos del sistema')
       return
     }
-    if (confirm(`¿Estás seguro de que quieres eliminar el permiso "${permission.name}"?`)) {
-      setPermissions(prev => prev.filter(p => p.id !== permission.id))
-      setFilteredPermissions(prev => prev.filter(p => p.id !== permission.id))
-    }
+    setSelectedPermission(permission)
+    setIsDeletePermissionDialogOpen(true)
   }
 
   const handleCreatePermissionSubmit = async (permissionData: any) => {
@@ -435,6 +489,15 @@ export default function UsersPage() {
       return true
     }
     return false
+  }
+
+  const handleDeletePermissionConfirm = async () => {
+    if (selectedPermission) {
+      setPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
+      setFilteredPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
+      setIsDeletePermissionDialogOpen(false)
+      setSelectedPermission(null)
+    }
   }
 
   const canManageUsers = hasPermission('users', 'manage')
@@ -684,6 +747,118 @@ export default function UsersPage() {
           onSubmit={handleEditPermissionSubmit}
           permission={selectedPermission}
         />
+
+        {/* Delete Modals */}
+        <ActionModal
+          isOpen={isDeleteUserDialogOpen}
+          onClose={() => {
+            setIsDeleteUserDialogOpen(false)
+            setSelectedUser(null)
+          }}
+          title="Eliminar Usuario"
+          type="delete"
+          onConfirm={handleDeleteUserConfirm}
+          destructive
+        >
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <Users className="h-8 w-8 text-red-600" />
+                <div>
+                  <h4 className="font-medium text-red-900 dark:text-red-100">
+                    {selectedUser.firstName} {selectedUser.lastName}
+                  </h4>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {selectedUser.email} - {selectedUser.department}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p>Al eliminar este usuario:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Se perderá acceso al sistema</li>
+                  <li>Se eliminarán todas las asignaciones</li>
+                  <li>Esta acción no se puede deshacer</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </ActionModal>
+
+        <ActionModal
+          isOpen={isDeleteRoleDialogOpen}
+          onClose={() => {
+            setIsDeleteRoleDialogOpen(false)
+            setSelectedRole(null)
+          }}
+          title="Eliminar Rol"
+          type="delete"
+          onConfirm={handleDeleteRoleConfirm}
+          destructive
+        >
+          {selectedRole && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <Shield className="h-8 w-8 text-red-600" />
+                <div>
+                  <h4 className="font-medium text-red-900 dark:text-red-100">
+                    {selectedRole.name}
+                  </h4>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {selectedRole.description}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p>Al eliminar este rol:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Los usuarios con este rol perderán permisos</li>
+                  <li>Se eliminarán todas las asignaciones</li>
+                  <li>Esta acción no se puede deshacer</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </ActionModal>
+
+        <ActionModal
+          isOpen={isDeletePermissionDialogOpen}
+          onClose={() => {
+            setIsDeletePermissionDialogOpen(false)
+            setSelectedPermission(null)
+          }}
+          title="Eliminar Permiso"
+          type="delete"
+          onConfirm={handleDeletePermissionConfirm}
+          destructive
+        >
+          {selectedPermission && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <ShieldCheck className="h-8 w-8 text-red-600" />
+                <div>
+                  <h4 className="font-medium text-red-900 dark:text-red-100">
+                    {selectedPermission.name}
+                  </h4>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {selectedPermission.description} - {selectedPermission.category}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p>Al eliminar este permiso:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Los roles que lo tengan perderán este acceso</li>
+                  <li>Se eliminarán todas las asignaciones</li>
+                  <li>Esta acción no se puede deshacer</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </ActionModal>
       </div>
     </MainLayout>
   )

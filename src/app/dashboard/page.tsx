@@ -1,252 +1,259 @@
-'use client'
+"use client"
 
-import React from 'react'
-import { useAuthContext } from '@/lib/auth/auth-context'
-import ProtectedRoute from '@/components/auth/protected-route'
-import { getVersionString } from '@/lib/version'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { 
+  Users, 
+  Package, 
+  MessageSquare, 
+  FileText, 
+  TrendingUp,
+  Settings,
+  Plus,
+  ArrowRight,
+  LogOut
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useAuthContext } from "@/lib/auth/auth-context"
+import { getVersionString } from "@/lib/version"
 
-const DashboardPage: React.FC = () => {
+export default function DashboardPage() {
+  const router = useRouter()
   const { user, logout } = useAuthContext()
 
-  const handleLogout = () => {
-    logout()
-  }
-
-  const getRoleDisplayName = (role: string) => {
-    switch (role) {
-      case 'SUPER_ADMIN':
-        return 'Super Administrador'
-      case 'ADMIN':
-        return 'Administrador'
-      case 'EXECUTIVE':
-        return 'Ejecutivo'
-      default:
-        return role
+  const modules = [
+    {
+      title: "Gestión de Proveedores",
+      description: "Administra proveedores, logos y información comercial",
+      icon: Users,
+      href: "/providers",
+      status: "V1 - Disponible",
+      color: "bg-blue-500"
+    },
+    {
+      title: "Gestión de Productos",
+      description: "CRUD de productos, variantes y precios escalonados",
+      icon: Package,
+      href: "/products",
+      status: "V1 - Disponible",
+      color: "bg-green-500"
+    },
+    {
+      title: "WhatsApp + IA",
+      description: "Procesamiento automático de mensajes con IA",
+      icon: MessageSquare,
+      href: "/whatsapp",
+      status: "V2 - En desarrollo",
+      color: "bg-yellow-500"
+    },
+    {
+      title: "Cotización Inteligente",
+      description: "Generación automática de cotizaciones con IA",
+      icon: FileText,
+      href: "/quotations",
+      status: "V3 - En desarrollo",
+      color: "bg-purple-500"
+    },
+    {
+      title: "Propuestas Comerciales",
+      description: "Creación y gestión de propuestas personalizadas",
+      icon: TrendingUp,
+      href: "/proposals",
+      status: "V4 - En desarrollo",
+      color: "bg-indigo-500"
+    },
+    {
+      title: "Generador PDF",
+      description: "Creación automática de documentos PDF",
+      icon: FileText,
+      href: "/pdf-generator",
+      status: "V5 - En desarrollo",
+      color: "bg-pink-500"
+    },
+    {
+      title: "Seguimiento",
+      description: "Tracking de propuestas y clientes",
+      icon: TrendingUp,
+      href: "/tracking",
+      status: "V6 - En desarrollo",
+      color: "bg-orange-500"
+    },
+    {
+      title: "Editor Visual",
+      description: "Editor de templates y mockups",
+      icon: Settings,
+      href: "/visual-editor",
+      status: "V7 - En desarrollo",
+      color: "bg-teal-500"
     }
-  }
+  ]
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'SUPER_ADMIN':
-        return 'bg-red-100 text-red-800'
-      case 'ADMIN':
-        return 'bg-blue-100 text-blue-800'
-      case 'EXECUTIVE':
-        return 'bg-green-100 text-green-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
+  const getStatusColor = (status: string) => {
+    if (status.includes("Disponible")) return "bg-green-100 text-green-800"
+    if (status.includes("En desarrollo")) return "bg-yellow-100 text-yellow-800"
+    return "bg-gray-100 text-gray-800"
   }
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-6">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    OnPoint Admin
-                  </h1>
-                </div>
-                <div className="ml-4">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    {getVersionString()}
-                  </span>
-                </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold text-gray-900">
+                  OnPoint Admin
+                </h1>
               </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">
-                    {user?.firstName} {user?.lastName}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {user?.email}
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user?.role || '')}`}>
-                    {getRoleDisplayName(user?.role || '')}
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  >
-                    Cerrar Sesión
-                  </button>
-                </div>
+              <div className="ml-4">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  {getVersionString()}
+                </span>
               </div>
             </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-              <div className="text-center">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  ¡Bienvenido al Dashboard!
-                </h2>
-                <p className="text-lg text-gray-600 mb-8">
-                  Sistema de Gestión OnPoint Admin v1.1.0
+            
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">
+                  {user?.firstName} {user?.lastName}
                 </p>
-                
-                {/* User Info Card */}
-                <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
-                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {user?.firstName} {user?.lastName}
-                  </h3>
-                  <p className="text-gray-600 mb-2">{user?.email}</p>
-                  <p className="text-gray-600 mb-2">{user?.phone}</p>
-                  <p className="text-gray-600 mb-2">{user?.department} - {user?.position}</p>
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRoleColor(user?.role || '')}`}>
-                    {getRoleDisplayName(user?.role || '')}
-                  </span>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl mx-auto">
-                  {/* Users Management */}
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-full">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Centro de Gestión de Usuarios
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Administra usuarios, roles y permisos del sistema
-                    </p>
-                    <button 
-                      onClick={() => window.location.href = '/users/management'}
-                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      Acceder
-                    </button>
-                  </div>
-
-                  {/* Roles Management */}
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-orange-100 rounded-full">
-                      <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Gestión de Roles
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Administra roles y permisos del sistema
-                    </p>
-                    <button 
-                      onClick={() => window.location.href = '/roles'}
-                      className="w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    >
-                      Acceder
-                    </button>
-                  </div>
-
-                  {/* Providers Management */}
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Gestión de Proveedores
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Administra proveedores y sus información
-                    </p>
-                    <button className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                      Acceder
-                    </button>
-                  </div>
-
-                  {/* Permissions Management */}
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-indigo-100 rounded-full">
-                      <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Gestión de Permisos
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Administra permisos y accesos del sistema
-                    </p>
-                    <button 
-                      onClick={() => window.location.href = '/permissions'}
-                      className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      Acceder
-                    </button>
-                  </div>
-
-                  {/* Products Management */}
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-full">
-                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Gestión de Productos
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Administra productos y catálogos
-                    </p>
-                    <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                      Acceder
-                    </button>
-                  </div>
-                </div>
-
-                {/* System Status */}
-                <div className="mt-8 max-w-2xl mx-auto">
-                  <div className="bg-white rounded-lg shadow-md p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                      Estado del Sistema
-                    </h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">✓</div>
-                        <p className="text-sm text-gray-600">Autenticación</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">✓</div>
-                        <p className="text-sm text-gray-600">Base de Datos</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">✓</div>
-                        <p className="text-sm text-gray-600">API Gateway</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">✓</div>
-                        <p className="text-sm text-gray-600">Lambda Functions</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-xs text-gray-500">
+                  {user?.email}
+                </p>
               </div>
+              <Button
+                onClick={logout}
+                variant="outline"
+                size="sm"
+                className="text-red-600 border-red-600 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar Sesión
+              </Button>
             </div>
           </div>
-        </main>
-      </div>
-    </ProtectedRoute>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Dashboard
+            </h2>
+            <p className="text-gray-600">
+              Bienvenido al sistema de gestión OnPoint Admin
+            </p>
+          </div>
+
+          {/* Modules Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {modules.map((module, index) => {
+              const IconComponent = module.icon
+              return (
+                <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className={`p-3 rounded-lg ${module.color}`}>
+                        <IconComponent className="h-6 w-6 text-white" />
+                      </div>
+                      <Badge className={getStatusColor(module.status)}>
+                        {module.status}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-lg">{module.title}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {module.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => router.push(module.href)}
+                    >
+                      Acceder
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mt-12">
+            <h3 className="text-xl font-semibold text-gray-900 mb-6">
+              Acciones Rápidas
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="hover:shadow-lg transition-shadow duration-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-blue-100 rounded-lg">
+                      <Users className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900">Gestión de Usuarios</h4>
+                      <p className="text-sm text-gray-600">Administra usuarios, roles y permisos</p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => router.push('/users')}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow duration-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-green-100 rounded-lg">
+                      <Package className="h-6 w-6 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900">Nuevo Producto</h4>
+                      <p className="text-sm text-gray-600">Agregar producto al catálogo</p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => router.push('/products')}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow duration-200">
+                <CardContent className="p-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="p-3 bg-purple-100 rounded-lg">
+                      <FileText className="h-6 w-6 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900">Reportes</h4>
+                      <p className="text-sm text-gray-600">Ver estadísticas y reportes</p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => router.push('/analytics')}
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   )
 }
 
