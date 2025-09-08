@@ -1,12 +1,12 @@
 'use client'
 
 import React from 'react'
-import { useAuth } from '@/lib/auth/auth-context'
+import { useAuthContext } from '@/lib/auth/auth-context'
 import ProtectedRoute from '@/components/auth/protected-route'
 import { getVersionString } from '@/lib/version'
 
 const DashboardPage: React.FC = () => {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAuthContext()
 
   const handleLogout = () => {
     logout()

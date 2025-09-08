@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth/auth-context'
+import { useAuthContext } from '@/lib/auth/auth-context'
 import { UserRoleType } from '@/types/users'
 
 interface ProtectedRouteProps {
@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredPermission,
   fallbackPath = '/auth/login'
 }) => {
-  const { isAuthenticated, user, isLoading } = useAuth()
+  const { isAuthenticated, user, isLoading } = useAuthContext()
   const router = useRouter()
 
   // Mostrar loading mientras se verifica la autenticación
@@ -85,10 +85,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
-  // Verificar permiso requerido
-  if (requiredPermission) {
-    const { hasPermission } = useAuth()
-    if (!hasPermission(requiredPermission.resource, requiredPermission.action)) {
+    // Verificar permiso requerido
+    if (requiredPermission) {
+      const { hasPermission } = useAuthContext()
+      if (!hasPermission(requiredPermission.resource, requiredPermission.action)) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">

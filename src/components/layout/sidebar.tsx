@@ -26,7 +26,7 @@ import {
   Zap,
   Cpu
 } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuthContext } from "@/lib/auth/auth-context"
 import { useState } from "react"
 import { useRoles } from "@/hooks/use-roles"
 
@@ -146,13 +146,13 @@ const navigation = [
 ]
 
 export function Sidebar() {
-  const { user, signOut } = useAuth()
+  const { user, logout } = useAuthContext()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const { hasPermission } = useRoles()
 
   const handleSignOut = async () => {
-    await signOut()
+    logout()
   }
 
   return (

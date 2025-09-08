@@ -16,15 +16,15 @@ import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
 import { RoleSwitcher } from "@/components/role-switcher"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuthContext } from "@/lib/auth/auth-context"
 import { getVersionString } from "@/lib/version"
 
 export function Header() {
-  const { user, signOut } = useAuth()
+  const { user, logout } = useAuthContext()
   const { theme, setTheme } = useTheme()
 
   const handleSignOut = async () => {
-    await signOut()
+    logout()
   }
 
   const toggleTheme = () => {

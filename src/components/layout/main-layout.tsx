@@ -2,7 +2,7 @@
 
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuthContext } from "@/lib/auth/auth-context"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Loader2 } from "lucide-react"
@@ -12,19 +12,19 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { user, loading, error } = useAuth()
+  const { user, isLoading, isAuthenticated } = useAuthContext()
   const router = useRouter()
 
   // Redirigir si no está autenticado
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoading && !isAuthenticated) {
       console.log('❌ Usuario no autenticado, redirigiendo al login...')
-      router.push('/auth/signin')
+      router.push('/auth/login')
     }
-  }, [user, loading, router])
+  }, [isAuthenticated, isLoading, router])
 
   // Mostrar loading mientras verifica autenticación
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="h-screen bg-background flex items-center justify-center">
         <div className="flex items-center space-x-2">

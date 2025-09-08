@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth/auth-context'
+import { useAuthContext } from '@/lib/auth/auth-context'
 import { getVersionString } from '@/lib/version'
 
 const LoginPage: React.FC = () => {
@@ -11,7 +11,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { login, isAuthenticated, isLoading: authLoading } = useAuthContext()
   const router = useRouter()
 
   // Redirigir si ya está autenticado
