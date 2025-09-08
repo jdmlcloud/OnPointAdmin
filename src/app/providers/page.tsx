@@ -363,9 +363,25 @@ export default function ProvidersPage() {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-red-500 mb-4">Error al cargar proveedores: {error}</p>
-            <Button onClick={refreshProviders}>Reintentar</Button>
+          <div className="text-center max-w-md">
+            <div className="mb-4">
+              <Building2 className="h-12 w-12 text-red-500 mx-auto mb-2" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Error de conexión
+              </h3>
+              <p className="text-red-500 mb-4">
+                {error}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Button onClick={refreshProviders} className="w-full">
+                <Building2 className="h-4 w-4 mr-2" />
+                Reintentar conexión
+              </Button>
+              <p className="text-xs text-gray-500">
+                Si el problema persiste, contacta al administrador
+              </p>
+            </div>
           </div>
         </div>
       </MainLayout>

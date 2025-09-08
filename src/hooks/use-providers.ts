@@ -33,11 +33,14 @@ export function useProviders(): UseProvidersReturn {
       
       if (data.success) {
         setProviders(data.providers || [])
+        // Limpiar error si la petición fue exitosa
+        setError(null)
       } else {
         throw new Error('Error al obtener proveedores desde la API')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido')
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
+      setError(errorMessage)
       console.error('Error fetching providers:', err)
     } finally {
       setLoading(false)
