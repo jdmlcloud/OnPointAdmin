@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DynamoDBProviderRepository } from '@/lib/db/repositories/dynamodb-provider-repository'
 
-const providerRepository = new DynamoDBProviderRepository()
-
 export async function GET(request: NextRequest) {
   try {
     console.log('🔍 Debug: Iniciando GET /api/providers...')
+    
+    // Instanciar el repositorio dentro de la función
+    const providerRepository = new DynamoDBProviderRepository()
     
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
@@ -46,6 +47,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Instanciar el repositorio dentro de la función
+    const providerRepository = new DynamoDBProviderRepository()
+    
     const body = await request.json()
     const { 
       name, 
