@@ -22,10 +22,25 @@ export const API_CONFIG = {
   }
 }
 
+// Función para detectar el entorno automáticamente
+export const detectEnvironment = (): 'sandbox' | 'prod' => {
+  // Si estamos en el navegador, detectar por la URL
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    if (hostname.includes('sandbox') || hostname.includes('d3ts6pwgn7uyyh.amplifyapp.com')) {
+      return 'sandbox'
+    }
+  }
+  
+  // Fallback a variable de entorno o producción
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'prod'
+  return environment as 'sandbox' | 'prod'
+}
+
 // Función para obtener la URL base según el entorno
 export const getBaseUrl = (): string => {
-  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'prod'
-  return API_CONFIG.BASE_URLS[environment as keyof typeof API_CONFIG.BASE_URLS] || API_CONFIG.BASE_URLS.prod
+  const environment = detectEnvironment()
+  return API_CONFIG.BASE_URLS[environment] || API_CONFIG.BASE_URLS.prod
 }
 
 // Función helper para construir URLs completas
@@ -39,6 +54,11 @@ export const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<T> => {
   const url = buildApiUrl(endpoint)
+  
+  // Debug: mostrar la URL que se está usando
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🌐 API Request: ${url}`)
+  }
   
   const config: RequestInit = {
     ...options,
