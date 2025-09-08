@@ -28,6 +28,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useTags } from "@/hooks/use-tags"
+import { useProviders } from "@/hooks/use-providers"
 import { TagSelector } from "@/components/ui/tag-selector"
 
 const providerSchema = z.object({
@@ -62,6 +63,7 @@ type ProviderFormData = z.infer<typeof providerSchema>
 export default function NewProviderPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { createProvider } = useProviders()
   const [isLoading, setIsLoading] = useState(false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
@@ -228,24 +230,16 @@ export default function NewProviderPage() {
         notes: ''
       }
 
-      const response = await fetch('/api/providers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(providerData),
-      })
+      const newProvider = await createProvider(providerData)
 
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Error al crear proveedor')
+      if (newProvider) {
+        toast({
+          title: "Proveedor creado",
+          description: "El proveedor se ha creado exitosamente.",
+        })
+      } else {
+        throw new Error('Error al crear proveedor')
       }
-      
-      toast({
-        title: "Proveedor creado",
-        description: result.message || "El proveedor se ha creado exitosamente.",
-      })
       
       router.push("/providers")
     } catch (error) {

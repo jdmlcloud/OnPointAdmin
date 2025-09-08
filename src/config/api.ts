@@ -8,7 +8,8 @@ export const API_CONFIG = {
     PROVIDERS: '/providers',
     USERS: '/users',
     STATS: '/stats',
-    TAGS: '/tags' // Este lo implementaremos después
+    TAGS: '/tags',
+    PRODUCTS: '/products'
   },
   
   // Headers por defecto

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface Product {
   id: string
@@ -34,22 +35,20 @@ export function useProducts(): UseProductsReturn {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/products')
-      
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
-      
-      const data = await response.json()
+      const data = await apiRequest<{
+        success: boolean
+        products: Product[]
+        message: string
+      }>(API_CONFIG.ENDPOINTS.PRODUCTS)
       
       if (data.success) {
         setProducts(data.products || [])
       } else {
-        throw new Error(data.message || 'Error al obtener productos')
+        throw new Error('Error al obtener productos desde la API')
       }
     } catch (err) {
-      console.error('Error fetching products:', err)
       setError(err instanceof Error ? err.message : 'Error desconocido')
+      console.error('Error fetching products:', err)
       setProducts([])
     } finally {
       setIsLoading(false)
@@ -60,29 +59,24 @@ export function useProducts(): UseProductsReturn {
     try {
       setError(null)
       
-      const response = await fetch('/api/products', {
+      const data = await apiRequest<{
+        success: boolean
+        product: Product
+        message: string
+      }>(API_CONFIG.ENDPOINTS.PRODUCTS, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(productData),
       })
       
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
-      
-      const data = await response.json()
-      
       if (data.success) {
-        await fetchProducts() // Recargar la lista
+        setProducts(prev => [...prev, data.product])
         return true
       } else {
-        throw new Error(data.message || 'Error al crear producto')
+        throw new Error('Error al crear producto')
       }
     } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear producto')
       console.error('Error creating product:', err)
-      setError(err instanceof Error ? err.message : 'Error desconocido')
       return false
     }
   }
@@ -91,29 +85,24 @@ export function useProducts(): UseProductsReturn {
     try {
       setError(null)
       
-      const response = await fetch(`/api/products/${id}`, {
+      const data = await apiRequest<{
+        success: boolean
+        product: Product
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.PRODUCTS}/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(productData),
       })
       
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
-      
-      const data = await response.json()
-      
       if (data.success) {
-        await fetchProducts() // Recargar la lista
+        setProducts(prev => prev.map(product => product.id === id ? data.product : product))
         return true
       } else {
-        throw new Error(data.message || 'Error al actualizar producto')
+        throw new Error('Error al actualizar producto')
       }
     } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al actualizar producto')
       console.error('Error updating product:', err)
-      setError(err instanceof Error ? err.message : 'Error desconocido')
       return false
     }
   }
@@ -122,25 +111,22 @@ export function useProducts(): UseProductsReturn {
     try {
       setError(null)
       
-      const response = await fetch(`/api/products/${id}`, {
+      const data = await apiRequest<{
+        success: boolean
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.PRODUCTS}/${id}`, {
         method: 'DELETE',
       })
       
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`)
-      }
-      
-      const data = await response.json()
-      
       if (data.success) {
-        await fetchProducts() // Recargar la lista
+        setProducts(prev => prev.filter(product => product.id !== id))
         return true
       } else {
-        throw new Error(data.message || 'Error al eliminar producto')
+        throw new Error('Error al eliminar producto')
       }
     } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar producto')
       console.error('Error deleting product:', err)
-      setError(err instanceof Error ? err.message : 'Error desconocido')
       return false
     }
   }

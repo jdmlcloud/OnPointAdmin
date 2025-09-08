@@ -48,22 +48,21 @@ export function useUsers(): UseUsersReturn {
     try {
       setError(null)
       
-      const response = await fetch('/api/users', {
+      const data = await apiRequest<{
+        success: boolean
+        user: User
+        message: string
+      }>(API_CONFIG.ENDPOINTS.USERS, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(userData),
       })
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Error ${response.status}`)
+      if (data.success) {
+        setUsers(prev => [...prev, data.user])
+        return data.user
+      } else {
+        throw new Error('Error al crear usuario')
       }
-      
-      const newUser = await response.json()
-      setUsers(prev => [...prev, newUser])
-      return newUser
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear usuario')
       console.error('Error creating user:', err)
@@ -75,22 +74,21 @@ export function useUsers(): UseUsersReturn {
     try {
       setError(null)
       
-      const response = await fetch(`/api/users/${id}`, {
+      const data = await apiRequest<{
+        success: boolean
+        user: User
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.USERS}/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify(userData),
       })
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Error ${response.status}`)
+      if (data.success) {
+        setUsers(prev => prev.map(user => user.id === id ? data.user : user))
+        return data.user
+      } else {
+        throw new Error('Error al actualizar usuario')
       }
-      
-      const updatedUser = await response.json()
-      setUsers(prev => prev.map(user => user.id === id ? updatedUser : user))
-      return updatedUser
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar usuario')
       console.error('Error updating user:', err)
@@ -102,17 +100,19 @@ export function useUsers(): UseUsersReturn {
     try {
       setError(null)
       
-      const response = await fetch(`/api/users/${id}`, {
+      const data = await apiRequest<{
+        success: boolean
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.USERS}/${id}`, {
         method: 'DELETE',
       })
       
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Error ${response.status}`)
+      if (data.success) {
+        setUsers(prev => prev.filter(user => user.id !== id))
+        return true
+      } else {
+        throw new Error('Error al eliminar usuario')
       }
-      
-      setUsers(prev => prev.filter(user => user.id !== id))
-      return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar usuario')
       console.error('Error deleting user:', err)
