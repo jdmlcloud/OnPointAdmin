@@ -141,7 +141,7 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Roles del Sistema */}
+          {/* Roles Personalizados */}
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
@@ -150,18 +150,18 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-blue-600">
-                    {rolesLoading ? "..." : systemRoles.length}
+                    {rolesLoading ? "..." : customRoles.length}
                   </p>
-                  <p className="text-sm text-muted-foreground">Roles del Sistema</p>
+                  <p className="text-sm text-muted-foreground">Roles Personalizados</p>
                   <p className="text-xs text-gray-500">
-                    + {rolesLoading ? "..." : customRoles.length} roles personalizados
+                    + {rolesLoading ? "..." : systemRoles.length} roles del sistema
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Permisos del Sistema */}
+          {/* Permisos Personalizados */}
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
@@ -170,11 +170,11 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-purple-600">
-                    {permissionsLoading ? "..." : systemPermissions.length}
+                    {permissionsLoading ? "..." : customPermissions.length}
                   </p>
-                  <p className="text-sm text-muted-foreground">Permisos del Sistema</p>
+                  <p className="text-sm text-muted-foreground">Permisos Personalizados</p>
                   <p className="text-xs text-gray-500">
-                    + {permissionsLoading ? "..." : customPermissions.length} permisos personalizados
+                    + {permissionsLoading ? "..." : systemPermissions.length} permisos del sistema
                   </p>
                 </div>
               </div>
