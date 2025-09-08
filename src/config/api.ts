@@ -1,7 +1,10 @@
 // Configuración de la API Gateway + Lambda
 export const API_CONFIG = {
-  // URL base de la API Gateway
-  BASE_URL: 'https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod',
+  // URLs base de la API Gateway por entorno
+  BASE_URLS: {
+    sandbox: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
+    prod: 'https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod'
+  },
   
   // Endpoints
   ENDPOINTS: {
@@ -19,9 +22,15 @@ export const API_CONFIG = {
   }
 }
 
+// Función para obtener la URL base según el entorno
+export const getBaseUrl = (): string => {
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'prod'
+  return API_CONFIG.BASE_URLS[environment as keyof typeof API_CONFIG.BASE_URLS] || API_CONFIG.BASE_URLS.prod
+}
+
 // Función helper para construir URLs completas
 export const buildApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}${endpoint}`
+  return `${getBaseUrl()}${endpoint}`
 }
 
 // Función helper para hacer requests a la API

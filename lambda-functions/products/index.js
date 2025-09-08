@@ -5,7 +5,7 @@ const dynamodb = new AWS.DynamoDB.DocumentClient({
   region: process.env.AWS_REGION || 'us-east-1'
 });
 
-const TABLE_NAME = 'onpoint-products';
+const TABLE_NAME = process.env.DYNAMODB_PRODUCTS_TABLE || 'OnPointAdmin-Products-sandbox';
 
 // Helper para crear respuestas con CORS
 const createResponse = (statusCode, body) => ({

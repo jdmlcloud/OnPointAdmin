@@ -30,7 +30,7 @@ exports.getProviders = async (event) => {
     const { page = 1, limit = 10, status } = event.queryStringParameters || {};
     
     const params = {
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'OnPointAdmin-Providers-sandbox',
       Limit: parseInt(limit),
       ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
     };
@@ -100,7 +100,7 @@ exports.createProvider = async (event) => {
     };
     
     await docClient.send(new PutCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'OnPointAdmin-Providers-sandbox',
       Item: provider
     }));
     
@@ -154,7 +154,7 @@ exports.updateProvider = async (event) => {
     };
     
     await docClient.send(new UpdateCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'OnPointAdmin-Providers-sandbox',
       Key: { id: providerId },
       UpdateExpression: 'SET ' + Object.keys(updateData).map(key => `#${key} = :${key}`).join(', '),
       ExpressionAttributeNames: Object.keys(updateData).reduce((acc, key) => {
@@ -170,7 +170,7 @@ exports.updateProvider = async (event) => {
     
     // Obtener el proveedor actualizado
     const result = await docClient.send(new GetCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'OnPointAdmin-Providers-sandbox',
       Key: { id: providerId }
     }));
     
@@ -205,7 +205,7 @@ exports.deleteProvider = async (event) => {
     }
     
     await docClient.send(new DeleteCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'OnPointAdmin-Providers-sandbox',
       Key: { id: providerId }
     }));
     

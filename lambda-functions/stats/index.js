@@ -29,17 +29,17 @@ exports.getStats = async (event) => {
     
     // Obtener estadísticas de usuarios
     const usersResult = await docClient.send(new ScanCommand({
-      TableName: 'onpoint-admin-users-dev'
+      TableName: process.env.DYNAMODB_USERS_TABLE || 'OnPointAdmin-Users-sandbox'
     }));
     
     // Obtener estadísticas de providers
     const providersResult = await docClient.send(new ScanCommand({
-      TableName: 'onpoint-admin-providers-dev'
+      TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'OnPointAdmin-Providers-sandbox'
     }));
     
     // Obtener estadísticas de products
     const productsResult = await docClient.send(new ScanCommand({
-      TableName: 'onpoint-admin-products-dev'
+      TableName: process.env.DYNAMODB_PRODUCTS_TABLE || 'OnPointAdmin-Products-sandbox'
     }));
     
     const users = usersResult.Items || [];

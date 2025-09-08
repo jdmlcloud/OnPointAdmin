@@ -30,7 +30,7 @@ exports.getUsers = async (event) => {
     const { page = 1, limit = 10, status } = event.queryStringParameters || {};
     
     const params = {
-      TableName: 'onpoint-admin-users-dev',
+      TableName: process.env.DYNAMODB_USERS_TABLE || 'OnPointAdmin-Users-sandbox',
       Limit: parseInt(limit),
       ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
     };
