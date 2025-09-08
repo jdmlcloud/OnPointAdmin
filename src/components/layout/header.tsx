@@ -95,18 +95,18 @@ export function Header() {
           <div className="flex items-center gap-3 pl-4 border-l">
             <div className="text-right">
               <p className="text-sm font-medium">
-                {session?.user?.name || "Usuario"}
+                Usuario Demo
               </p>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {(session as any)?.role || "ejecutivo"}
+                  admin
                 </Badge>
               </div>
             </div>
             <Avatar className="h-8 w-8">
-              <AvatarImage src={session?.user?.image || ""} />
+              <AvatarImage src="" />
               <AvatarFallback>
-                {session?.user?.name?.charAt(0) || "U"}
+                U
               </AvatarFallback>
             </Avatar>
             <Button

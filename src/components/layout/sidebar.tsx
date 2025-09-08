@@ -246,21 +246,21 @@ export function Sidebar() {
           collapsed && "justify-center"
         )}>
           <Avatar className="h-8 w-8">
-            <AvatarImage src={session?.user?.image || ""} />
+            <AvatarImage src="" />
             <AvatarFallback>
-              {session?.user?.name?.charAt(0) || "U"}
+              U
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {session?.user?.name || "Usuario"}
+                Usuario Demo
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {session?.user?.email || "usuario@ejemplo.com"}
+                usuario@ejemplo.com
               </p>
               <Badge variant="outline" className="text-xs mt-1">
-                {(session as any)?.role || "ejecutivo"}
+                admin
               </Badge>
             </div>
           )}
