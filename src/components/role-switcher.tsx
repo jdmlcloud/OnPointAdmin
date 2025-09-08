@@ -52,7 +52,7 @@ export function RoleSwitcher() {
     )
   }
 
-  const CurrentIcon = roleIcons[currentRole]
+  const CurrentIcon = roleIcons[currentRole] || User
 
   return (
     <div className="relative">
@@ -86,7 +86,7 @@ export function RoleSwitcher() {
             
             <CardContent className="space-y-3">
               {availableRoles.map((role) => {
-                const Icon = roleIcons[role]
+                const Icon = roleIcons[role] || User
                 const isActive = role === currentRole
                 
                 return (
