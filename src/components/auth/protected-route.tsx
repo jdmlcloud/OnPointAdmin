@@ -1,6 +1,6 @@
 'use client'
 
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/lib/auth/auth-context'
 import { UserRoleType } from '@/types/users'
@@ -37,8 +37,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Redirigir si no está autenticado
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      router.push(fallbackPath)
+    }
+  }, [isAuthenticated, user, router, fallbackPath])
+
   if (!isAuthenticated || !user) {
-    router.push(fallbackPath)
     return null
   }
 
