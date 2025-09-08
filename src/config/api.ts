@@ -1,7 +1,10 @@
 // Configuración de la API Gateway + Lambda
 export const API_CONFIG = {
-  // URL base de la API Gateway
-  BASE_URL: 'https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod',
+  // URLs base de la API Gateway por entorno
+  BASE_URLS: {
+    sandbox: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
+    prod: 'https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod'
+  },
   
   // Endpoints
   ENDPOINTS: {
@@ -19,9 +22,34 @@ export const API_CONFIG = {
   }
 }
 
+// Función para detectar el entorno automáticamente
+export const detectEnvironment = (): 'sandbox' | 'prod' => {
+  // Si estamos en el navegador, detectar por la URL
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    console.log('🔍 Detectando entorno - hostname:', hostname)
+    
+    if (hostname.includes('sandbox') || hostname.includes('d3ts6pwgn7uyyh.amplifyapp.com')) {
+      console.log('✅ Entorno detectado: sandbox')
+      return 'sandbox'
+    }
+  }
+  
+  // Fallback a variable de entorno o producción
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'prod'
+  console.log('⚠️ Usando fallback - entorno:', environment)
+  return environment as 'sandbox' | 'prod'
+}
+
+// Función para obtener la URL base según el entorno
+export const getBaseUrl = (): string => {
+  const environment = detectEnvironment()
+  return API_CONFIG.BASE_URLS[environment] || API_CONFIG.BASE_URLS.prod
+}
+
 // Función helper para construir URLs completas
 export const buildApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}${endpoint}`
+  return `${getBaseUrl()}${endpoint}`
 }
 
 // Función helper para hacer requests a la API
@@ -30,6 +58,11 @@ export const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<T> => {
   const url = buildApiUrl(endpoint)
+  
+  // Debug: mostrar la URL que se está usando
+  console.log(`🌐 API Request: ${url}`)
+  console.log(`🔍 Endpoint: ${endpoint}`)
+  console.log(`🌍 Entorno detectado: ${detectEnvironment()}`)
   
   const config: RequestInit = {
     ...options,
