@@ -26,7 +26,7 @@ npm run dev
 ```
 
 4. **Acceder a la aplicación**
-- URL: https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
+- URL: https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com
 - Credenciales demo: admin@onpoint.com / password
 
 ## 🏗️ Estructura del Proyecto
@@ -122,7 +122,7 @@ npm run type-check   # Verificación de tipos TypeScript
 ### Variables de Entorno
 ```env
 # Desarrollo (opcional)
-NEXTAUTH_URL=https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
+NEXTAUTH_URL=https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com
 NEXTAUTH_SECRET=dev-secret-key
 
 # Producción (requerido)

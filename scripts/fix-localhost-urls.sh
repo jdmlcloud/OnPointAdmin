@@ -4,7 +4,7 @@
 echo "🔧 Reemplazando referencias de localhost con URLs de producción..."
 
 # URL de producción
-PROD_URL="https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com"
+PROD_URL="https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com"
 
 # Archivos a procesar
 FILES=(
@@ -39,7 +39,7 @@ echo "🔍 Verificando cambios..."
 
 # Mostrar archivos modificados
 for file in "${FILES[@]}"; do
-  if [ -f "$file" ] && grep -q "sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com" "$file"; then
+  if [ -f "$file" ] && grep -q "sandbox.d3ts6pwgn7uyyh.amplifyapp.com" "$file"; then
     echo "✅ $file - Actualizado"
   fi
 done

@@ -130,8 +130,8 @@ CLIENT_ID=$(aws cognito-idp create-user-pool-client \
     --generate-secret \
     --explicit-auth-flows USER_PASSWORD_AUTH ALLOW_USER_SRP_AUTH \
     --supported-identity-providers COGNITO \
-    --callback-urls "https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/callback" \
-    --logout-urls "https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin" \
+    --callback-urls "https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com/auth/callback" \
+    --logout-urls "https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin" \
     --allowed-o-auth-flows implicit code \
     --allowed-o-auth-scopes email openid profile \
     --allowed-o-auth-flows-user-pool-client \
@@ -197,7 +197,7 @@ AWS_COGNITO_CLIENT_ID=$CLIENT_ID
 AWS_COGNITO_CLIENT_SECRET=$CLIENT_SECRET
 
 # NextAuth Configuration (temporal)
-NEXTAUTH_URL=https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com
+NEXTAUTH_URL=https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com
 NEXTAUTH_SECRET=your-secret-key-here
 EOF
 

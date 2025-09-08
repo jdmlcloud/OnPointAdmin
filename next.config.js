@@ -4,7 +4,7 @@ const nextConfig = {
     serverComponentsExternalPackages: ['aws-sdk', '@aws-sdk/client-dynamodb', '@aws-sdk/client-s3']
   },
   images: {
-    domains: ['https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com', 's3.amazonaws.com', 'cloudfront.amazonaws.com', 'sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com'],
+    domains: ['https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com', 's3.amazonaws.com', 'cloudfront.amazonaws.com', 'sandbox.d3ts6pwgn7uyyh.amplifyapp.com'],
     remotePatterns: [
       {
         protocol: 'https',

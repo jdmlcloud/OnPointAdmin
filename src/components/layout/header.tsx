@@ -25,7 +25,7 @@ export function Header() {
 
   const handleSignOut = () => {
     // Redirigir al login sin NextAuth
-    window.location.href = 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin'
+    window.location.href = 'https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin'
   }
 
   const toggleTheme = () => {
