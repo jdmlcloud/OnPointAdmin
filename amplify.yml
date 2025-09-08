@@ -3,11 +3,13 @@ frontend:
   phases:
     preBuild:
       commands:
+        - echo "Installing dependencies..."
         - npm ci
-        - cp next.config.amplify.js next.config.js
     build:
       commands:
+        - echo "Building application..."
         - npm run build
+        - echo "Build completed successfully"
   artifacts:
     baseDirectory: .next
     files:
