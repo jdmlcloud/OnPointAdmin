@@ -33,34 +33,46 @@ export function useAuth(): UseAuthReturn {
       setLoading(true)
       setError(null)
       
-      const currentUser = await getCurrentUser()
+      // Verificar si hay una sesión activa primero
       const session = await fetchAuthSession()
       
-      if (currentUser && session) {
-        // Mapear atributos de Cognito a nuestro formato
-        const userAttributes = currentUser.signInDetails?.loginId || currentUser.username
+      if (session && session.tokens) {
+        // Solo si hay sesión, obtener el usuario
+        const currentUser = await getCurrentUser()
         
-        // Determinar rol basado en el email
-        const email = currentUser.signInDetails?.loginId || ''
-        const role = email.includes('admin') ? 'admin' : 'ejecutivo'
-        
-        const authUser: AuthUser = {
-          id: currentUser.userId,
-          email: email,
-          name: currentUser.signInDetails?.loginId?.split('@')[0] || 'Usuario',
-          role: role
+        if (currentUser) {
+          // Mapear atributos de Cognito a nuestro formato
+          const email = currentUser.signInDetails?.loginId || currentUser.username || ''
+          const role = email.includes('admin') ? 'admin' : 'ejecutivo'
+          
+          const authUser: AuthUser = {
+            id: currentUser.userId,
+            email: email,
+            name: email.split('@')[0] || 'Usuario',
+            role: role
+          }
+          
+          setUser(authUser)
+          console.log('✅ Usuario autenticado:', authUser)
+        } else {
+          setUser(null)
+          console.log('❌ No se pudo obtener información del usuario')
         }
-        
-        setUser(authUser)
-        console.log('✅ Usuario autenticado:', authUser)
       } else {
         setUser(null)
-        console.log('❌ No hay usuario autenticado')
+        console.log('❌ No hay sesión activa')
       }
     } catch (err) {
-      console.log('❌ Error verificando autenticación:', err)
-      setUser(null)
-      setError(err instanceof Error ? err.message : 'Error de autenticación')
+      // Si es error de usuario no autenticado, es normal
+      if (err instanceof Error && err.message.includes('User needs to be authenticated')) {
+        console.log('ℹ️ Usuario no autenticado (normal en primera carga)')
+        setUser(null)
+        setError(null) // No mostrar error para usuarios no autenticados
+      } else {
+        console.error('❌ Error verificando autenticación:', err)
+        setUser(null)
+        setError(err instanceof Error ? err.message : 'Error de autenticación')
+      }
     } finally {
       setLoading(false)
     }

@@ -104,3 +104,22 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Configuración sensible de Cognito
+scripts/cognito-config.env
+scripts/*.env
+*.env
+.env.*
+
+# Archivos de configuración con credenciales
+config/credentials.json
+config/secrets.json
+
+# Archivos temporales de AWS
+*.pem
+*.key
+*.crt
+
+# Logs de AWS
+aws-logs/
+*.aws-log
