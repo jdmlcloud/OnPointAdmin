@@ -3,17 +3,14 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "🚀 Starting Amplify build process..."
-        - echo "📦 Installing dependencies..."
+        - echo "🚀 OnPoint Admin - Frontend Build"
+        - echo "📋 Usando API Gateway + Lambda (no Amplify Auth)"
         - npm ci
-        - echo "✅ Dependencies installed successfully"
     build:
       commands:
-        - echo "🔨 Building application..."
+        - echo "🔨 Building Next.js application..."
         - npm run build
-        - echo "📁 Build artifacts created:"
-        - ls -la .next/
-        - echo "✅ Build completed successfully!"
+        - echo "✅ Build completed successfully"
   artifacts:
     baseDirectory: .next
     files:
