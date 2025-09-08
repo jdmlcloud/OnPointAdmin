@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User, LoginRequest, LoginResponse, AuthContextType, UserRoleType } from '@/types/users'
+import { hasPermission, hasRole, canManageUser, canAssignRole, getAssignableRoles, canAccessRoute } from './permission-utils'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -105,31 +106,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsAuthenticated(false)
   }
 
-  const hasPermission = (resource: string, action: string): boolean => {
-    if (!user || !user.role) return false
-
-    // Super Admin tiene todos los permisos
-    if (user.role === 'SUPER_ADMIN') return true
-
-    // Admin tiene permisos de gestión
-    if (user.role === 'ADMIN') {
-      const adminPermissions = ['users', 'providers', 'products']
-      return adminPermissions.includes(resource) && action === 'manage'
-    }
-
-    // Ejecutivo tiene permisos limitados
-    if (user.role === 'EXECUTIVE') {
-      const executivePermissions = ['providers', 'products']
-      const executiveActions = ['read', 'create', 'update']
-      return executivePermissions.includes(resource) && executiveActions.includes(action)
-    }
-
-    return false
+  const checkPermission = (resource: string, action: string): boolean => {
+    return hasPermission(user, resource, action)
   }
 
-  const hasRole = (role: UserRoleType): boolean => {
-    if (!user) return false
-    return user.role === role
+  const checkRole = (role: UserRoleType): boolean => {
+    return hasRole(user, role)
+  }
+
+  const canManage = (targetUser: User | null): boolean => {
+    return canManageUser(user, targetUser)
+  }
+
+  const canAssign = (targetRole: string): boolean => {
+    return canAssignRole(user, targetRole)
+  }
+
+  const getAssignable = (): string[] => {
+    return getAssignableRoles(user)
+  }
+
+  const canAccess = (route: string): boolean => {
+    return canAccessRoute(user, route)
   }
 
   const value: AuthContextType = {
@@ -138,8 +136,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     login,
     logout,
-    hasPermission,
-    hasRole
+    hasPermission: checkPermission,
+    hasRole: checkRole,
+    canManage,
+    canAssign,
+    getAssignableRoles: getAssignable,
+    canAccessRoute: canAccess
   }
 
   return (

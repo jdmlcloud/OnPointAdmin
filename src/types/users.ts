@@ -82,6 +82,10 @@ export interface AuthContextType {
   logout: () => void
   hasPermission: (resource: string, action: string) => boolean
   hasRole: (role: UserRoleType) => boolean
+  canManage: (targetUser: User | null) => boolean
+  canAssign: (targetRole: string) => boolean
+  getAssignableRoles: () => string[]
+  canAccessRoute: (route: string) => boolean
 }
 
 // Constantes para roles

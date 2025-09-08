@@ -1,0 +1,193 @@
+'use client'
+
+import { User, Role, Permission } from '@/types/users'
+
+// Jerarquía de roles (menor número = mayor privilegio)
+export const ROLE_HIERARCHY: Record<string, number> = {
+  'SUPER_ADMIN': 1,
+  'ADMIN': 2,
+  'EXECUTIVE': 3,
+  'GUEST': 4
+}
+
+// Permisos por defecto para cada rol
+export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
+  'SUPER_ADMIN': [
+    'users:read', 'users:write', 'users:manage',
+    'roles:read', 'roles:manage',
+    'permissions:read', 'permissions:manage',
+    'providers:read', 'providers:write', 'providers:manage',
+    'products:read', 'products:write', 'products:manage',
+    'reports:view',
+    'settings:manage'
+  ],
+  'ADMIN': [
+    'users:read', 'users:write', 'users:manage',
+    'providers:read', 'providers:write', 'providers:manage',
+    'products:read', 'products:write', 'products:manage',
+    'reports:view'
+  ],
+  'EXECUTIVE': [
+    'providers:read', 'products:read', 'reports:view'
+  ],
+  'GUEST': [
+    'reports:view'
+  ]
+}
+
+/**
+ * Verifica si un usuario tiene un permiso específico
+ */
+export const hasPermission = (user: User | null, resource: string, action: string): boolean => {
+  if (!user) return false
+
+  // Super Admin tiene todos los permisos
+  if (user.role === 'SUPER_ADMIN') return true
+
+  // Verificar permisos por defecto del rol
+  const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role] || []
+  const permissionString = `${resource}:${action}`
+  
+  return rolePermissions.includes(permissionString)
+}
+
+/**
+ * Verifica si un usuario tiene un rol específico o superior
+ */
+export const hasRole = (user: User | null, requiredRole: string): boolean => {
+  if (!user) return false
+
+  const userLevel = ROLE_HIERARCHY[user.role] || 999
+  const requiredLevel = ROLE_HIERARCHY[requiredRole] || 999
+
+  return userLevel <= requiredLevel
+}
+
+/**
+ * Verifica si un usuario puede gestionar otro usuario
+ */
+export const canManageUser = (currentUser: User | null, targetUser: User | null): boolean => {
+  if (!currentUser || !targetUser) return false
+
+  // No se puede gestionar a sí mismo
+  if (currentUser.id === targetUser.id) return false
+
+  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
+  const targetLevel = ROLE_HIERARCHY[targetUser.role] || 999
+
+  // Solo se puede gestionar usuarios de nivel inferior
+  return currentLevel < targetLevel
+}
+
+/**
+ * Verifica si un usuario puede asignar un rol específico
+ */
+export const canAssignRole = (currentUser: User | null, targetRole: string): boolean => {
+  if (!currentUser) return false
+
+  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
+  const targetLevel = ROLE_HIERARCHY[targetRole] || 999
+
+  // Solo se puede asignar roles de nivel inferior
+  return currentLevel < targetLevel
+}
+
+/**
+ * Obtiene todos los roles que un usuario puede asignar
+ */
+export const getAssignableRoles = (currentUser: User | null): string[] => {
+  if (!currentUser) return []
+
+  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
+  
+  return Object.entries(ROLE_HIERARCHY)
+    .filter(([_, level]) => level > currentLevel)
+    .map(([role, _]) => role)
+}
+
+/**
+ * Obtiene todos los permisos disponibles para un rol
+ */
+export const getAvailablePermissions = (role: string): string[] => {
+  return DEFAULT_ROLE_PERMISSIONS[role] || []
+}
+
+/**
+ * Verifica si un permiso es válido
+ */
+export const isValidPermission = (permission: string): boolean => {
+  const [resource, action] = permission.split(':')
+  return !!(resource && action)
+}
+
+/**
+ * Obtiene la descripción de un permiso
+ */
+export const getPermissionDescription = (permission: string): string => {
+  const [resource, action] = permission.split(':')
+  
+  const resourceNames: Record<string, string> = {
+    'users': 'Usuarios',
+    'roles': 'Roles',
+    'permissions': 'Permisos',
+    'providers': 'Proveedores',
+    'products': 'Productos',
+    'reports': 'Reportes',
+    'settings': 'Configuración'
+  }
+  
+  const actionNames: Record<string, string> = {
+    'read': 'Ver',
+    'write': 'Editar',
+    'manage': 'Gestionar',
+    'view': 'Ver'
+  }
+  
+  const resourceName = resourceNames[resource] || resource
+  const actionName = actionNames[action] || action
+  
+  return `${actionName} ${resourceName}`
+}
+
+/**
+ * Obtiene la categoría de un permiso
+ */
+export const getPermissionCategory = (permission: string): string => {
+  const [resource] = permission.split(':')
+  
+  const resourceToCategory: Record<string, string> = {
+    'users': 'Usuarios',
+    'roles': 'Roles',
+    'permissions': 'Permisos',
+    'providers': 'Proveedores',
+    'products': 'Productos',
+    'reports': 'Reportes',
+    'settings': 'Configuración'
+  }
+  
+  return resourceToCategory[resource] || 'Otros'
+}
+
+/**
+ * Verifica si un usuario puede acceder a una ruta específica
+ */
+export const canAccessRoute = (user: User | null, route: string): boolean => {
+  if (!user) return false
+
+  const routePermissions: Record<string, string[]> = {
+    '/users': ['users:read'],
+    '/roles': ['roles:read'],
+    '/permissions': ['permissions:read'],
+    '/providers': ['providers:read'],
+    '/products': ['products:read'],
+    '/reports': ['reports:view'],
+    '/settings': ['settings:manage']
+  }
+
+  const requiredPermissions = routePermissions[route] || []
+  
+  return requiredPermissions.some(permission => {
+    const [resource, action] = permission.split(':')
+    return hasPermission(user, resource, action)
+  })
+}
