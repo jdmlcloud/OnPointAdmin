@@ -1,7 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
-// import { useSession } from "next-auth/react"
+// import { useSession } from "next-auth/react" // Removido - no usamos NextAuth
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
@@ -27,7 +26,8 @@ import {
   Zap,
   Cpu
 } from "lucide-react"
-// import { signOut } from "next-auth/react"
+import { signOut } from "next-auth/react"
+import { useState } from "react"
 import { useRoles } from "@/hooks/use-roles"
 
 const navigation = [
@@ -36,132 +36,123 @@ const navigation = [
     href: "/dashboard",
     icon: LayoutDashboard,
     badge: null,
-    permission: "canViewDashboard",
-    status: "ready"
+    permission: "canViewDashboard"
   },
   {
     name: "Proveedores",
     href: "/providers",
     icon: Building2,
-    badge: "✅",
-    permission: "canManageProviders",
-    status: "ready"
+    badge: "V1",
+    permission: "canManageProviders"
   },
   {
     name: "Productos",
     href: "/products",
     icon: Package,
-    badge: "✅",
-    permission: "canManageProducts",
-    status: "ready"
+    badge: "V1",
+    permission: "canManageProducts"
+  },
+  {
+    name: "WhatsApp + IA",
+    href: "/whatsapp",
+    icon: MessageSquare,
+    badge: "V2",
+    permission: "canManageWhatsApp"
+  },
+  {
+    name: "Cotizaciones",
+    href: "/quotations",
+    icon: TrendingUp,
+    badge: "V3",
+    permission: "canManageQuotations"
+  },
+  {
+    name: "Propuestas",
+    href: "/proposals",
+    icon: FileText,
+    badge: "V4",
+    permission: "canManageProposals"
+  },
+  {
+    name: "Generador PDFs",
+    href: "/pdf-generator",
+    icon: FileBarChart,
+    badge: "V5",
+    permission: "canGeneratePDFs"
+  },
+  {
+    name: "Envío y Tracking",
+    href: "/tracking",
+    icon: BarChart3,
+    badge: "V6",
+    permission: "canViewAnalytics"
+  },
+  {
+    name: "Editor Visual",
+    href: "/editor",
+    icon: Palette,
+    badge: "V7",
+    permission: "canManageTemplates"
+  },
+  {
+    name: "Analytics",
+    href: "/analytics",
+    icon: BarChart3,
+    badge: null,
+    permission: "canViewAnalytics"
+  },
+  {
+    name: "Reportes",
+    href: "/reports",
+    icon: FileBarChart,
+    badge: null,
+    permission: "canViewReports"
   },
   {
     name: "Usuarios",
     href: "/users",
     icon: Users,
-    badge: "✅",
-    permission: "canManageUsers",
-    status: "ready"
-  },
-  {
-    name: "WhatsApp + IA",
-    href: "#",
-    icon: MessageSquare,
-    badge: "🚧",
-    permission: "canManageWhatsApp",
-    status: "development"
-  },
-  {
-    name: "Cotizaciones",
-    href: "#",
-    icon: TrendingUp,
-    badge: "🚧",
-    permission: "canManageQuotations",
-    status: "development"
-  },
-  {
-    name: "Propuestas",
-    href: "#",
-    icon: FileText,
-    badge: "🚧",
-    permission: "canManageProposals",
-    status: "development"
-  },
-  {
-    name: "Generador PDFs",
-    href: "#",
-    icon: FileBarChart,
-    badge: "🚧",
-    permission: "canGeneratePDFs",
-    status: "development"
-  },
-  {
-    name: "Envío y Tracking",
-    href: "#",
-    icon: BarChart3,
-    badge: "🚧",
-    permission: "canViewAnalytics",
-    status: "development"
-  },
-  {
-    name: "Editor Visual",
-    href: "#",
-    icon: Palette,
-    badge: "🚧",
-    permission: "canManageTemplates",
-    status: "development"
-  },
-  {
-    name: "Analytics",
-    href: "#",
-    icon: BarChart3,
-    badge: "🚧",
-    permission: "canViewAnalytics",
-    status: "development"
-  },
-  {
-    name: "Reportes",
-    href: "#",
-    icon: FileBarChart,
-    badge: "🚧",
-    permission: "canViewReports",
-    status: "development"
+    badge: null,
+    permission: "canManageUsers"
   },
   {
     name: "Integraciones",
-    href: "#",
+    href: "/integrations",
     icon: Zap,
-    badge: "🚧",
-    permission: "canManageIntegrations",
-    status: "development"
+    badge: null,
+    permission: "canManageIntegrations"
   },
   {
     name: "Sistema",
     href: "/system",
     icon: Shield,
-    badge: "✅",
-    permission: "canManageSystem",
-    status: "ready"
+    badge: null,
+    permission: "canManageSystem"
   },
   {
     name: "Configuración",
     href: "/settings",
     icon: Settings,
-    badge: "✅",
-    permission: "canManageSettings",
-    status: "ready"
+    badge: "V1",
+    permission: "canManageSettings"
+  },
+  {
+    name: "AI Test",
+    href: "/ai-test",
+    icon: Cpu,
+    badge: "TEST",
+    permission: "canManageSystem"
   },
 ]
 
 export function Sidebar() {
-  // const { data: session } = useSession()
+  // const { data: session } = useSession() // Removido - no usamos NextAuth
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const { hasPermission } = useRoles()
 
   const handleSignOut = () => {
-    // Redirigir al login sin NextAuth
-    window.location.href = 'https://sandbox-deploy.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin'
+    signOut({ callbackUrl: '/auth/signin' })
   }
 
   return (
@@ -194,46 +185,31 @@ export function Sidebar() {
         {navigation.filter(item => hasPermission(item.permission as any)).map((item) => {
           const isActive = pathname === item.href
           const Icon = item.icon
-          const isDevelopment = item.status === "development"
-          
-          const buttonContent = (
-            <Button
-              variant={isActive ? "default" : "ghost"}
-              className={cn(
-                "w-full justify-start gap-3 h-10",
-                collapsed && "px-2",
-                isDevelopment && "opacity-60 cursor-not-allowed"
-              )}
-              disabled={isDevelopment}
-            >
-              <Icon className="h-4 w-4 flex-shrink-0" />
-              {!collapsed && (
-                <>
-                  <span className="flex-1 text-left">{item.name}</span>
-                  {item.badge && (
-                    <Badge 
-                      variant={item.badge === "✅" ? "default" : "secondary"}
-                      className="text-xs"
-                    >
-                      {item.badge}
-                    </Badge>
-                  )}
-                </>
-              )}
-            </Button>
-          )
-          
-          if (isDevelopment) {
-            return (
-              <div key={item.name} title="En desarrollo - Próximamente">
-                {buttonContent}
-              </div>
-            )
-          }
           
           return (
             <Link key={item.name} href={item.href}>
-              {buttonContent}
+              <Button
+                variant={isActive ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start gap-3 h-10",
+                  collapsed && "px-2"
+                )}
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 text-left">{item.name}</span>
+                    {item.badge && (
+                      <Badge 
+                        variant={item.badge === "V1" ? "default" : "secondary"}
+                        className="text-xs"
+                      >
+                        {item.badge}
+                      </Badge>
+                    )}
+                  </>
+                )}
+              </Button>
             </Link>
           )
         })}
@@ -248,19 +224,19 @@ export function Sidebar() {
           <Avatar className="h-8 w-8">
             <AvatarImage src="" />
             <AvatarFallback>
-              U
+              {"A"}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                Usuario Demo
+                {"Admin"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                usuario@ejemplo.com
+                {"admin@onpoint.com"}
               </p>
               <Badge variant="outline" className="text-xs mt-1">
-                admin
+                {"admin"}
               </Badge>
             </div>
           )}

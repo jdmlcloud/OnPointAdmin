@@ -1,8 +1,6 @@
 "use client"
 
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+// Sin autenticación - acceso directo
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
 
@@ -11,27 +9,7 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin')
-    }
-  }, [status, router])
-
-  if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return null
-  }
-
+  // Sin autenticación - acceso directo al dashboard
   return (
     <div className="h-screen bg-background overflow-hidden">
       <div className="flex h-full">
