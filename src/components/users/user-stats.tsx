@@ -57,30 +57,30 @@ export const UserStats: React.FC<UserStatsProps> = ({ users, roles, permissions 
         </CardContent>
       </Card>
 
-      {/* Roles del Sistema */}
+      {/* Roles Personalizados */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Roles del Sistema</CardTitle>
+          <CardTitle className="text-sm font-medium">Roles Personalizados</CardTitle>
           <Shield className="h-4 w-4 text-blue-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-blue-600">{systemRoles}</div>
+          <div className="text-2xl font-bold text-blue-600">{customRoles}</div>
           <p className="text-xs text-muted-foreground">
-            + {customRoles} roles personalizados
+            + {systemRoles} roles del sistema
           </p>
         </CardContent>
       </Card>
 
-      {/* Permisos del Sistema */}
+      {/* Permisos Personalizados */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Permisos del Sistema</CardTitle>
+          <CardTitle className="text-sm font-medium">Permisos Personalizados</CardTitle>
           <ShieldCheck className="h-4 w-4 text-purple-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-purple-600">{systemPermissions}</div>
+          <div className="text-2xl font-bold text-purple-600">{customPermissions}</div>
           <p className="text-xs text-muted-foreground">
-            + {customPermissions} permisos personalizados
+            + {systemPermissions} permisos del sistema
           </p>
         </CardContent>
       </Card>
