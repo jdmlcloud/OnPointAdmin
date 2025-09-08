@@ -1,34 +1,21 @@
 "use client"
 
-import { signIn, getSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 export default function SignInPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    getSession().then((session) => {
-      if (session) {
-        router.push('/dashboard')
-      }
-    })
-  }, [router])
-
   const handleSignIn = async () => {
     setIsLoading(true)
     try {
-      // En modo desarrollo, usar credenciales por defecto
-      await signIn('credentials', { 
-        email: 'admin@onpoint.com',
-        password: 'password',
-        callbackUrl: '/dashboard' 
-      })
+      // Redirigir directamente al dashboard sin autenticación
+      router.push('/dashboard')
     } catch (error) {
-      console.error('Error signing in:', error)
+      console.error('Error navigating to dashboard:', error)
     } finally {
       setIsLoading(false)
     }
@@ -50,11 +37,11 @@ export default function SignInPage() {
             className="w-full"
             size="lg"
           >
-            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión (Modo Demo)'}
+            {isLoading ? 'Accediendo...' : 'Acceder al Dashboard'}
           </Button>
           
           <div className="text-center text-sm text-muted-foreground">
-            <p>Modo desarrollo - Credenciales: admin@onpoint.com / password</p>
+            <p>Acceso directo al sistema de administración</p>
           </div>
         </CardContent>
       </Card>
