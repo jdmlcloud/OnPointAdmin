@@ -162,18 +162,8 @@ echo -e "${BLUE}⚡ Configurando throttling en API Gateway...${NC}"
 aws apigateway update-stage \
     --rest-api-id "$API_ID" \
     --stage-name "$STAGE" \
-    --patch-ops '[
-        {
-            "op": "replace",
-            "path": "/throttle/rateLimit",
-            "value": "'$THROTTLE_RATE'"
-        },
-        {
-            "op": "replace",
-            "path": "/throttle/burstLimit",
-            "value": "'$THROTTLE_BURST'"
-        }
-    ]'
+    --patch-ops op=replace,path=/throttle/rateLimit,value="$THROTTLE_RATE" \
+    --patch-ops op=replace,path=/throttle/burstLimit,value="$THROTTLE_BURST"
 
 echo -e "${GREEN}✅ Throttling configurado${NC}"
 
@@ -199,18 +189,8 @@ aws logs create-log-group \
 aws apigateway update-stage \
     --rest-api-id "$API_ID" \
     --stage-name "$STAGE" \
-    --patch-ops '[
-        {
-            "op": "replace",
-            "path": "/accessLogSettings/destinationArn",
-            "value": "arn:aws:logs:us-east-1:209350187548:log-group:'$LOG_GROUP_NAME'"
-        },
-        {
-            "op": "replace",
-            "path": "/accessLogSettings/format",
-            "value": "{\"requestId\":\"$context.requestId\",\"ip\":\"$context.identity.sourceIp\",\"user\":\"$context.identity.user\",\"requestTime\":\"$context.requestTime\",\"httpMethod\":\"$context.httpMethod\",\"resourcePath\":\"$context.resourcePath\",\"status\":\"$context.status\",\"responseLength\":\"$context.responseLength\",\"responseTime\":\"$context.responseTime\"}"
-        }
-    ]'
+    --patch-ops op=replace,path=/accessLogSettings/destinationArn,value="arn:aws:logs:us-east-1:209350187548:log-group:$LOG_GROUP_NAME" \
+    --patch-ops op=replace,path=/accessLogSettings/format,value='{"requestId":"$context.requestId","ip":"$context.identity.sourceIp","user":"$context.identity.user","requestTime":"$context.requestTime","httpMethod":"$context.httpMethod","resourcePath":"$context.resourcePath","status":"$context.status","responseLength":"$context.responseLength","responseTime":"$context.responseTime"}'
 
 echo -e "${GREEN}✅ CloudWatch Logs configurado${NC}"
 
