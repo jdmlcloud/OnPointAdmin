@@ -2,7 +2,7 @@
 export const API_CONFIG = {
   // URLs base de la API Gateway por entorno
   BASE_URLS: {
-    local: 'http://localhost:3000/api', // API local de Next.js
+    local: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox', // Local usa sandbox
     sandbox: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
     prod: 'https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod'
   },

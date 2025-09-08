@@ -593,7 +593,7 @@ export default function UsersPage() {
                   />
                 </div>
               </div>
-              <div className="flex gap-2 overflow-x-auto">
+              <div className="flex gap-2 flex-wrap">
                 {categories.map((category) => {
                   const IconComponent = category.icon
                   return (
