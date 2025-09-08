@@ -27,13 +27,17 @@ export const detectEnvironment = (): 'sandbox' | 'prod' => {
   // Si estamos en el navegador, detectar por la URL
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
+    console.log('🔍 Detectando entorno - hostname:', hostname)
+    
     if (hostname.includes('sandbox') || hostname.includes('d3ts6pwgn7uyyh.amplifyapp.com')) {
+      console.log('✅ Entorno detectado: sandbox')
       return 'sandbox'
     }
   }
   
   // Fallback a variable de entorno o producción
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'prod'
+  console.log('⚠️ Usando fallback - entorno:', environment)
   return environment as 'sandbox' | 'prod'
 }
 
@@ -56,9 +60,9 @@ export const apiRequest = async <T>(
   const url = buildApiUrl(endpoint)
   
   // Debug: mostrar la URL que se está usando
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🌐 API Request: ${url}`)
-  }
+  console.log(`🌐 API Request: ${url}`)
+  console.log(`🔍 Endpoint: ${endpoint}`)
+  console.log(`🌍 Entorno detectado: ${detectEnvironment()}`)
   
   const config: RequestInit = {
     ...options,
