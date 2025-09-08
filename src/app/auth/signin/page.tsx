@@ -12,10 +12,14 @@ export default function SignInPage() {
   const handleSignIn = async () => {
     setIsLoading(true)
     try {
+      console.log('🚀 Intentando navegar al dashboard...')
       // Redirigir directamente al dashboard sin autenticación
-      router.push('/dashboard')
+      await router.push('/dashboard')
+      console.log('✅ Navegación exitosa al dashboard')
     } catch (error) {
-      console.error('Error navigating to dashboard:', error)
+      console.error('❌ Error navigating to dashboard:', error)
+      // Fallback: usar window.location
+      window.location.href = '/dashboard'
     } finally {
       setIsLoading(false)
     }
@@ -40,8 +44,20 @@ export default function SignInPage() {
             {isLoading ? 'Accediendo...' : 'Acceder al Dashboard'}
           </Button>
           
+          <Button 
+            onClick={() => window.location.href = '/dashboard'}
+            variant="outline"
+            className="w-full"
+            size="lg"
+          >
+            Acceso Directo (Fallback)
+          </Button>
+          
           <div className="text-center text-sm text-muted-foreground">
             <p>Acceso directo al sistema de administración</p>
+            <p className="text-xs mt-2">
+              Si el botón principal no funciona, usa el botón de fallback
+            </p>
           </div>
         </CardContent>
       </Card>
