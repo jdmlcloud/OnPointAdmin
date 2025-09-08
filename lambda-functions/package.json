@@ -1,0 +1,17 @@
+{
+  "name": "onpoint-admin-lambda-functions",
+  "version": "1.0.0",
+  "description": "Lambda functions for OnPoint Admin API",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install",
+    "deploy": "aws lambda update-function-code --function-name onpoint-admin-providers --zip-file fileb://providers.zip"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.0.0"
+  }
+}
