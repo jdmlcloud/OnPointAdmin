@@ -1,15 +1,63 @@
 "use client"
 
-// Sin autenticación - acceso directo
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
+import { useAuth } from "@/hooks/use-auth"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
+import { Loader2 } from "lucide-react"
 
 interface MainLayoutProps {
   children: React.ReactNode
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
-  // Sin autenticación - acceso directo al dashboard
+  const { user, loading, error } = useAuth()
+  const router = useRouter()
+
+  // Redirigir si no está autenticado
+  useEffect(() => {
+    if (!loading && !user) {
+      console.log('❌ Usuario no autenticado, redirigiendo al login...')
+      router.push('/auth/signin')
+    }
+  }, [user, loading, router])
+
+  // Mostrar loading mientras verifica autenticación
+  if (loading) {
+    return (
+      <div className="h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Verificando autenticación...</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Mostrar error si hay problema de autenticación
+  if (error) {
+    return (
+      <div className="h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600">Error de autenticación</h2>
+          <p className="text-muted-foreground mt-2">{error}</p>
+          <button 
+            onClick={() => router.push('/auth/signin')}
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Volver al login
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Si no hay usuario, no renderizar nada (se redirigirá)
+  if (!user) {
+    return null
+  }
+
   return (
     <div className="h-screen bg-background overflow-hidden">
       <div className="flex h-full">

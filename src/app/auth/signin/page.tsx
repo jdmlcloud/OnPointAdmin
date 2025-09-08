@@ -2,35 +2,60 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useAuth } from "@/hooks/use-auth"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, Eye, EyeOff } from "lucide-react"
 
 export default function SignInPage() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const { user, loading, error, signIn } = useAuth()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSignIn = async () => {
-    setIsLoading(true)
-    try {
-      console.log('🚀 Limpiando cookies de NextAuth...')
-      
-      // Limpiar todas las cookies de NextAuth
-      document.cookie = 'next-auth.csrf-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-      document.cookie = 'next-auth.callback-url=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-      document.cookie = 'next-auth.session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-      
-      console.log('🧹 Cookies limpiadas, navegando al dashboard...')
-      
-      // Usar window.location para forzar navegación completa
-      window.location.href = '/dashboard'
-      
-    } catch (error) {
-      console.error('❌ Error navigating to dashboard:', error)
-      // Fallback: usar window.location
-      window.location.href = '/dashboard'
-    } finally {
-      setIsLoading(false)
+  // Redirigir si ya está autenticado
+  useEffect(() => {
+    if (user && !loading) {
+      console.log('✅ Usuario ya autenticado, redirigiendo...')
+      router.push('/dashboard')
     }
+  }, [user, loading, router])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!email || !password) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const success = await signIn(email, password)
+      if (success) {
+        console.log('✅ Login exitoso, redirigiendo...')
+        router.push('/dashboard')
+      }
+    } catch (err) {
+      console.error('❌ Error en login:', err)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Verificando autenticación...</span>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -42,35 +67,81 @@ export default function SignInPage() {
             Plataforma de Ventas B2B con IA Integrada
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Button 
-            onClick={handleSignIn}
-            disabled={isLoading}
-            className="w-full"
-            size="lg"
-          >
-            {isLoading ? 'Accediendo...' : 'Acceder al Dashboard'}
-          </Button>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@onpoint.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={isSubmitting}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+            
+            <Button 
+              type="submit"
+              disabled={isSubmitting || !email || !password}
+              className="w-full"
+              size="lg"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </Button>
+          </form>
           
-          <Button 
-            onClick={() => {
-              // Limpiar cookies y navegar
-              document.cookie = 'next-auth.csrf-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-              document.cookie = 'next-auth.callback-url=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-              document.cookie = 'next-auth.session-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-              window.location.href = '/dashboard'
-            }}
-            variant="outline"
-            className="w-full"
-            size="lg"
-          >
-            Acceso Directo (Sin Cookies)
-          </Button>
-          
-          <div className="text-center text-sm text-muted-foreground">
-            <p>Acceso directo al sistema de administración</p>
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="font-medium">Usuarios de prueba:</p>
+            <div className="mt-2 space-y-1">
+              <p><strong>Admin:</strong> admin@onpoint.com</p>
+              <p><strong>Ejecutivo:</strong> ejecutivo@onpoint.com</p>
+            </div>
             <p className="text-xs mt-2">
-              Si el botón principal no funciona, usa el botón de fallback
+              Contacta al administrador para obtener las contraseñas
             </p>
           </div>
         </CardContent>

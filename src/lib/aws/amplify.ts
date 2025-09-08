@@ -5,8 +5,8 @@ export const configureAmplify = () => {
   const config = {
     Auth: {
       Cognito: {
-        userPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID || '',
-        userPoolClientId: process.env.NEXT_PUBLIC_AWS_COGNITO_CLIENT_ID || '',
+        userPoolId: 'us-east-1_pnE1wndnB',
+        userPoolClientId: '76ho4o7fqhh3vdsiqqq269jjt5',
         loginWith: {
           email: true,
           username: false,
@@ -28,9 +28,9 @@ export const configureAmplify = () => {
 export const getAmplifyConfig = () => {
   return {
     Auth: {
-      region: process.env.AWS_REGION || 'us-east-1',
-      userPoolId: process.env.AWS_COGNITO_USER_POOL_ID || '',
-      userPoolWebClientId: process.env.AWS_COGNITO_CLIENT_ID || '',
+      region: 'us-east-1',
+      userPoolId: 'us-east-1_pnE1wndnB',
+      userPoolWebClientId: '76ho4o7fqhh3vdsiqqq269jjt5',
     }
   }
 }

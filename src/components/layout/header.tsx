@@ -1,6 +1,5 @@
 "use client"
 
-// import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,19 +12,18 @@ import {
   Sun,
   Monitor
 } from "lucide-react"
-// import { signOut } from "next-auth/react"
 import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
 import { RoleSwitcher } from "@/components/role-switcher"
+import { useAuth } from "@/hooks/use-auth"
 
 export function Header() {
-  // const { data: session } = useSession()
+  const { user, signOut } = useAuth()
   const { theme, setTheme } = useTheme()
 
-  const handleSignOut = () => {
-    // Redirigir al login sin NextAuth
-    window.location.href = 'https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com/auth/signin'
+  const handleSignOut = async () => {
+    await signOut()
   }
 
   const toggleTheme = () => {
@@ -95,18 +93,18 @@ export function Header() {
           <div className="flex items-center gap-3 pl-4 border-l">
             <div className="text-right">
               <p className="text-sm font-medium">
-                Usuario Demo
+                {user?.name || "Usuario"}
               </p>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  admin
+                  {user?.role || "usuario"}
                 </Badge>
               </div>
             </div>
             <Avatar className="h-8 w-8">
               <AvatarImage src="" />
               <AvatarFallback>
-                U
+                {user?.name?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <Button

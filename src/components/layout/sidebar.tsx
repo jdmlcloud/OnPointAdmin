@@ -26,7 +26,7 @@ import {
   Zap,
   Cpu
 } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
 import { useState } from "react"
 import { useRoles } from "@/hooks/use-roles"
 
@@ -146,13 +146,13 @@ const navigation = [
 ]
 
 export function Sidebar() {
-  // const { data: session } = useSession() // Removido - no usamos NextAuth
+  const { user, signOut } = useAuth()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const { hasPermission } = useRoles()
 
-  const handleSignOut = () => {
-    signOut({ callbackUrl: '/auth/signin' })
+  const handleSignOut = async () => {
+    await signOut()
   }
 
   return (
@@ -224,19 +224,19 @@ export function Sidebar() {
           <Avatar className="h-8 w-8">
             <AvatarImage src="" />
             <AvatarFallback>
-              {"A"}
+              {user?.name?.charAt(0).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {"Admin"}
+                {user?.name || "Usuario"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {"admin@onpoint.com"}
+                {user?.email || "usuario@onpoint.com"}
               </p>
               <Badge variant="outline" className="text-xs mt-1">
-                {"admin"}
+                {user?.role || "usuario"}
               </Badge>
             </div>
           )}
