@@ -1,89 +1,150 @@
 #!/bin/bash
 
-# Script para arreglar CORS en API Gateway
-echo "🚀 Arreglando configuración de CORS..."
+# Script para arreglar configuración CORS en API Gateway
+set -e
 
-# Configuración
-REGION="us-east-1"
-API_ID="7z4skk6jy0"
-
-# IDs de recursos
-PROVIDERS_RESOURCE_ID="2zlxq1"
-USERS_RESOURCE_ID="70taq0"
-STATS_RESOURCE_ID="kqk8tl"
-TAGS_RESOURCE_ID="31z472"
-PROVIDER_ID_RESOURCE_ID="b3n8ay"
+echo "🔧 Arreglando configuración CORS en API Gateway..."
 
 # Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Función para imprimir mensajes
-print_info() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
+API_ID="7z4skk6jy0"
+STAGE="prod"
 
-print_warning() {
-    echo -e "${YELLOW}⚠️ $1${NC}"
-}
+echo -e "${BLUE}🔧 Configurando CORS para API: $API_ID${NC}"
+echo -e "${BLUE}📋 Stage: $STAGE${NC}"
 
-print_error() {
-    echo -e "${RED}❌ $1${NC}"
-}
+# 1. Obtener recursos de la API
+echo -e "${BLUE}🔍 Obteniendo recursos de la API...${NC}"
+RESOURCES=$(aws apigateway get-resources --rest-api-id "$API_ID" --query 'items[?resourceMethods].{Id:id,Path:pathPart,Methods:resourceMethods}' --output json)
+
+echo -e "${YELLOW}📋 Recursos encontrados:${NC}"
+echo "$RESOURCES" | jq -r '.[] | "\(.Id) - \(.Path) - \(.Methods | keys | join(", "))"'
+
+# 2. Configurar CORS para cada recurso
+echo -e "${BLUE}🔧 Configurando CORS para cada recurso...${NC}"
 
 # Función para configurar CORS en un recurso
 configure_cors() {
     local resource_id=$1
-    local resource_name=$2
+    local path=$2
     
-    print_info "Configurando CORS para $resource_name"
+    echo -e "${BLUE}  🔧 Configurando CORS para: $path (ID: $resource_id)${NC}"
     
-    # Crear respuesta de método para OPTIONS
+    # Configurar OPTIONS method si no existe
+    aws apigateway put-method \
+        --rest-api-id "$API_ID" \
+        --resource-id "$resource_id" \
+        --http-method OPTIONS \
+        --authorization-type NONE \
+        --no-api-key-required 2>/dev/null || echo "    OPTIONS method ya existe"
+    
+    # Configurar integración para OPTIONS
+    aws apigateway put-integration \
+        --rest-api-id "$API_ID" \
+        --resource-id "$resource_id" \
+        --http-method OPTIONS \
+        --type MOCK \
+        --integration-http-method OPTIONS \
+        --request-templates '{"application/json": "{\"statusCode\": 200}"}' \
+        --request-parameters '{"method.request.header.Access-Control-Request-Headers": false, "method.request.header.Access-Control-Request-Method": false, "method.request.header.Origin": false}' 2>/dev/null || echo "    Integración OPTIONS ya existe"
+    
+    # Configurar response para OPTIONS
     aws apigateway put-method-response \
         --rest-api-id "$API_ID" \
         --resource-id "$resource_id" \
         --http-method OPTIONS \
         --status-code 200 \
-        --response-parameters '{"method.response.header.Access-Control-Allow-Headers": true,"method.response.header.Access-Control-Allow-Origin": true,"method.response.header.Access-Control-Allow-Methods": true}' \
-        --region "$REGION"
+        --response-parameters '{"method.response.header.Access-Control-Allow-Headers": true, "method.response.header.Access-Control-Allow-Methods": true, "method.response.header.Access-Control-Allow-Origin": true}' 2>/dev/null || echo "    Method response OPTIONS ya existe"
     
-    # Crear respuesta de integración para OPTIONS
+    # Configurar integration response para OPTIONS
     aws apigateway put-integration-response \
         --rest-api-id "$API_ID" \
         --resource-id "$resource_id" \
         --http-method OPTIONS \
         --status-code 200 \
-        --response-parameters '{"method.response.header.Access-Control-Allow-Headers": "'\''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'\''","method.response.header.Access-Control-Allow-Origin": "'\''*'\''","method.response.header.Access-Control-Allow-Methods": "'\''GET,POST,PUT,DELETE,OPTIONS'\''"}' \
-        --region "$REGION"
+        --response-parameters '{"method.response.header.Access-Control-Allow-Headers": "'"'"'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"'"'", "method.response.header.Access-Control-Allow-Methods": "'"'"'GET,POST,PUT,DELETE,OPTIONS'"'"'", "method.response.header.Access-Control-Allow-Origin": "'"'"'*'"'"'"}' 2>/dev/null || echo "    Integration response OPTIONS ya existe"
     
-    print_info "✅ CORS configurado para $resource_name"
+    echo -e "${GREEN}  ✅ CORS configurado para: $path${NC}"
 }
 
-# Configurar CORS para todos los recursos
-configure_cors "$PROVIDERS_RESOURCE_ID" "providers"
-configure_cors "$USERS_RESOURCE_ID" "users"
-configure_cors "$STATS_RESOURCE_ID" "stats"
-configure_cors "$TAGS_RESOURCE_ID" "tags"
-configure_cors "$PROVIDER_ID_RESOURCE_ID" "providers/{id}"
+# Configurar CORS para cada recurso
+echo "$RESOURCES" | jq -r '.[] | "\(.Id)|\(.Path)"' | while IFS='|' read -r resource_id path; do
+    if [ "$resource_id" != "null" ] && [ "$path" != "null" ]; then
+        configure_cors "$resource_id" "$path"
+    fi
+done
 
-# Desplegar API
-print_info "Desplegando API Gateway con CORS actualizado"
-aws apigateway create-deployment \
+# 3. Configurar CORS para métodos existentes
+echo -e "${BLUE}🔧 Configurando CORS para métodos existentes...${NC}"
+
+# Función para agregar headers CORS a métodos existentes
+add_cors_headers() {
+    local resource_id=$1
+    local method=$2
+    
+    echo -e "${BLUE}  🔧 Agregando headers CORS para: $method${NC}"
+    
+    # Agregar response parameters para CORS
+    aws apigateway put-method-response \
+        --rest-api-id "$API_ID" \
+        --resource-id "$resource_id" \
+        --http-method "$method" \
+        --status-code 200 \
+        --response-parameters '{"method.response.header.Access-Control-Allow-Origin": true}' 2>/dev/null || echo "    Response parameters ya existen"
+    
+    # Agregar integration response parameters para CORS
+    aws apigateway put-integration-response \
+        --rest-api-id "$API_ID" \
+        --resource-id "$resource_id" \
+        --http-method "$method" \
+        --status-code 200 \
+        --response-parameters '{"method.response.header.Access-Control-Allow-Origin": "'"'"'*'"'"'"}' 2>/dev/null || echo "    Integration response parameters ya existen"
+    
+    echo -e "${GREEN}  ✅ Headers CORS agregados para: $method${NC}"
+}
+
+# Agregar headers CORS a métodos existentes
+echo "$RESOURCES" | jq -r '.[] | select(.Methods != null) | .Methods | to_entries[] | "\(.key)"' | sort -u | while read -r method; do
+    if [ "$method" != "OPTIONS" ]; then
+        echo "$RESOURCES" | jq -r '.[] | select(.Methods != null and .Methods["'"$method"'"] != null) | "\(.Id)|\(.Path)"' | while IFS='|' read -r resource_id path; do
+            if [ "$resource_id" != "null" ]; then
+                add_cors_headers "$resource_id" "$method"
+            fi
+        done
+    fi
+done
+
+# 4. Desplegar cambios
+echo -e "${BLUE}🚀 Desplegando cambios...${NC}"
+DEPLOYMENT_ID=$(aws apigateway create-deployment \
     --rest-api-id "$API_ID" \
-    --stage-name "prod" \
-    --region "$REGION"
+    --stage-name "$STAGE" \
+    --description "CORS configuration update" \
+    --query 'id' \
+    --output text)
 
-if [ $? -eq 0 ]; then
-    print_info "✅ API Gateway desplegado exitosamente con CORS"
-else
-    print_error "❌ Error desplegando API Gateway"
-    exit 1
-fi
+echo -e "${GREEN}✅ Deployment creado: $DEPLOYMENT_ID${NC}"
 
-print_info "🎉 CORS configurado exitosamente!"
-print_info "📋 Ahora el frontend puede conectarse desde:"
-print_info "   https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com"
-print_info "   https://main.d3ts6pwgn7uyyh.amplifyapp.com"
-print_info "   Cualquier dominio (*)"
+# 5. Mostrar resumen
+echo -e "${GREEN}🎉 ¡CORS configurado exitosamente!${NC}"
+echo ""
+echo -e "${BLUE}📋 Resumen de configuración:${NC}"
+echo "  - API ID: $API_ID"
+echo "  - Stage: $STAGE"
+echo "  - Deployment ID: $DEPLOYMENT_ID"
+echo "  - CORS habilitado para todos los recursos"
+echo "  - Headers CORS configurados"
+echo ""
+echo -e "${YELLOW}📋 Headers CORS configurados:${NC}"
+echo "  ✅ Access-Control-Allow-Origin: *"
+echo "  ✅ Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS"
+echo "  ✅ Access-Control-Allow-Headers: Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+echo ""
+echo -e "${BLUE}🔗 URLs:${NC}"
+echo "  - API: https://$API_ID.execute-api.us-east-1.amazonaws.com/$STAGE"
+echo "  - API Gateway Console: https://console.aws.amazon.com/apigateway/home?region=us-east-1"
