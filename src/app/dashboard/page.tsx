@@ -1,474 +1,208 @@
-"use client"
+'use client'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { MainLayout } from "@/components/layout/main-layout"
-import { 
-  Users, 
-  Package, 
-  MessageSquare, 
-  FileText, 
-  TrendingUp,
-  Settings,
-  Plus,
-  ArrowRight
-} from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useRoles } from "@/hooks/use-roles"
-import { useUsers } from "@/hooks/use-users"
-import { useProviders } from "@/hooks/use-providers"
-import { useStats } from "@/hooks/use-stats"
+import React from 'react'
+import { useAuth } from '@/lib/auth/auth-context'
+import ProtectedRoute from '@/components/auth/protected-route'
+import { getVersionString } from '@/lib/version'
 
-export default function DashboardPage() {
-  const router = useRouter()
-  const { currentRole, hasPermission } = useRoles()
-  const { users, loading: usersLoading } = useUsers()
-  const { providers, loading: providersLoading } = useProviders()
-  const { stats, loading: statsLoading } = useStats()
+const DashboardPage: React.FC = () => {
+  const { user, logout } = useAuth()
 
-  const modules = [
-    {
-      title: "Gestión de Proveedores",
-      description: "Administra proveedores, logos y información comercial",
-      icon: Users,
-      href: "/providers",
-      status: "V1 - Disponible",
-      color: "bg-blue-500"
-    },
-    {
-      title: "Gestión de Productos",
-      description: "CRUD de productos, variantes y precios escalonados",
-      icon: Package,
-      href: "/products",
-      status: "V1 - Disponible",
-      color: "bg-green-500"
-    },
-    {
-      title: "WhatsApp + IA",
-      description: "Procesamiento automático de mensajes con IA",
-      icon: MessageSquare,
-      href: "/whatsapp",
-      status: "V2 - En desarrollo",
-      color: "bg-yellow-500"
-    },
-    {
-      title: "Cotización Inteligente",
-      description: "Sistema de recomendación y cotizador automático",
-      icon: TrendingUp,
-      href: "/quotations",
-      status: "V3 - Planificado",
-      color: "bg-purple-500"
-    },
-    {
-      title: "Diseño de Propuestas",
-      description: "Generación de mockups y diseño visual",
-      icon: FileText,
-      href: "/proposals",
-      status: "V4 - Planificado",
-      color: "bg-pink-500"
-    },
-    {
-      title: "Configuración",
-      description: "Ajustes del sistema y preferencias",
-      icon: Settings,
-      href: "/settings",
-      status: "V1 - Disponible",
-      color: "bg-gray-500"
+  const handleLogout = () => {
+    logout()
+  }
+
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'Super Administrador'
+      case 'ADMIN':
+        return 'Administrador'
+      case 'EXECUTIVE':
+        return 'Ejecutivo'
+      default:
+        return role
     }
-  ]
+  }
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'bg-red-100 text-red-800'
+      case 'ADMIN':
+        return 'bg-blue-100 text-blue-800'
+      case 'EXECUTIVE':
+        return 'bg-green-100 text-green-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
 
   return (
-    <MainLayout>
-      <div className="space-y-8">
-        {/* Welcome Section */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Dashboard Principal</h1>
-            <p className="text-muted-foreground">
-              Bienvenido a OnPoint Admin - Plataforma de Ventas B2B con IA
-            </p>
-          </div>
-          <Button onClick={() => router.push('/providers/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Proveedor
-          </Button>
-        </div>
-
-        {/* Modules Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {modules.map((module) => {
-            const Icon = module.icon
-            return (
-              <Card key={module.title} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${module.color} text-white`}>
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{module.title}</CardTitle>
-                      <Badge variant="secondary" className="mt-1">
-                        {module.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="mb-4">
-                    {module.description}
-                  </CardDescription>
-                  <Button 
-                    className="w-full" 
-                    variant="outline"
-                    onClick={() => router.push(module.href)}
-                  >
-                    Acceder
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-
-        {/* Stats Overview */}
-        <div className="mt-12">
-          <h3 className="text-2xl font-bold mb-6">Resumen del Sistema</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <Users className="h-8 w-8 text-blue-500" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.overview.totalUsers || 0}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Usuarios</p>
-                    {stats && (
-                      <p className="text-xs text-green-600">
-                        {stats.overview.totalActiveUsers} activos
-                      </p>
-                    )}
-                  </div>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-white shadow">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    OnPoint Admin
+                  </h1>
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <Package className="h-8 w-8 text-green-500" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.overview.totalProducts || 0}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Productos</p>
-                    {stats && (
-                      <p className="text-xs text-green-600">
-                        {stats.overview.totalActiveProducts} activos
-                      </p>
-                    )}
-                  </div>
+                <div className="ml-4">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {getVersionString()}
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <Users className="h-8 w-8 text-purple-500" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.overview.totalProviders || 0}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Proveedores</p>
-                    {stats && (
-                      <p className="text-xs text-green-600">
-                        {stats.overview.totalActiveProviders} activos
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="h-8 w-8 text-yellow-500" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : (stats?.products.total || 0)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Total Productos</p>
-                    {stats && (
-                      <p className="text-xs text-orange-600">
-                        {stats.products.active} activos
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Gestión de Usuarios - Solo para Administradores */}
-        {hasPermission('canManageUsers') && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Gestión de Usuarios</h2>
-                <p className="text-muted-foreground">
-                  Administra usuarios internos, roles y permisos del sistema
-                </p>
               </div>
-              <Button onClick={() => router.push('/users')}>
-                <Users className="h-4 w-4 mr-2" />
-                Ver Todos los Usuarios
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <Users className="h-8 w-8 text-blue-500" />
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {usersLoading ? "..." : users.length}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Total Usuarios</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                      <span className="text-white font-bold">
-                        {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Usuarios Activos</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
-                      <span className="text-white font-bold">
-                        {usersLoading ? "..." : users.filter(u => u.status === 'pending').length}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {usersLoading ? "..." : users.filter(u => u.status === 'pending').length}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Pendientes</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Usuarios Recientes</CardTitle>
-                <CardDescription>
-                  Últimos usuarios registrados y su actividad
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {usersLoading ? (
-                    <div className="text-center py-4">
-                      <p className="text-muted-foreground">Cargando usuarios...</p>
-                    </div>
-                  ) : users.length === 0 ? (
-                    <div className="text-center py-4">
-                      <p className="text-muted-foreground">No hay usuarios registrados</p>
-                    </div>
-                  ) : (
-                    users.slice(0, 5).map((user) => (
-                      <div key={user.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Users className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium">{user.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {user.email} • {user.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <Badge 
-                            className={
-                              user.status === 'active' 
-                                ? "bg-green-100 text-green-800" 
-                                : "bg-yellow-100 text-yellow-800"
-                            }
-                          >
-                            {user.status === 'active' ? 'Activo' : 'Pendiente'}
-                          </Badge>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(user.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
+              
+              <div className="flex items-center space-x-4">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user?.email}
+                  </p>
                 </div>
-                
-                <div className="mt-4 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => router.push('/users')}
+                <div className="flex items-center space-x-2">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user?.role || '')}`}>
+                    {getRoleDisplayName(user?.role || '')}
+                  </span>
+                  <button
+                    onClick={handleLogout}
+                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
-                    Ver Todos los Usuarios
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
+                    Cerrar Sesión
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* Gestión de Proveedores - Solo para Administradores */}
-        {hasPermission('canManageProviders') && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Gestión de Proveedores</h2>
-                <p className="text-muted-foreground">
-                  Administra proveedores, logos y información comercial
-                </p>
               </div>
-              <Button onClick={() => router.push('/providers')}>
-                <Package className="h-4 w-4 mr-2" />
-                Ver Todos los Proveedores
-              </Button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <Package className="h-8 w-8 text-blue-500" />
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {providersLoading ? "..." : providers.length}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Total Proveedores</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                      <span className="text-white font-bold">
-                        {providersLoading ? "..." : providers.filter(p => p.status === 'active').length}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {providersLoading ? "..." : providers.filter(p => p.status === 'active').length}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Proveedores Activos</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
-                      <span className="text-white font-bold">
-                        {providersLoading ? "..." : providers.filter(p => p.status === 'inactive').length}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {providersLoading ? "..." : providers.filter(p => p.status === 'inactive').length}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Inactivos</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Proveedores Recientes</CardTitle>
-                <CardDescription>
-                  Últimos proveedores registrados y su actividad
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {providersLoading ? (
-                    <div className="text-center py-4">
-                      <p className="text-muted-foreground">Cargando proveedores...</p>
-                    </div>
-                  ) : providers.length === 0 ? (
-                    <div className="text-center py-4">
-                      <p className="text-muted-foreground">No hay proveedores registrados</p>
-                    </div>
-                  ) : (
-                    providers.slice(0, 5).map((provider) => (
-                      <div key={provider.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Package className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium">{provider.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {provider.email} • {provider.company || 'Sin empresa'}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <Badge 
-                            className={
-                              provider.status === 'active' 
-                                ? "bg-green-100 text-green-800" 
-                                : "bg-red-100 text-red-800"
-                            }
-                          >
-                            {provider.status === 'active' ? 'Activo' : 'Inactivo'}
-                          </Badge>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {new Date(provider.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-                
-                <div className="mt-4 pt-4 border-t">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => router.push('/providers')}
-                  >
-                    Ver Todos los Proveedores
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
-        )}
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="px-4 py-6 sm:px-0">
+            <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                  ¡Bienvenido al Dashboard!
+                </h2>
+                <p className="text-lg text-gray-600 mb-8">
+                  Sistema de Gestión OnPoint Admin v1.1.0
+                </p>
+                
+                {/* User Info Card */}
+                <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+                  <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full">
+                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {user?.firstName} {user?.lastName}
+                  </h3>
+                  <p className="text-gray-600 mb-2">{user?.email}</p>
+                  <p className="text-gray-600 mb-2">{user?.phone}</p>
+                  <p className="text-gray-600 mb-2">{user?.department} - {user?.position}</p>
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getRoleColor(user?.role || '')}`}>
+                    {getRoleDisplayName(user?.role || '')}
+                  </span>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                  {/* Users Management */}
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-full">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Gestión de Usuarios
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Administra usuarios, roles y permisos del sistema
+                    </p>
+                    <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      Acceder
+                    </button>
+                  </div>
+
+                  {/* Providers Management */}
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-green-100 rounded-full">
+                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Gestión de Proveedores
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Administra proveedores y sus información
+                    </p>
+                    <button className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                      Acceder
+                    </button>
+                  </div>
+
+                  {/* Products Management */}
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-full">
+                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Gestión de Productos
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Administra productos y catálogos
+                    </p>
+                    <button className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                      Acceder
+                    </button>
+                  </div>
+                </div>
+
+                {/* System Status */}
+                <div className="mt-8 max-w-2xl mx-auto">
+                  <div className="bg-white rounded-lg shadow-md p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Estado del Sistema
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">✓</div>
+                        <p className="text-sm text-gray-600">Autenticación</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">✓</div>
+                        <p className="text-sm text-gray-600">Base de Datos</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">✓</div>
+                        <p className="text-sm text-gray-600">API Gateway</p>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-600">✓</div>
+                        <p className="text-sm text-gray-600">Lambda Functions</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-    </MainLayout>
+    </ProtectedRoute>
   )
 }
+
+export default DashboardPage

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
 export default async function HomePage() {
-  // Redirigir directamente al dashboard principal
-  redirect('/dashboard')
+  // Redirigir al login para el sistema de usuarios
+  redirect('/auth/login')
 }

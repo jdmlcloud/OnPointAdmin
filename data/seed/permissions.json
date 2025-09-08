@@ -1,0 +1,60 @@
+{
+  "OnPointAdmin-Permissions-local": [
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "permission-users-manage"},
+          "name": {"S": "Gestionar Usuarios"},
+          "resource": {"S": "users"},
+          "action": {"S": "manage"},
+          "description": {"S": "Crear, leer, actualizar y eliminar usuarios"},
+          "createdAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "updatedAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "createdBy": {"S": "system"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "permission-roles-manage"},
+          "name": {"S": "Gestionar Roles"},
+          "resource": {"S": "roles"},
+          "action": {"S": "manage"},
+          "description": {"S": "Crear, leer, actualizar y eliminar roles"},
+          "createdAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "updatedAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "createdBy": {"S": "system"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "permission-providers-manage"},
+          "name": {"S": "Gestionar Proveedores"},
+          "resource": {"S": "providers"},
+          "action": {"S": "manage"},
+          "description": {"S": "Crear, leer, actualizar y eliminar proveedores"},
+          "createdAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "updatedAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "createdBy": {"S": "system"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "permission-products-manage"},
+          "name": {"S": "Gestionar Productos"},
+          "resource": {"S": "products"},
+          "action": {"S": "manage"},
+          "description": {"S": "Crear, leer, actualizar y eliminar productos"},
+          "createdAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "updatedAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "createdBy": {"S": "system"}
+        }
+      }
+    }
+  ]
+}
