@@ -224,27 +224,29 @@ export function AssetCard({
 
   return (
     <Card 
-      className={`hover:shadow-xl hover:ring-2 hover:ring-blue-200 hover:ring-opacity-50 transition-all duration-300 ease-in-out flex flex-col h-72 overflow-hidden cursor-pointer ${maxWidth} ${className}`}
+      className={`hover:shadow-2xl hover:shadow-purple-500/20 hover:ring-2 hover:ring-purple-400 hover:ring-opacity-60 hover:-translate-y-1 transition-all duration-500 ease-out flex flex-col h-72 overflow-hidden cursor-pointer group ${maxWidth} ${className}`}
       onClick={onClick}
     >
       {/* Imagen/Thumbnail */}
-      <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
+      <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden group-hover:bg-gradient-to-br group-hover:from-purple-50 group-hover:to-pink-50 transition-all duration-500">
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
             alt={name}
-            className="max-w-full max-h-full object-contain"
+            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-out"
           />
         ) : (
-          <div className="text-muted-foreground text-center">
-            {getTypeIcon()}
+          <div className="text-muted-foreground text-center group-hover:text-purple-400 transition-colors duration-500">
+            <div className="group-hover:scale-110 transition-transform duration-500 ease-out">
+              {getTypeIcon()}
+            </div>
             <p className="text-xs">{fallbackText || 'Sin vista previa'}</p>
           </div>
         )}
       </div>
       
       {/* Contenido de la card */}
-      <CardContent className="p-3 flex-1 flex flex-col">
+      <CardContent className="p-3 flex-1 flex flex-col group-hover:bg-gradient-to-b group-hover:from-transparent group-hover:to-purple-50/30 transition-all duration-500">
         <div className="flex-1">
           <h3 className="font-semibold text-base mb-1 line-clamp-1">{name}</h3>
           <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
