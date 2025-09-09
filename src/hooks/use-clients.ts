@@ -24,7 +24,6 @@ interface UseClientsReturn {
 
 export function useClients(): UseClientsReturn {
   const [clients, setClients] = useState<Client[]>([])
-  const [manualClients, setManualClients] = useState<Client[]>([]) // Clientes creados manualmente
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,61 +32,16 @@ export function useClients(): UseClientsReturn {
       setIsLoading(true)
       setError(null)
       
-      // Por ahora, generamos clientes basados en los logos existentes
-      // En el futuro, esto vendrá de una API dedicada de clientes
-      const response = await fetch('/api/logos')
+      // Obtener clientes de la API
+      const response = await fetch('/api/clients')
       const data = await response.json()
       
       if (!response.ok) {
-        throw new Error(data.message || 'Error al obtener logos')
+        throw new Error(data.message || 'Error al obtener clientes')
       }
       
-      // Agrupar logos por cliente usando el campo brand
-      const logosByClient = data.logos.reduce((acc: any, logo: any) => {
-        const clientKey = logo.brand || 'Sin Marca'
-        if (!acc[clientKey]) {
-          acc[clientKey] = {
-            id: clientKey.toLowerCase().replace(/\s+/g, '-'),
-            name: clientKey,
-            description: `Cliente con logos de ${clientKey}`,
-            industry: 'Entertainment',
-            contactEmail: `${clientKey.toLowerCase().replace(/\s+/g, '')}@example.com`,
-            logos: [],
-            primaryLogoId: null,
-            createdAt: logo.createdAt,
-            updatedAt: logo.updatedAt
-          }
-        }
-        acc[clientKey].logos.push(logo)
-        return acc
-      }, {})
-
-      // Encontrar el logo principal de cada cliente
-      Object.values(logosByClient).forEach((client: any) => {
-        const primaryLogo = client.logos.find((logo: any) => logo.isPrimary)
-        if (primaryLogo) {
-          client.primaryLogoId = primaryLogo.id
-        }
-      })
-
-      // Combinar clientes generados desde logos con clientes manuales
-      const logoClients = Object.values(logosByClient)
-      const allClients = [...logoClients, ...manualClients]
-      
-      // Eliminar duplicados basándose en el nombre del cliente
-      const uniqueClients = allClients.reduce((acc, client) => {
-        const existingClient = acc.find(c => c.name === client.name)
-        if (existingClient) {
-          // Si ya existe, combinar logos
-          existingClient.logos = [...existingClient.logos, ...client.logos]
-          existingClient.primaryLogoId = existingClient.logos.find(logo => logo.isPrimary)?.id || null
-        } else {
-          acc.push(client)
-        }
-        return acc
-      }, [] as Client[])
-      
-      setClients(uniqueClients)
+      // Los clientes vienen directamente de la API
+      setClients(data.clients || [])
     } catch (err) {
       console.error('Error fetching clients:', err)
       setError(err instanceof Error ? err.message : 'Error desconocido')
@@ -98,17 +52,21 @@ export function useClients(): UseClientsReturn {
 
   const createClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>): Promise<boolean> => {
     try {
-      // Crear nuevo cliente
-      const newClient: Client = {
-        ...clientData,
-        id: `client-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        logos: []
+      // Enviar a la API
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(clientData)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al crear cliente')
       }
-      
-      // Agregar a clientes manuales
-      setManualClients(prev => [...prev, newClient])
-      
+
       // Refrescar la lista para que aparezca en la UI
       await fetchClients()
       
@@ -122,13 +80,21 @@ export function useClients(): UseClientsReturn {
 
   const updateClient = async (id: string, clientData: Partial<Omit<Client, 'id' | 'createdAt' | 'logos'>>): Promise<boolean> => {
     try {
-      // Actualizar en clientes manuales
-      setManualClients(prev => prev.map(client => 
-        client.id === id 
-          ? { ...client, ...clientData, updatedAt: new Date().toISOString() }
-          : client
-      ))
-      
+      // Enviar a la API
+      const response = await fetch(`/api/clients/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(clientData)
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al actualizar cliente')
+      }
+
       // Refrescar la lista
       await fetchClients()
       
@@ -142,9 +108,20 @@ export function useClients(): UseClientsReturn {
 
   const deleteClient = async (id: string): Promise<boolean> => {
     try {
-      // Eliminar de clientes manuales
-      setManualClients(prev => prev.filter(client => client.id !== id))
-      
+      // Enviar a la API
+      const response = await fetch(`/api/clients/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al eliminar cliente')
+      }
+
       // Refrescar la lista
       await fetchClients()
       
