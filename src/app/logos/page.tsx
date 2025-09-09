@@ -510,7 +510,7 @@ export default function LogosPage() {
               </>
             )}
           </div>
-          {viewMode === 'clients' && (
+          {viewMode === 'clients' && !selectedClient && (
             <div className="flex gap-2">
               <Button onClick={handleCreateClient} variant="outline">
                 <Building2 className="h-4 w-4 mr-2" />
