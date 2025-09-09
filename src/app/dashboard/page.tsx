@@ -31,7 +31,18 @@ import {
   Smartphone,
   Monitor,
   Laptop,
-  HardDrive
+  HardDrive,
+  Bell,
+  CheckCircle,
+  AlertCircle,
+  UserPlus,
+  MessageSquarePlus,
+  FileTextIcon,
+  Calendar,
+  Target,
+  TrendingDown,
+  Eye,
+  Mail
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/lib/auth/auth-context"
@@ -138,6 +149,195 @@ export default function DashboardPage() {
               Bienvenido a JDML Cloud - Servicios de Infraestructura
             </p>
           </div>
+        </div>
+
+        {/* Pendientes y Actividades - Para Ejecutivos y Administradores */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-orange-500" />
+            <h2 className="text-xl font-semibold">Pendientes y Actividades</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Propuestas Pendientes */}
+            <Card className="border-orange-200 dark:border-orange-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
+                    <FileTextIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-orange-600">3</p>
+                    <p className="text-sm text-muted-foreground">Propuestas Pendientes</p>
+                    <p className="text-xs text-gray-500">Requieren revisión</p>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-orange-600 border-orange-200 hover:bg-orange-50"
+                    onClick={() => router.push('/proposals')}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Revisar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Clientes Nuevos */}
+            <Card className="border-green-200 dark:border-green-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                    <UserPlus className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">5</p>
+                    <p className="text-sm text-muted-foreground">Clientes Nuevos</p>
+                    <p className="text-xs text-gray-500">Esta semana</p>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-green-600 border-green-200 hover:bg-green-50"
+                    onClick={() => router.push('/logos')}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Clientes
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* WhatsApp Nuevos */}
+            <Card className="border-blue-200 dark:border-blue-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                    <MessageSquarePlus className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-blue-600">12</p>
+                    <p className="text-sm text-muted-foreground">Mensajes WhatsApp</p>
+                    <p className="text-xs text-gray-500">Sin responder</p>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-blue-600 border-blue-200 hover:bg-blue-50"
+                    onClick={() => router.push('/whatsapp')}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Responder
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Tareas Pendientes */}
+            <Card className="border-purple-200 dark:border-purple-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-purple-600">8</p>
+                    <p className="text-sm text-muted-foreground">Tareas Pendientes</p>
+                    <p className="text-xs text-gray-500">Por completar</p>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full text-purple-600 border-purple-200 hover:bg-purple-50"
+                    onClick={() => router.push('/tasks')}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Ver Tareas
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Lista de Actividades Recientes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Actividades Recientes
+              </CardTitle>
+              <CardDescription>
+                Últimas acciones y notificaciones importantes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border-l-4 border-orange-500">
+                  <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
+                    <FileTextIcon className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Nueva propuesta pendiente de aprobación</p>
+                    <p className="text-xs text-muted-foreground">Cliente: Empresa ABC - Hace 30 minutos</p>
+                  </div>
+                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">Urgente</Badge>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border-l-4 border-green-500">
+                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                    <UserPlus className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Nuevo cliente registrado</p>
+                    <p className="text-xs text-muted-foreground">Netflix - Hace 1 hora</p>
+                  </div>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">Nuevo</Badge>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border-l-4 border-blue-500">
+                  <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                    <MessageSquarePlus className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Mensaje de WhatsApp sin responder</p>
+                    <p className="text-xs text-muted-foreground">+52 55 1234 5678 - Hace 2 horas</p>
+                  </div>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">Pendiente</Badge>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg border-l-4 border-purple-500">
+                  <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+                    <Target className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Tarea completada: Actualizar catálogo</p>
+                    <p className="text-xs text-muted-foreground">Productos - Hace 3 horas</p>
+                  </div>
+                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">Completado</Badge>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border-l-4 border-red-500">
+                  <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center">
+                    <AlertCircle className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Cotización vence mañana</p>
+                    <p className="text-xs text-muted-foreground">Cliente: HBO - Hace 4 horas</p>
+                  </div>
+                  <Badge variant="secondary" className="bg-red-100 text-red-800">Vence pronto</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Accesos Rápidos */}
