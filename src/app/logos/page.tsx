@@ -914,7 +914,7 @@ export default function LogosPage() {
                 {Object.values(logosByClient).map((client) => (
                   <Card 
                     key={client.clientId} 
-                    className="hover:shadow-lg transition-shadow cursor-pointer h-48 w-full"
+                    className="hover:shadow-lg transition-shadow cursor-pointer h-80 w-full"
                     onClick={() => handleClientClick(client)}
                   >
                     <CardContent className="p-4 h-full flex flex-col justify-between">
