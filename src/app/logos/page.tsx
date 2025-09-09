@@ -598,23 +598,30 @@ export default function LogosPage() {
           </div>
           
           {/* Botón de cambio de vista */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant={viewMode === 'clients' ? 'default' : 'outline'}
-              size="sm"
+          {/* Pestañas de Vista */}
+          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+            <button
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'clients'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
               onClick={() => setViewMode('clients')}
             >
-              <Building2 className="h-4 w-4 mr-2" />
+              <Building2 className="h-4 w-4" />
               Clientes
-            </Button>
-            <Button
-              variant={viewMode === 'logos' ? 'default' : 'outline'}
-              size="sm"
+            </button>
+            <button
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                viewMode === 'logos'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
               onClick={() => setViewMode('logos')}
             >
-              <Image className="h-4 w-4 mr-2" />
-              Logos
-            </Button>
+              <Image className="h-4 w-4" />
+              Todos los Logos
+            </button>
           </div>
           
           <Button 
