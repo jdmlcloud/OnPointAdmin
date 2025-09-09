@@ -114,6 +114,11 @@ export default function LogosPage() {
   // Estado para modal de cliente
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
+  
+  // Estado para archivo de logo en edición
+  const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [logoDeleted, setLogoDeleted] = useState(false)
 
   // Agrupar logos por cliente
   const logosByClient = logos.reduce((acc, logo) => {
@@ -135,7 +140,7 @@ export default function LogosPage() {
       name: client.clientName,
       description: `Cliente con ${client.logos.length} logos`,
       industry: 'Entertainment',
-      contactEmail: `${client.clientName.toLowerCase()}@example.com`,
+      contactEmail: `${client.clientName?.toLowerCase() || 'cliente'}@example.com`,
       logos: client.logos,
       primaryLogoId: client.logos.find(logo => logo.isPrimary)?.id,
       createdAt: client.logos[0]?.createdAt || new Date().toISOString(),
@@ -190,6 +195,52 @@ export default function LogosPage() {
     setIsClientModalOpen(false)
     setEditingClient(null)
   }
+
+  // Funciones para manejar archivos de logo
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setLogoFile(file)
+      setLogoDeleted(false)
+      
+      // Crear preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleLogoDelete = () => {
+    setLogoFile(null)
+    setLogoPreview(null)
+    setLogoDeleted(true)
+    
+    // Limpiar el input file
+    const fileInput = document.getElementById('logo-input') as HTMLInputElement
+    if (fileInput) {
+      fileInput.value = ''
+    }
+  }
+
+  const handleLogoReset = () => {
+    setLogoFile(null)
+    setLogoPreview(null)
+    setLogoDeleted(false)
+    // Limpiar el input file
+    const fileInput = document.getElementById('logo-input') as HTMLInputElement
+    if (fileInput) {
+      fileInput.value = ''
+    }
+  }
+
+  // Limpiar el estado del logo cuando se abra el modal de editar
+  useEffect(() => {
+    if (modals.edit.isOpen) {
+      handleLogoReset()
+    }
+  }, [modals.edit.isOpen])
 
   const filteredLogos = logos.filter(logo => {
     const searchLower = searchTerm.toLowerCase()
@@ -368,18 +419,12 @@ export default function LogosPage() {
               }
             </p>
           </div>
-          <div className="flex gap-3">
-            {viewMode === 'clients' && (
-              <Button onClick={handleCreateClient} variant="outline">
-                <Building2 className="h-4 w-4 mr-2" />
-                Nuevo Cliente
-              </Button>
-            )}
-            <Button onClick={() => router.push('/logos/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Logo
+          {viewMode === 'clients' && (
+            <Button onClick={handleCreateClient} variant="outline">
+              <Building2 className="h-4 w-4 mr-2" />
+              Nuevo Cliente
             </Button>
-          </div>
+          )}
         </div>
 
         {/* Search and Filters */}
@@ -685,17 +730,28 @@ export default function LogosPage() {
                         )}
                       </div>
                       
-                      <Button 
-                        className="w-full" 
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleClientClick(client)
-                        }}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Ver Logos
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          className="flex-1" 
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleClientClick(client)
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver Logos
+                        </Button>
+                        <Button 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/logos/new?client=${client.clientId}&clientName=${encodeURIComponent(client.clientName)}`)
+                          }}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -721,12 +777,19 @@ export default function LogosPage() {
                     <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                       <Building2 className="h-5 w-5 text-primary" />
                     </div>
-                    <div>
-                      <h2 className="text-xl font-semibold">{selectedClient.name}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedClient.logos.length} logos disponibles
-                      </p>
-                    </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold">{selectedClient.name}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedClient.logos.length} logos disponibles
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => router.push(`/logos/new?client=${selectedClient.id}&clientName=${encodeURIComponent(selectedClient.name)}`)}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nuevo Logo
+                  </Button>
                   </div>
                 </div>
                 
@@ -1212,6 +1275,54 @@ export default function LogosPage() {
         >
           {selectedItem && (
             <div className="space-y-6">
+              {/* Logo Section */}
+              <div>
+                <label className="text-sm font-medium">Archivo del Logo</label>
+                <div className="mt-2 flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+                    {logoPreview ? (
+                      <img 
+                        src={logoPreview} 
+                        alt="Preview"
+                        className="w-full h-full object-contain"
+                      />
+                    ) : selectedItem.thumbnailUrl ? (
+                      <img 
+                        src={selectedItem.thumbnailUrl} 
+                        alt={selectedItem.name}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Image className="w-8 h-8 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept="image/*,.svg,.pdf"
+                      className="hidden"
+                      id="logo-input"
+                      onChange={handleLogoUpload}
+                    />
+                    <label
+                      htmlFor="logo-input"
+                      className="px-3 py-1 text-xs bg-primary text-primary-foreground rounded hover:bg-primary/90 cursor-pointer"
+                    >
+                      {selectedItem.thumbnailUrl || logoPreview ? 'Cambiar' : 'Subir'}
+                    </label>
+                    {(selectedItem.thumbnailUrl || logoPreview) && (
+                      <button
+                        type="button"
+                        onClick={handleLogoDelete}
+                        className="px-3 py-1 text-xs bg-destructive text-destructive-foreground rounded hover:bg-destructive/90"
+                      >
+                        Borrar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="edit-name" className="block text-sm font-medium mb-2">Nombre *</label>
@@ -1243,6 +1354,14 @@ export default function LogosPage() {
                     id="edit-version"
                     defaultValue={selectedItem.version || ''}
                     placeholder="v1.0"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="edit-variant" className="block text-sm font-medium mb-2">Variante</label>
+                  <Input
+                    id="edit-variant"
+                    defaultValue={selectedItem.variant || ''}
+                    placeholder="Oficial, Horizontal, etc."
                   />
                 </div>
                 <div>
@@ -1288,10 +1407,27 @@ export default function LogosPage() {
           onSave={() => handleDeleteConfirm(selectedItem)}
           saveText="Eliminar"
           saveVariant="destructive"
+          showSaveButton={true}
         >
           {selectedItem && (
             <div className="space-y-4">
-              <p>¿Estás seguro de que quieres eliminar el logo <strong>{selectedItem.name}</strong>?</p>
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
+                  {selectedItem.thumbnailUrl ? (
+                    <img 
+                      src={selectedItem.thumbnailUrl} 
+                      alt={selectedItem.name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <Image className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <div>
+                  <p className="font-medium">¿Estás seguro de que quieres eliminar este logo?</p>
+                  <p className="text-sm text-muted-foreground">{selectedItem.name}</p>
+                </div>
+              </div>
               <p className="text-sm text-muted-foreground">Esta acción no se puede deshacer y eliminará el archivo del almacenamiento.</p>
             </div>
           )}
