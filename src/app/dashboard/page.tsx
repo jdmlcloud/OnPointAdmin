@@ -52,6 +52,9 @@ import { useStats } from "@/hooks/use-stats"
 import { useLogos } from "@/hooks/use-logos"
 import { useProducts } from "@/hooks/use-products"
 import { useClients } from "@/hooks/use-clients"
+import { useNotifications } from "@/hooks/use-notifications"
+import { useProductivity } from "@/hooks/use-productivity"
+import { useSystemMetrics } from "@/hooks/use-system-metrics"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -62,6 +65,9 @@ export default function DashboardPage() {
   const { logos, loading: logosLoading } = useLogos()
   const { products, loading: productsLoading } = useProducts()
   const { clients, loading: clientsLoading } = useClients()
+  const { notifications, stats: notificationStats, loading: notificationsLoading } = useNotifications()
+  const { metrics: productivityMetrics, loading: productivityLoading } = useProductivity()
+  const { metrics: systemMetrics, services: systemServices, loading: systemLoading } = useSystemMetrics()
 
   const services = [
     {
@@ -167,7 +173,9 @@ export default function DashboardPage() {
                     <FileTextIcon className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-orange-600">3</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {notificationsLoading ? "..." : notificationStats.proposals}
+                    </p>
                     <p className="text-sm text-muted-foreground">Propuestas Pendientes</p>
                     <p className="text-xs text-gray-500">Requieren revisión</p>
                   </div>
@@ -194,7 +202,9 @@ export default function DashboardPage() {
                     <UserPlus className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-green-600">5</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {notificationsLoading ? "..." : notificationStats.clients}
+                    </p>
                     <p className="text-sm text-muted-foreground">Clientes Nuevos</p>
                     <p className="text-xs text-gray-500">Esta semana</p>
                   </div>
@@ -221,7 +231,9 @@ export default function DashboardPage() {
                     <MessageSquarePlus className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-blue-600">12</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {notificationsLoading ? "..." : notificationStats.messages}
+                    </p>
                     <p className="text-sm text-muted-foreground">Mensajes WhatsApp</p>
                     <p className="text-xs text-gray-500">Sin responder</p>
                   </div>
@@ -248,7 +260,9 @@ export default function DashboardPage() {
                     <Target className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-purple-600">8</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {notificationsLoading ? "..." : notificationStats.tasks}
+                    </p>
                     <p className="text-sm text-muted-foreground">Tareas Pendientes</p>
                     <p className="text-xs text-gray-500">Por completar</p>
                   </div>
@@ -314,7 +328,7 @@ export default function DashboardPage() {
                   <MessageSquare className="h-5 w-5" />
                   Comunicación
                 </CardTitle>
-              </CardHeader>
+                </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -355,7 +369,9 @@ export default function DashboardPage() {
                     <CheckCircle className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-green-600">5</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {productivityLoading ? "..." : productivityMetrics.tasksCompletedToday}
+                    </p>
                     <p className="text-sm text-muted-foreground">Tareas Completadas</p>
                     <p className="text-xs text-gray-500">Hoy</p>
                   </div>
@@ -371,7 +387,9 @@ export default function DashboardPage() {
                     <Users className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-purple-600">8</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {productivityLoading ? "..." : productivityMetrics.clientsContactedThisWeek}
+                    </p>
                     <p className="text-sm text-muted-foreground">Clientes Contactados</p>
                     <p className="text-xs text-gray-500">Esta semana</p>
                   </div>
@@ -387,7 +405,9 @@ export default function DashboardPage() {
                     <FileTextIcon className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-orange-600">12</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {productivityLoading ? "..." : productivityMetrics.proposalsSentThisMonth}
+                    </p>
                     <p className="text-sm text-muted-foreground">Propuestas Enviadas</p>
                     <p className="text-xs text-gray-500">Este mes</p>
                   </div>
@@ -415,11 +435,11 @@ export default function DashboardPage() {
                     </div>
                     <h3 className="text-sm font-medium truncate w-full">{service.title}</h3>
                     <p className="text-xs text-muted-foreground truncate w-full">{service.description}</p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
         </div>
 
         {/* Métricas del Sistema */}
@@ -509,39 +529,39 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center">
                     <Users className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
+        </div>
+              <div>
                     <p className="text-2xl font-bold text-emerald-600">
                       {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
-                    </p>
+                </p>
                     <p className="text-sm text-muted-foreground">Usuarios Activos</p>
                     <p className="text-xs text-gray-500">de {usersLoading ? "..." : users.length} totales</p>
-                  </div>
-                </div>
+              </div>
+            </div>
               </CardContent>
             </Card>
 
             {/* Servicios Disponibles */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
                     <Zap className="h-5 w-5 text-white" />
                   </div>
-                  <div>
+                    <div>
                     <p className="text-2xl font-bold text-indigo-600">{services.length}</p>
                     <p className="text-sm text-muted-foreground">Servicios</p>
                     <p className="text-xs text-gray-500">Disponibles en la plataforma</p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
 
             {/* Estado del Sistema */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
                     <Cpu className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -561,7 +581,9 @@ export default function DashboardPage() {
                     <Clock className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-cyan-600">99.9%</p>
+                    <p className="text-2xl font-bold text-cyan-600">
+                      {systemLoading ? "..." : `${systemMetrics.uptime}%`}
+                    </p>
                     <p className="text-sm text-muted-foreground">Uptime</p>
                     <p className="text-xs text-gray-500">Disponibilidad del sistema</p>
                   </div>
@@ -583,16 +605,16 @@ export default function DashboardPage() {
                     <p className="text-2xl font-bold text-red-600">DynamoDB</p>
                     <p className="text-sm text-muted-foreground">Base de Datos</p>
                     <p className="text-xs text-gray-500">AWS DynamoDB activa</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
             {/* Almacenamiento */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
                     <HardDrive className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -610,8 +632,8 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-teal-500 flex items-center justify-center">
                     <Server className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
+                    </div>
+                    <div>
                     <p className="text-2xl font-bold text-teal-600">Lambda</p>
                     <p className="text-sm text-muted-foreground">Servidor</p>
                     <p className="text-xs text-gray-500">AWS Lambda functions</p>
@@ -631,28 +653,28 @@ export default function DashboardPage() {
                     <p className="text-2xl font-bold text-pink-600">HTTPS</p>
                     <p className="text-sm text-muted-foreground">Seguridad</p>
                     <p className="text-xs text-gray-500">Conexión encriptada</p>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
           </div>
-        </div>
+            </div>
 
         {/* Actividad Reciente y Estadísticas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Actividad Reciente */}
-          <Card>
-            <CardHeader>
+            <Card>
+              <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5" />
                 Actividad Reciente
               </CardTitle>
-              <CardDescription>
+                <CardDescription>
                 Últimas acciones realizadas en el sistema
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
                 <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                   <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
                     <Building2 className="h-4 w-4 text-white" />
@@ -660,18 +682,18 @@ export default function DashboardPage() {
                   <div className="flex-1">
                     <p className="text-sm font-medium">Nuevo proveedor agregado</p>
                     <p className="text-xs text-muted-foreground">Hace 2 minutos</p>
-                  </div>
-                </div>
+                    </div>
+                    </div>
                 
                 <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                   <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
                     <Image className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="flex-1">
+                        </div>
+                        <div className="flex-1">
                     <p className="text-sm font-medium">Logo actualizado</p>
                     <p className="text-xs text-muted-foreground">Hace 15 minutos</p>
-                  </div>
-                </div>
+                        </div>
+                      </div>
                 
                 <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                   <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
@@ -692,9 +714,9 @@ export default function DashboardPage() {
                     <p className="text-xs text-muted-foreground">Hace 2 horas</p>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                </div>
+              </CardContent>
+            </Card>
 
           {/* Estadísticas de Uso */}
           <Card>
@@ -713,10 +735,15 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Uso de CPU</span>
-                    <span className="text-sm text-muted-foreground">45%</span>
+                    <span className="text-sm text-muted-foreground">
+                      {systemLoading ? "..." : `${systemMetrics.cpuUsage}%`}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '45%'}}></div>
+                    <div 
+                      className="bg-blue-500 h-2 rounded-full" 
+                      style={{width: `${systemLoading ? 0 : systemMetrics.cpuUsage}%`}}
+                    ></div>
                   </div>
                 </div>
 
@@ -724,10 +751,15 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Memoria</span>
-                    <span className="text-sm text-muted-foreground">2.1GB / 4GB</span>
+                    <span className="text-sm text-muted-foreground">
+                      {systemLoading ? "..." : `${systemMetrics.memoryUsage}%`}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{width: '52%'}}></div>
+                    <div 
+                      className="bg-green-500 h-2 rounded-full" 
+                      style={{width: `${systemLoading ? 0 : systemMetrics.memoryUsage}%`}}
+                    ></div>
                   </div>
                 </div>
 
@@ -735,10 +767,15 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Almacenamiento</span>
-                    <span className="text-sm text-muted-foreground">15.2GB / 100GB</span>
+                    <span className="text-sm text-muted-foreground">
+                      {systemLoading ? "..." : `${systemMetrics.storageUsage}%`}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-yellow-500 h-2 rounded-full" style={{width: '15%'}}></div>
+                    <div 
+                      className="bg-yellow-500 h-2 rounded-full" 
+                      style={{width: `${systemLoading ? 0 : systemMetrics.storageUsage}%`}}
+                    ></div>
                   </div>
                 </div>
 
@@ -746,10 +783,15 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Requests/min</span>
-                    <span className="text-sm text-muted-foreground">127</span>
+                    <span className="text-sm text-muted-foreground">
+                      {systemLoading ? "..." : systemMetrics.requestsPerMinute}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{width: '63%'}}></div>
+                    <div 
+                      className="bg-purple-500 h-2 rounded-full" 
+                      style={{width: `${systemLoading ? 0 : Math.min(systemMetrics.requestsPerMinute / 200 * 100, 100)}%`}}
+                    ></div>
                   </div>
                 </div>
 
@@ -757,71 +799,76 @@ export default function DashboardPage() {
                 <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Tiempo de respuesta</span>
-                    <span className="text-sm text-muted-foreground">245ms</span>
+                    <span className="text-sm text-muted-foreground">
+                      {systemLoading ? "..." : `${systemMetrics.networkLatency}ms`}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-cyan-500 h-2 rounded-full" style={{width: '25%'}}></div>
+                    <div 
+                      className="bg-cyan-500 h-2 rounded-full" 
+                      style={{width: `${systemLoading ? 0 : Math.min(systemMetrics.networkLatency / 1000 * 100, 100)}%`}}
+                    ></div>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
+            </div>
 
         {/* Información del Sistema */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Versión del Sistema */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
                   <Globe className="h-5 w-5 text-white" />
                 </div>
-                <div>
+                    <div>
                   <p className="text-lg font-bold">v1.0.0</p>
                   <p className="text-sm text-muted-foreground">Versión del Sistema</p>
                   <p className="text-xs text-gray-500">Última actualización: Hoy</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
           {/* Entorno */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
                   <Monitor className="h-5 w-5 text-white" />
-                </div>
-                <div>
+                    </div>
+                    <div>
                   <p className="text-lg font-bold">Sandbox</p>
                   <p className="text-sm text-muted-foreground">Entorno Actual</p>
                   <p className="text-xs text-gray-500">Desarrollo y pruebas</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
           {/* Región AWS */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
                   <Server className="h-5 w-5 text-white" />
-                </div>
-                <div>
+                    </div>
+                    <div>
                   <p className="text-lg font-bold">us-east-1</p>
                   <p className="text-sm text-muted-foreground">Región AWS</p>
                   <p className="text-xs text-gray-500">N. Virginia, Estados Unidos</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
         {/* Chat Flotante con IA */}
         <div className="fixed bottom-6 right-6 z-50">
-          <Button
+                  <Button 
             size="lg"
             className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
             onClick={() => {
@@ -830,8 +877,8 @@ export default function DashboardPage() {
             }}
           >
             <Bot className="h-6 w-6 text-white" />
-          </Button>
-        </div>
+                  </Button>
+                </div>
       </div>
     </MainLayout>
   )

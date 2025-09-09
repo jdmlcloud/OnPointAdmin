@@ -1,111 +1,155 @@
-"use client"
-
-import { useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { apiRequest } from '@/config/api'
 
 export interface Notification {
   id: string
-  type: 'info' | 'success' | 'warning' | 'error'
+  type: 'urgent' | 'message' | 'task' | 'proposal' | 'client'
   title: string
-  message: string
-  timestamp: Date
-  read: boolean
-  action?: {
-    label: string
-    onClick: () => void
-  }
+  description: string
+  timestamp: string
+  status: 'new' | 'pending' | 'completed' | 'expired'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  clientId?: string
+  proposalId?: string
+  taskId?: string
+  messageId?: string
 }
 
-export function useNotifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'success',
-      title: 'Nueva Cotización Creada',
-      message: 'La cotización Q-2024-004 ha sido creada exitosamente',
-      timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutos atrás
-      read: false,
-      action: {
-        label: 'Ver Cotización',
-        onClick: () => console.log('Ver cotización')
+export interface NotificationStats {
+  urgent: number
+  messages: number
+  tasks: number
+  proposals: number
+  clients: number
+}
+
+export const useNotifications = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [stats, setStats] = useState<NotificationStats>({
+    urgent: 0,
+    messages: 0,
+    tasks: 0,
+    proposals: 0,
+    clients: 0
+  })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Por ahora usar datos mock, después conectar con AWS
+      const mockNotifications: Notification[] = [
+        {
+          id: '1',
+          type: 'proposal',
+          title: 'Propuesta ABC',
+          description: 'Vence en 2 horas',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          status: 'pending',
+          priority: 'urgent',
+          proposalId: 'prop-123'
+        },
+        {
+          id: '2',
+          type: 'proposal',
+          title: 'Cotización HBO',
+          description: 'Vence mañana',
+          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          status: 'pending',
+          priority: 'high',
+          proposalId: 'prop-456'
+        },
+        {
+          id: '3',
+          type: 'message',
+          title: 'WhatsApp +52 55 1234',
+          description: 'Mensaje sin responder',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          status: 'new',
+          priority: 'medium',
+          messageId: 'msg-789'
+        },
+        {
+          id: '4',
+          type: 'message',
+          title: 'Email Netflix',
+          description: 'Solicitud de información',
+          timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+          status: 'pending',
+          priority: 'medium',
+          messageId: 'msg-101'
+        },
+        {
+          id: '5',
+          type: 'client',
+          title: 'Nuevo cliente registrado',
+          description: 'Netflix se registró esta semana',
+          timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+          status: 'new',
+          priority: 'low',
+          clientId: 'client-123'
+        }
+      ]
+
+      setNotifications(mockNotifications)
+      
+      // Calcular estadísticas
+      const newStats: NotificationStats = {
+        urgent: mockNotifications.filter(n => n.priority === 'urgent').length,
+        messages: mockNotifications.filter(n => n.type === 'message').length,
+        tasks: mockNotifications.filter(n => n.type === 'task').length,
+        proposals: mockNotifications.filter(n => n.type === 'proposal').length,
+        clients: mockNotifications.filter(n => n.type === 'client').length
       }
-    },
-    {
-      id: '2',
-      type: 'info',
-      title: 'Mensaje de WhatsApp Recibido',
-      message: 'Nuevo mensaje de María González - TechCorp Solutions',
-      timestamp: new Date(Date.now() - 15 * 60 * 1000), // 15 minutos atrás
-      read: false,
-      action: {
-        label: 'Responder',
-        onClick: () => console.log('Responder mensaje')
-      }
-    },
-    {
-      id: '3',
-      type: 'warning',
-      title: 'Cotización Próxima a Vencer',
-      message: 'La cotización Q-2024-002 vence en 2 días',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutos atrás
-      read: true,
-      action: {
-        label: 'Renovar',
-        onClick: () => console.log('Renovar cotización')
-      }
-    },
-    {
-      id: '4',
-      type: 'success',
-      title: 'Propuesta Aprobada',
-      message: 'La propuesta P-2024-003 ha sido aprobada por el cliente',
-      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 horas atrás
-      read: true
+      
+      setStats(newStats)
+      
+    } catch (err) {
+      console.error('Error fetching notifications:', err)
+      setError(err instanceof Error ? err.message : 'Error desconocido')
+    } finally {
+      setLoading(false)
     }
-  ])
+  }
 
-  const unreadCount = notifications.filter(n => !n.read).length
-
-  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      read: false
-    }
-    setNotifications(prev => [newNotification, ...prev])
-  }, [])
-
-  const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, read: true }
-          : notification
+  const markAsRead = async (notificationId: string) => {
+    try {
+      // TODO: Implementar API call para marcar como leído
+      setNotifications(prev => 
+        prev.map(n => 
+          n.id === notificationId 
+            ? { ...n, status: 'completed' as const }
+            : n
+        )
       )
-    )
-  }, [])
+    } catch (err) {
+      console.error('Error marking notification as read:', err)
+    }
+  }
 
-  const markAllAsRead = useCallback(() => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    )
-  }, [])
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      // TODO: Implementar API call para eliminar notificación
+      setNotifications(prev => prev.filter(n => n.id !== notificationId))
+    } catch (err) {
+      console.error('Error deleting notification:', err)
+    }
+  }
 
-  const removeNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id))
-  }, [])
-
-  const clearAll = useCallback(() => {
-    setNotifications([])
+  useEffect(() => {
+    fetchNotifications()
   }, [])
 
   return {
     notifications,
-    unreadCount,
-    addNotification,
+    stats,
+    loading,
+    error,
+    fetchNotifications,
     markAsRead,
-    markAllAsRead,
-    removeNotification,
-    clearAll
+    deleteNotification
   }
 }
