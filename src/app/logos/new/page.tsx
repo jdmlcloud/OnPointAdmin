@@ -92,10 +92,19 @@ export default function NewLogoPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }))
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      }
+      
+      // Si cambia el nombre del cliente, actualizar también la marca
+      if (name === 'clientName') {
+        newData.brand = value
+      }
+      
+      return newData
+    })
   }
 
   const handleSelectChange = (field: string, value: string) => {
@@ -158,27 +167,36 @@ export default function NewLogoPage() {
     e.preventDefault()
     
     // Validar campos requeridos
-    if (!formData.name || !formData.category || !formData.brand || !selectedFile) {
-      alert('Por favor completa todos los campos requeridos: Nombre del Logo, Categoría, Marca y selecciona un archivo')
+    if (!formData.name || !formData.category || !formData.clientName || !selectedFile) {
+      alert('Por favor completa todos los campos requeridos: Nombre del Logo, Categoría, Nombre del Cliente y selecciona un archivo')
       return
     }
 
     setIsLoading(true)
     
+    // Debug: mostrar datos que se van a enviar
+    console.log('🔍 Datos del formulario:', formData)
+    console.log('🔍 Etiquetas seleccionadas:', selectedTags)
+    console.log('🔍 Archivo seleccionado:', selectedFile)
+    
     try {
-      const success = await createLogo({
+      const logoData = {
         name: formData.name,
         description: formData.description,
         category: formData.category,
-        clientId: formData.clientId || `client-${formData.brand.toLowerCase().replace(/\s+/g, '-')}`,
-        clientName: formData.brand, // Usar brand como clientName
+        clientId: formData.clientId || `client-${formData.clientName.toLowerCase().replace(/\s+/g, '-')}`,
+        clientName: formData.clientName,
         variant: formData.variant,
-        brand: formData.brand,
+        brand: formData.clientName, // Usar clientName como brand
         version: formData.version,
         tags: selectedTags,
         status: formData.status,
         isPrimary: formData.isPrimary
-      }, selectedFile)
+      }
+      
+      console.log('🚀 Enviando datos del logo:', logoData)
+      
+      const success = await createLogo(logoData, selectedFile)
       
       if (success) {
         router.push('/logos')
