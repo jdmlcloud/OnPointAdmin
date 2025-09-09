@@ -88,6 +88,13 @@ export default function LogosPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<'clients' | 'logos'>('clients')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+
+  // Usar hook de logos para datos reales de DynamoDB
+  const { logos, isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
+
+  // Estado para el item seleccionado
+  const [selectedItem, setSelectedItem] = useState<Logo | null>(null)
+
   const {
     modals,
     setModals,
@@ -100,12 +107,6 @@ export default function LogosPage() {
     handleShare,
     closeModal
   } = useCardActions(refreshLogos)
-
-  // Estado para el item seleccionado
-  const [selectedItem, setSelectedItem] = useState<Logo | null>(null)
-
-  // Usar hook de logos para datos reales de DynamoDB
-  const { logos, isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
   
   // Usar hook de clientes
   const { clients, createClient, updateClient, deleteClient } = useClients()
