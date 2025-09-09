@@ -769,30 +769,30 @@ export default function LogosPage() {
                 {Object.values(logosByClient).map((client) => (
                   <Card 
                     key={client.clientId} 
-                    className="hover:shadow-lg transition-shadow cursor-pointer h-44 w-full"
+                    className="hover:shadow-lg transition-shadow cursor-pointer h-48 w-full"
                     onClick={() => handleClientClick(client)}
                   >
-                    <CardContent className="p-5 h-full flex flex-col justify-between">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <Building2 className="h-5 w-5 text-primary" />
+                    <CardContent className="p-4 h-full flex flex-col justify-between">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Building2 className="h-4 w-4 text-primary" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h3 className="text-base font-semibold truncate">{client.clientName}</h3>
-                            <p className="text-sm text-muted-foreground">Cliente</p>
+                            <h3 className="text-sm font-semibold truncate">{client.clientName}</h3>
+                            <p className="text-xs text-muted-foreground">Cliente</p>
                           </div>
                         </div>
-                        <Badge variant="outline" className="text-sm px-2 py-1">
+                        <Badge variant="outline" className="text-xs">
                           {client.logos.length}
                         </Badge>
                       </div>
                       
                       {/* Contenido principal */}
-                      <div className="space-y-4 flex-1">
+                      <div className="space-y-3 flex-1">
                         {/* Información de logos y formatos */}
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Image className="h-4 w-4" />
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Image className="h-3 w-3" />
                           <span>{client.logos.length} logos</span>
                           {client.logos.length > 0 && (
                             <>
@@ -806,7 +806,7 @@ export default function LogosPage() {
                         
                         {/* Etiquetas de formatos agrupados */}
                         {client.logos.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1">
                             {Object.entries(
                               client.logos.reduce((acc, logo) => {
                                 const type = logo.fileType || 'UNKNOWN'
@@ -814,7 +814,7 @@ export default function LogosPage() {
                                 return acc
                               }, {} as Record<string, number>)
                             ).map(([format, count]) => (
-                              <Badge key={format} variant="secondary" className="text-sm px-3 py-1">
+                              <Badge key={format} variant="secondary" className="text-xs px-2 py-1">
                                 {format} {count > 1 ? `(${count})` : ''}
                               </Badge>
                             ))}
@@ -823,15 +823,15 @@ export default function LogosPage() {
                         
                         {/* Indicador de logo principal */}
                         {client.logos.some(logo => logo.isPrimary) && (
-                          <div className="flex items-center gap-2 text-sm text-yellow-600">
-                            <Star className="h-4 w-4" />
+                          <div className="flex items-center gap-1 text-xs text-yellow-600">
+                            <Star className="h-3 w-3" />
                             <span>Logo principal</span>
                           </div>
                         )}
                       </div>
                       
                       {/* Botones de acción */}
-                      <div className="flex gap-2 pt-3 border-t border-border/50">
+                      <div className="flex gap-1 pt-2 border-t border-border/50">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -839,9 +839,9 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleClientClick(client)
                           }}
-                          className="h-8 px-3 text-sm flex-1"
+                          className="h-6 px-2 text-xs flex-1"
                         >
-                          <Eye className="h-4 w-4 mr-2" />
+                          <Eye className="h-3 w-3 mr-1" />
                           Ver
                         </Button>
                         <Button 
@@ -851,9 +851,9 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleAddLogoToClient(client)
                           }}
-                          className="h-8 px-3 text-sm"
+                          className="h-6 px-2 text-xs"
                         >
-                          <Plus className="h-4 w-4" />
+                          <Plus className="h-3 w-3" />
                         </Button>
                         <Button 
                           variant="outline" 
@@ -862,9 +862,9 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleDeleteClient(client)
                           }}
-                          className="h-8 px-3 text-sm text-destructive hover:text-destructive"
+                          className="h-6 px-2 text-xs text-destructive hover:text-destructive"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
                     </CardContent>
