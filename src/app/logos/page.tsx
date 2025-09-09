@@ -866,7 +866,7 @@ export default function LogosPage() {
               // Vista de logos de un cliente específico
               <div className="space-y-6">
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 justify-items-center">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 justify-items-center">
                   {selectedClient.logos.map((logo) => (
                     <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                       {/* Imagen centrada en la parte superior */}
@@ -879,8 +879,8 @@ export default function LogosPage() {
                           />
                         ) : (
                           <div className="text-muted-foreground text-center">
-                            <Image className="h-12 w-12 mx-auto mb-2" />
-                            <p className="text-sm">Sin vista previa</p>
+                            <Image className="h-16 w-16 mx-auto mb-2" />
+                            <p className="text-xs">Sin vista previa</p>
                           </div>
                         )}
                       </div>
@@ -888,22 +888,44 @@ export default function LogosPage() {
                       {/* Información del logo */}
                       <CardContent className="p-3 flex-1 flex flex-col">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-2">{logo.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                          <h3 className="font-semibold text-base mb-1 line-clamp-1">{logo.name}</h3>
+                          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                             {logo.description || 'Sin descripción'}
                           </p>
                           
+                          {/* Información adicional del logo */}
+                          <div className="space-y-1 mb-2">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <span className="font-medium">Categoría:</span>
+                              <span>{logo.category || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <span className="font-medium">Variante:</span>
+                              <span>{logo.variant || 'N/A'}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <span className="font-medium">Formato:</span>
+                              <span>{logo.fileType || 'N/A'}</span>
+                            </div>
+                            {logo.isPrimary && (
+                              <div className="flex items-center gap-1 text-xs text-yellow-600">
+                                <Star className="h-3 w-3" />
+                                <span>Logo Principal</span>
+                              </div>
+                            )}
+                          </div>
+                          
                           {/* Tags */}
                           {logo.tags && logo.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mb-3">
-                              {logo.tags.slice(0, 3).map((tag, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
+                            <div className="flex flex-wrap gap-1 mb-2">
+                              {logo.tags.slice(0, 2).map((tag, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs px-1 py-0">
                                   {tag}
                                 </Badge>
                               ))}
-                              {logo.tags.length > 3 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{logo.tags.length - 3}
+                              {logo.tags.length > 2 && (
+                                <Badge variant="outline" className="text-xs px-1 py-0">
+                                  +{logo.tags.length - 2}
                                 </Badge>
                               )}
                             </div>
@@ -911,28 +933,36 @@ export default function LogosPage() {
                         </div>
                         
                         {/* Botones de acción */}
-                        <div className="flex gap-2 mt-4">
+                        <div className="flex gap-1 mt-3">
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => handleView(logo)}
-                            className="flex-1"
+                            className="flex-1 h-8"
                           >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Ver
+                            <Eye className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="outline" 
                             size="sm"
                             onClick={() => handleEdit(logo)}
+                            className="h-8 px-2"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="outline" 
                             size="sm"
+                            onClick={() => handleDownload(logo)}
+                            className="h-8 px-2"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
                             onClick={() => handleDelete(logo)}
-                            className="text-destructive hover:text-destructive"
+                            className="h-8 px-2 text-destructive hover:text-destructive"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -1104,7 +1134,7 @@ export default function LogosPage() {
                 </div>
                 
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 justify-items-center">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 justify-items-center">
                   {selectedClient.logos.map((logo) => (
                     <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                       {/* Imagen centrada en la parte superior */}
@@ -1302,7 +1332,7 @@ export default function LogosPage() {
                       </div>
 
                       {/* Grid de Logos del Cliente */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 justify-items-center">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 justify-items-center">
                         {client.logos.map((logo) => (
                           <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                             {/* Imagen centrada en la parte superior */}
