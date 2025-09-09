@@ -1028,211 +1028,28 @@ export default function LogosPage() {
         <ActionModal
           isOpen={modals.view}
           onClose={() => closeModal('view')}
-          title="Detalles del Logo"
-          size="lg"
-        >
-          {modals.selectedItem && (
-            <div className="space-y-6">
-              {/* Imagen del logo */}
-              <div className="flex justify-center">
-                {modals.selectedItem.thumbnailUrl ? (
-                  <img 
-                    src={modals.selectedItem.thumbnailUrl} 
-                    alt={modals.selectedItem.name}
-                    className="max-w-md max-h-64 object-contain"
-                  />
-                ) : (
-                  <div className="w-64 h-64 bg-muted rounded-lg flex items-center justify-center">
-                    <Image className="h-16 w-16 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-
-              {/* Información básica */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Nombre</label>
-                  <p className="text-lg font-semibold">{modals.selectedItem.name}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Categoría</label>
-                  <p className="text-lg">{modals.selectedItem.category}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Tipo de Archivo</label>
-                  <p className="text-lg font-mono">{modals.selectedItem.fileType.toUpperCase()}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Tamaño</label>
-                  <p className="text-lg">{formatFileSize(modals.selectedItem.fileSize)}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Estado</label>
-                  <Badge variant={getStatusBadgeVariant(modals.selectedItem.status)}>
-                    {getStatusText(modals.selectedItem.status)}
-                  </Badge>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Cliente</label>
-                  <p className="text-lg">{modals.selectedItem.clientName}</p>
-                </div>
-              </div>
-
-              {/* Especificaciones técnicas */}
-              {(modals.selectedItem.dimensions || modals.selectedItem.dpi || modals.selectedItem.isVector) && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Especificaciones Técnicas</label>
-                  <div className="grid grid-cols-3 gap-4 mt-2">
-                    {modals.selectedItem.dimensions && (
-                      <div>
-                        <p className="text-sm font-medium">Dimensiones</p>
-                        <p className="text-sm text-muted-foreground">
-                          {modals.selectedItem.dimensions.width} x {modals.selectedItem.dimensions.height}px
-                        </p>
-                      </div>
-                    )}
-                    {modals.selectedItem.dpi && (
-                      <div>
-                        <p className="text-sm font-medium">DPI</p>
-                        <p className="text-sm text-muted-foreground">{modals.selectedItem.dpi}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium">Tipo</p>
-                      <p className="text-sm text-muted-foreground">
-                        {modals.selectedItem.isVector ? 'Vectorial' : 'Raster'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Etiquetas */}
-              {modals.selectedItem.tags && modals.selectedItem.tags.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Etiquetas</label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {modals.selectedItem.tags.map((tag: string, index: number) => (
-                      <Badge key={index} variant="outline">{tag}</Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Descripción */}
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Descripción</label>
-                <p className="text-lg">{modals.selectedItem.description || 'Sin descripción'}</p>
-              </div>
-
-              {/* Fechas */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Creado</label>
-                  <p className="text-sm">{new Date(modals.selectedItem.createdAt).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Última actualización</label>
-                  <p className="text-sm">{new Date(modals.selectedItem.updatedAt || modals.selectedItem.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </ActionModal>
+          mode="view"
+          title="Ver Logo"
+          data={modals.selectedItem}
+        />
 
         <ActionModal
           isOpen={modals.edit}
           onClose={() => closeModal('edit')}
+          mode="edit"
           title="Editar Logo"
-          size="lg"
-          onSave={() => handleSave(modals.selectedItem)}
-        >
-          {modals.selectedItem && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="edit-name" className="block text-sm font-medium mb-2">Nombre *</label>
-                  <Input
-                    id="edit-name"
-                    defaultValue={modals.selectedItem.name}
-                    placeholder="Nombre del logo"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edit-category" className="block text-sm font-medium mb-2">Categoría *</label>
-                  <Input
-                    id="edit-category"
-                    defaultValue={modals.selectedItem.category}
-                    placeholder="Categoría del logo"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edit-brand" className="block text-sm font-medium mb-2">Marca</label>
-                  <Input
-                    id="edit-brand"
-                    defaultValue={modals.selectedItem.brand || ''}
-                    placeholder="Nombre de la marca"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edit-version" className="block text-sm font-medium mb-2">Versión</label>
-                  <Input
-                    id="edit-version"
-                    defaultValue={modals.selectedItem.version || ''}
-                    placeholder="v1.0"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="edit-status" className="block text-sm font-medium mb-2">Estado</label>
-                  <select
-                    id="edit-status"
-                    defaultValue={modals.selectedItem.status}
-                    className="w-full px-3 py-2 border border-input bg-background rounded-md"
-                  >
-                    <option value="active">Activo</option>
-                    <option value="inactive">Inactivo</option>
-                    <option value="archived">Archivado</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div>
-                <label htmlFor="edit-description" className="block text-sm font-medium mb-2">Descripción</label>
-                <textarea
-                  id="edit-description"
-                  defaultValue={modals.selectedItem.description || ''}
-                  placeholder="Descripción del logo"
-                  className="w-full px-3 py-2 border border-input bg-background rounded-md min-h-[100px]"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="edit-tags" className="block text-sm font-medium mb-2">Etiquetas</label>
-                <Input
-                  id="edit-tags"
-                  defaultValue={modals.selectedItem.tags ? modals.selectedItem.tags.join(', ') : ''}
-                  placeholder="Etiquetas separadas por comas"
-                />
-              </div>
-            </div>
-          )}
-        </ActionModal>
+          data={modals.selectedItem}
+          onSave={handleSave}
+        />
 
         <ActionModal
           isOpen={modals.delete}
           onClose={() => closeModal('delete')}
+          mode="delete"
           title="Eliminar Logo"
-          onSave={() => handleDeleteConfirm(modals.selectedItem)}
-          saveText="Eliminar"
-          saveVariant="destructive"
-        >
-          {modals.selectedItem && (
-            <div className="space-y-4">
-              <p>¿Estás seguro de que quieres eliminar el logo <strong>{modals.selectedItem.name}</strong>?</p>
-              <p className="text-sm text-muted-foreground">Esta acción no se puede deshacer y eliminará el archivo del almacenamiento.</p>
-            </div>
-          )}
-        </ActionModal>
+          data={modals.selectedItem}
+          onConfirm={handleDeleteConfirm}
+        />
       </div>
     </MainLayout>
   )
