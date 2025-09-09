@@ -159,7 +159,7 @@ export default function LogosPage() {
       createdAt: client.logos[0]?.createdAt || new Date().toISOString(),
       updatedAt: client.logos[0]?.updatedAt || new Date().toISOString()
     })
-    setViewMode('logos')
+    // No cambiar viewMode - mantener en 'clients' para mostrar logos del cliente
   }
 
   const handleBackToClients = () => {
