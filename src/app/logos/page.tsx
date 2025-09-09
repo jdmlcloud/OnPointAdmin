@@ -121,19 +121,37 @@ export default function LogosPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [logoDeleted, setLogoDeleted] = useState(false)
 
-  // Agrupar logos por cliente usando el campo brand
-  const logosByClient = logos.reduce((acc, logo) => {
-    const clientKey = logo.brand || 'Sin Marca'
-    if (!acc[clientKey]) {
-      acc[clientKey] = {
-        clientId: clientKey.toLowerCase().replace(/\s+/g, '-'),
-        clientName: clientKey,
-        logos: []
+  // Crear un mapa de clientes combinando los del hook con los generados desde logos
+  const allClientsMap = useMemo(() => {
+    const clientMap = new Map<string, { clientId: string; clientName: string; logos: Logo[] }>()
+    
+    // Agregar clientes del hook (incluye clientes manuales)
+    clients.forEach(client => {
+      clientMap.set(client.name, {
+        clientId: client.id,
+        clientName: client.name,
+        logos: client.logos || []
+      })
+    })
+    
+    // Agregar clientes generados desde logos
+    logos.forEach(logo => {
+      const clientKey = logo.brand || 'Sin Marca'
+      if (!clientMap.has(clientKey)) {
+        clientMap.set(clientKey, {
+          clientId: clientKey.toLowerCase().replace(/\s+/g, '-'),
+          clientName: clientKey,
+          logos: []
+        })
       }
-    }
-    acc[clientKey].logos.push(logo)
-    return acc
-  }, {} as Record<string, { clientId: string; clientName: string; logos: Logo[] }>)
+      clientMap.get(clientKey)!.logos.push(logo)
+    })
+    
+    return clientMap
+  }, [clients, logos])
+
+  // Convertir el mapa a objeto para compatibilidad
+  const logosByClient = Object.fromEntries(allClientsMap)
 
   // Funciones para manejar la navegación entre vistas
   const handleClientClick = (client: { clientId: string; clientName: string; logos: Logo[] }) => {
