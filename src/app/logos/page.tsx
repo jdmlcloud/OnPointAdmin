@@ -866,11 +866,11 @@ export default function LogosPage() {
               // Vista de logos de un cliente específico
               <div className="space-y-6">
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                   {selectedClient.logos.map((logo) => (
-                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden">
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden">
                       {/* Imagen centrada en la parte superior */}
-                      <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                      <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                         {logo.thumbnailUrl ? (
                           <img
                             src={logo.thumbnailUrl}
@@ -886,7 +886,7 @@ export default function LogosPage() {
                       </div>
                       
                       {/* Información del logo */}
-                      <CardContent className="p-4 flex-1 flex flex-col">
+                      <CardContent className="p-3 flex-1 flex flex-col">
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg mb-2">{logo.name}</h3>
                           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
@@ -1104,11 +1104,11 @@ export default function LogosPage() {
                 </div>
                 
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                   {selectedClient.logos.map((logo) => (
-                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden">
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden">
                       {/* Imagen centrada en la parte superior */}
-                      <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                      <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                         {logo.thumbnailUrl ? (
                           <img
                             src={logo.thumbnailUrl}
@@ -1148,7 +1148,7 @@ export default function LogosPage() {
                       </div>
 
                       {/* Contenido de la card */}
-                      <CardContent className="flex-1 flex flex-col p-4">
+                      <CardContent className="flex-1 flex flex-col p-3">
                         {/* Nombre y variante */}
                         <div className="mb-3">
                           <CardTitle className="text-lg mb-1 line-clamp-1">{logo.name}</CardTitle>
@@ -1302,11 +1302,11 @@ export default function LogosPage() {
                       </div>
 
                       {/* Grid de Logos del Cliente */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                         {client.logos.map((logo) => (
-                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden">
+                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden">
                             {/* Imagen centrada en la parte superior */}
-                            <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                            <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                               {logo.thumbnailUrl ? (
                                 <img
                                   src={logo.thumbnailUrl}
@@ -1346,7 +1346,7 @@ export default function LogosPage() {
                             </div>
 
                             {/* Contenido de la card */}
-                            <CardContent className="flex-1 flex flex-col p-4">
+                            <CardContent className="flex-1 flex flex-col p-3">
                               {/* Nombre y variante */}
                               <div className="mb-3">
                                 <CardTitle className="text-lg mb-1 line-clamp-1">{logo.name}</CardTitle>
