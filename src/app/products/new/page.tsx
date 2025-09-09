@@ -23,15 +23,55 @@ export default function NewProductPage() {
     currency: 'USD',
     stock: '',
     providerName: '',
-    status: 'active'
+    status: 'active',
+    // Campos específicos para merch
+    sku: '',
+    capacity: '',
+    materials: '',
+    dimensions: {
+      width: '',
+      height: '',
+      depth: ''
+    },
+    weight: '',
+    printingArea: {
+      width: '',
+      height: ''
+    },
+    printingMethods: '',
+    packaging: {
+      quantity: '',
+      dimensions: {
+        width: '',
+        height: '',
+        depth: ''
+      },
+      weight: ''
+    },
+    decorationOptions: '',
+    minOrderQuantity: '',
+    leadTime: ''
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    
+    // Manejar campos anidados
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.')
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent as keyof typeof prev],
+          [child]: value
+        }
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,7 +95,34 @@ export default function NewProductPage() {
         stock: Number(formData.stock) || 0,
         providerName: formData.providerName,
         status: formData.status,
-        images: []
+        images: [],
+        // Campos específicos para merch
+        sku: formData.sku,
+        capacity: formData.capacity,
+        materials: formData.materials ? formData.materials.split(',').map(m => m.trim()) : [],
+        dimensions: formData.dimensions.width ? {
+          width: Number(formData.dimensions.width),
+          height: Number(formData.dimensions.height),
+          depth: formData.dimensions.depth ? Number(formData.dimensions.depth) : undefined
+        } : undefined,
+        weight: formData.weight ? Number(formData.weight) : undefined,
+        printingArea: formData.printingArea.width ? {
+          width: Number(formData.printingArea.width),
+          height: Number(formData.printingArea.height)
+        } : undefined,
+        printingMethods: formData.printingMethods ? formData.printingMethods.split(',').map(m => m.trim()) : [],
+        packaging: formData.packaging.quantity ? {
+          quantity: Number(formData.packaging.quantity),
+          dimensions: {
+            width: Number(formData.packaging.dimensions.width),
+            height: Number(formData.packaging.dimensions.height),
+            depth: formData.packaging.dimensions.depth ? Number(formData.packaging.dimensions.depth) : undefined
+          },
+          weight: Number(formData.packaging.weight)
+        } : undefined,
+        decorationOptions: formData.decorationOptions ? formData.decorationOptions.split(',').map(o => o.trim()) : [],
+        minOrderQuantity: formData.minOrderQuantity ? Number(formData.minOrderQuantity) : undefined,
+        leadTime: formData.leadTime
       }
 
       const success = await createProduct(productData)
@@ -174,16 +241,49 @@ export default function NewProductPage() {
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="providerName">Proveedor</Label>
-                  <Input
-                    id="providerName"
-                    name="providerName"
-                    value={formData.providerName}
-                    onChange={handleInputChange}
-                    placeholder="Nombre del proveedor"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="providerName">Proveedor</Label>
+                <Input
+                  id="providerName"
+                  name="providerName"
+                  value={formData.providerName}
+                  onChange={handleInputChange}
+                  placeholder="Nombre del proveedor"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="sku">SKU</Label>
+                <Input
+                  id="sku"
+                  name="sku"
+                  value={formData.sku}
+                  onChange={handleInputChange}
+                  placeholder="Código del producto"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="capacity">Capacidad</Label>
+                <Input
+                  id="capacity"
+                  name="capacity"
+                  value={formData.capacity}
+                  onChange={handleInputChange}
+                  placeholder="Ej: 660ml, 500ml"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="materials">Materiales</Label>
+                <Input
+                  id="materials"
+                  name="materials"
+                  value={formData.materials}
+                  onChange={handleInputChange}
+                  placeholder="Acero inoxidable, Silicón (separados por comas)"
+                />
+              </div>
               </div>
 
               {/* Descripción */}
@@ -214,6 +314,191 @@ export default function NewProductPage() {
                   <option value="discontinued">Descontinuado</option>
                 </select>
               </div>
+            </div>
+
+            {/* Especificaciones Técnicas */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Especificaciones Técnicas</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="dimensions.width">Ancho (cm)</Label>
+                  <Input
+                    id="dimensions.width"
+                    name="dimensions.width"
+                    type="number"
+                    step="0.1"
+                    value={formData.dimensions.width}
+                    onChange={handleInputChange}
+                    placeholder="9.3"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dimensions.height">Alto (cm)</Label>
+                  <Input
+                    id="dimensions.height"
+                    name="dimensions.height"
+                    type="number"
+                    step="0.1"
+                    value={formData.dimensions.height}
+                    onChange={handleInputChange}
+                    placeholder="20.5"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dimensions.depth">Profundidad (cm)</Label>
+                  <Input
+                    id="dimensions.depth"
+                    name="dimensions.depth"
+                    type="number"
+                    step="0.1"
+                    value={formData.dimensions.depth}
+                    onChange={handleInputChange}
+                    placeholder="Opcional"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Peso (g)</Label>
+                  <Input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    placeholder="500"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="printingArea.width">Área Impresión - Ancho (cm)</Label>
+                  <Input
+                    id="printingArea.width"
+                    name="printingArea.width"
+                    type="number"
+                    step="0.1"
+                    value={formData.printingArea.width}
+                    onChange={handleInputChange}
+                    placeholder="8"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="printingArea.height">Área Impresión - Alto (cm)</Label>
+                  <Input
+                    id="printingArea.height"
+                    name="printingArea.height"
+                    type="number"
+                    step="0.1"
+                    value={formData.printingArea.height}
+                    onChange={handleInputChange}
+                    placeholder="7"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="printingMethods">Métodos de Impresión</Label>
+                <Input
+                  id="printingMethods"
+                  name="printingMethods"
+                  value={formData.printingMethods}
+                  onChange={handleInputChange}
+                  placeholder="Grabado Láser, Serigrafía, Tampografía (separados por comas)"
+                />
+              </div>
+            </div>
+
+            {/* Información de Empaque */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Información de Empaque</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="packaging.quantity">Cantidad por Empaque</Label>
+                  <Input
+                    id="packaging.quantity"
+                    name="packaging.quantity"
+                    type="number"
+                    value={formData.packaging.quantity}
+                    onChange={handleInputChange}
+                    placeholder="25"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="packaging.dimensions.width">Ancho Empaque (cm)</Label>
+                  <Input
+                    id="packaging.dimensions.width"
+                    name="packaging.dimensions.width"
+                    type="number"
+                    step="0.1"
+                    value={formData.packaging.dimensions.width}
+                    onChange={handleInputChange}
+                    placeholder="50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="packaging.dimensions.height">Alto Empaque (cm)</Label>
+                  <Input
+                    id="packaging.dimensions.height"
+                    name="packaging.dimensions.height"
+                    type="number"
+                    step="0.1"
+                    value={formData.packaging.dimensions.height}
+                    onChange={handleInputChange}
+                    placeholder="50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="packaging.weight">Peso Empaque (kg)</Label>
+                  <Input
+                    id="packaging.weight"
+                    name="packaging.weight"
+                    type="number"
+                    step="0.1"
+                    value={formData.packaging.weight}
+                    onChange={handleInputChange}
+                    placeholder="21.0"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Información Adicional */}
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold">Información Adicional</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="decorationOptions">Opciones de Decoración</Label>
+                  <Input
+                    id="decorationOptions"
+                    name="decorationOptions"
+                    value={formData.decorationOptions}
+                    onChange={handleInputChange}
+                    placeholder="Ninguno, Logo, Texto (separados por comas)"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="minOrderQuantity">Cantidad Mínima de Pedido</Label>
+                  <Input
+                    id="minOrderQuantity"
+                    name="minOrderQuantity"
+                    type="number"
+                    value={formData.minOrderQuantity}
+                    onChange={handleInputChange}
+                    placeholder="100"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="leadTime">Tiempo de Entrega</Label>
+                  <Input
+                    id="leadTime"
+                    name="leadTime"
+                    value={formData.leadTime}
+                    onChange={handleInputChange}
+                    placeholder="15-20 días hábiles"
+                  />
+                </div>
+              </div>
+            </div>
 
               {/* Botones */}
               <div className="flex gap-4 pt-6">

@@ -29,7 +29,8 @@ import {
   ShoppingCart,
   Tag,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  Building2
 } from "lucide-react"
 
 interface Product {
@@ -44,6 +45,38 @@ interface Product {
   images?: string[]
   status: string
   createdAt: string
+  // Campos específicos para merch
+  sku?: string
+  colors?: Array<{
+    name: string
+    hex: string
+    stock: number
+  }>
+  materials?: string[]
+  dimensions?: {
+    width: number
+    height: number
+    depth?: number
+  }
+  weight?: number
+  capacity?: string
+  printingArea?: {
+    width: number
+    height: number
+  }
+  printingMethods?: string[]
+  packaging?: {
+    quantity: number
+    dimensions: {
+      width: number
+      height: number
+      depth?: number
+    }
+    weight: number
+  }
+  decorationOptions?: string[]
+  minOrderQuantity?: number
+  leadTime?: string
 }
 
 export default function ProductsPage() {
@@ -122,7 +155,21 @@ export default function ProductsPage() {
         stock: Number((document.getElementById('edit-stock') as HTMLInputElement)?.value || productData.stock || 0),
         providerName: (document.getElementById('edit-provider') as HTMLInputElement)?.value || productData.providerName,
         status: (document.getElementById('edit-status') as HTMLSelectElement)?.value || productData.status,
-        images: productData.images || []
+        images: productData.images || [],
+        // Campos específicos para merch
+        sku: (document.getElementById('edit-sku') as HTMLInputElement)?.value || productData.sku || '',
+        capacity: (document.getElementById('edit-capacity') as HTMLInputElement)?.value || productData.capacity || '',
+        // Mantener campos existentes
+        colors: productData.colors || [],
+        materials: productData.materials || [],
+        dimensions: productData.dimensions,
+        weight: productData.weight,
+        printingArea: productData.printingArea,
+        printingMethods: productData.printingMethods || [],
+        packaging: productData.packaging,
+        decorationOptions: productData.decorationOptions || [],
+        minOrderQuantity: productData.minOrderQuantity,
+        leadTime: productData.leadTime
       }
 
       const success = await updateProduct(productData.id, formData)
@@ -432,13 +479,55 @@ export default function ProductsPage() {
                     <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <span className="font-semibold text-lg">{formatPrice(product.price, product.currency)}</span>
                   </div>
+                  
+                  {/* SKU */}
+                  {product.sku && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Tag className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate font-mono text-xs">{product.sku}</span>
+                    </div>
+                  )}
+                  
+                  {/* Stock total */}
                   <div className="flex items-center gap-2 text-sm">
                     <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">Stock: {product.stock || 0} unidades</span>
+                    <span className="truncate">Stock total: {product.stock || 0} unidades</span>
                   </div>
-                  {product.providerName && (
+                  
+                  {/* Colores disponibles */}
+                  {product.colors && product.colors.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="flex gap-1">
+                        {product.colors.slice(0, 3).map((color, index) => (
+                          <div
+                            key={index}
+                            className="w-4 h-4 rounded-full border border-gray-300"
+                            style={{ backgroundColor: color.hex }}
+                            title={`${color.name} (${color.stock})`}
+                          />
+                        ))}
+                        {product.colors.length > 3 && (
+                          <span className="text-xs text-muted-foreground">+{product.colors.length - 3}</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {product.colors.length} colores
+                      </span>
+                    </div>
+                  )}
+                  
+                  {/* Capacidad */}
+                  {product.capacity && (
                     <div className="flex items-center gap-2 text-sm">
                       <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{product.capacity}</span>
+                    </div>
+                  )}
+                  
+                  {/* Proveedor */}
+                  {product.providerName && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                       <span className="truncate">{product.providerName}</span>
                     </div>
                   )}
@@ -513,6 +602,10 @@ export default function ProductsPage() {
                 <p className="text-lg font-semibold">{modals.view.data.name}</p>
               </div>
               <div>
+                <label className="text-sm font-medium text-muted-foreground">SKU</label>
+                <p className="text-lg font-mono">{modals.view.data.sku || 'No especificado'}</p>
+              </div>
+              <div>
                 <label className="text-sm font-medium text-muted-foreground">Categoría</label>
                 <p className="text-lg">{modals.view.data.category}</p>
               </div>
@@ -521,7 +614,7 @@ export default function ProductsPage() {
                 <p className="text-lg font-semibold text-green-600">{formatPrice(modals.view.data.price, modals.view.data.currency)}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Stock</label>
+                <label className="text-sm font-medium text-muted-foreground">Stock Total</label>
                 <p className="text-lg">{modals.view.data.stock || 0} unidades</p>
               </div>
               <div>
@@ -534,7 +627,106 @@ export default function ProductsPage() {
                 <label className="text-sm font-medium text-muted-foreground">Proveedor</label>
                 <p className="text-lg">{modals.view.data.providerName || 'No especificado'}</p>
               </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Capacidad</label>
+                <p className="text-lg">{modals.view.data.capacity || 'No especificado'}</p>
+              </div>
             </div>
+
+            {/* Colores disponibles */}
+            {modals.view.data.colors && modals.view.data.colors.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Colores Disponibles</label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {modals.view.data.colors.map((color: any, index: number) => (
+                    <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                      <div
+                        className="w-6 h-6 rounded-full border border-gray-300"
+                        style={{ backgroundColor: color.hex }}
+                      />
+                      <div>
+                        <p className="text-sm font-medium">{color.name}</p>
+                        <p className="text-xs text-muted-foreground">Stock: {color.stock}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Información técnica */}
+            {(modals.view.data.dimensions || modals.view.data.weight || modals.view.data.materials) && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Especificaciones Técnicas</label>
+                <div className="grid grid-cols-3 gap-4 mt-2">
+                  {modals.view.data.dimensions && (
+                    <div>
+                      <p className="text-sm font-medium">Dimensiones</p>
+                      <p className="text-sm text-muted-foreground">
+                        {modals.view.data.dimensions.width} x {modals.view.data.dimensions.height}
+                        {modals.view.data.dimensions.depth && ` x ${modals.view.data.dimensions.depth}`} cm
+                      </p>
+                    </div>
+                  )}
+                  {modals.view.data.weight && (
+                    <div>
+                      <p className="text-sm font-medium">Peso</p>
+                      <p className="text-sm text-muted-foreground">{modals.view.data.weight} g</p>
+                    </div>
+                  )}
+                  {modals.view.data.materials && modals.view.data.materials.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium">Materiales</p>
+                      <p className="text-sm text-muted-foreground">{modals.view.data.materials.join(', ')}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Área de impresión */}
+            {modals.view.data.printingArea && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Área de Impresión</label>
+                <p className="text-lg">{modals.view.data.printingArea.width} x {modals.view.data.printingArea.height} cm</p>
+              </div>
+            )}
+
+            {/* Métodos de impresión */}
+            {modals.view.data.printingMethods && modals.view.data.printingMethods.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Métodos de Impresión</label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {modals.view.data.printingMethods.map((method: string, index: number) => (
+                    <Badge key={index} variant="outline">{method}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Información de empaque */}
+            {modals.view.data.packaging && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Información de Empaque</label>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <p className="text-sm font-medium">Cantidad por empaque</p>
+                    <p className="text-sm text-muted-foreground">{modals.view.data.packaging.quantity} unidades</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Dimensiones del empaque</p>
+                    <p className="text-sm text-muted-foreground">
+                      {modals.view.data.packaging.dimensions.width} x {modals.view.data.packaging.dimensions.height}
+                      {modals.view.data.packaging.dimensions.depth && ` x ${modals.view.data.packaging.dimensions.depth}`} cm
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Peso del empaque</p>
+                    <p className="text-sm text-muted-foreground">{modals.view.data.packaging.weight} kg</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Descripción */}
             <div>
@@ -576,11 +768,27 @@ export default function ProductsPage() {
                 />
               </div>
               <div>
+                <label htmlFor="edit-sku" className="block text-sm font-medium mb-2">SKU</label>
+                <Input
+                  id="edit-sku"
+                  defaultValue={modals.edit.data.sku || ''}
+                  placeholder="Código del producto"
+                />
+              </div>
+              <div>
                 <label htmlFor="edit-category" className="block text-sm font-medium mb-2">Categoría *</label>
                 <Input
                   id="edit-category"
                   defaultValue={modals.edit.data.category}
                   placeholder="Categoría del producto"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-capacity" className="block text-sm font-medium mb-2">Capacidad</label>
+                <Input
+                  id="edit-capacity"
+                  defaultValue={modals.edit.data.capacity || ''}
+                  placeholder="Ej: 660ml, 500ml"
                 />
               </div>
               <div>
@@ -606,7 +814,7 @@ export default function ProductsPage() {
                 </select>
               </div>
               <div>
-                <label htmlFor="edit-stock" className="block text-sm font-medium mb-2">Stock</label>
+                <label htmlFor="edit-stock" className="block text-sm font-medium mb-2">Stock Total</label>
                 <Input
                   id="edit-stock"
                   type="number"
