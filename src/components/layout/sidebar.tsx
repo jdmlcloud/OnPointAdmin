@@ -24,7 +24,8 @@ import {
   FileBarChart,
   Palette,
   Zap,
-  Cpu
+  Cpu,
+  Image
 } from "lucide-react"
 import { useAuthContext } from "@/lib/auth/auth-context"
 import { useState } from "react"
@@ -50,6 +51,13 @@ const navigation = [
     icon: Package,
     badge: "V1",
     permission: "canManageProducts"
+  },
+  {
+    name: "Logos",
+    href: "/logos",
+    icon: Image,
+    badge: "V1",
+    permission: "canManageLogos"
   },
   {
     name: "WhatsApp + IA",
@@ -186,6 +194,7 @@ export function Sidebar() {
             'canViewDashboard': { resource: 'dashboard', action: 'read' },
             'canManageProviders': { resource: 'providers', action: 'read' },
             'canManageProducts': { resource: 'products', action: 'read' },
+            'canManageLogos': { resource: 'logos', action: 'read' },
             'canManageWhatsApp': { resource: 'whatsapp', action: 'read' },
             'canManageQuotations': { resource: 'quotations', action: 'read' },
             'canManageProposals': { resource: 'proposals', action: 'read' },
