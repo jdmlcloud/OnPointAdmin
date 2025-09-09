@@ -589,6 +589,36 @@ export default function LogosPage() {
           </div>
         )}
 
+        {/* Header del Cliente Seleccionado - Solo se muestra cuando hay un cliente seleccionado */}
+        {selectedClient && (
+          <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToClients}
+              className="mr-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+              <Building2 className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold">{selectedClient.name}</h2>
+              <p className="text-sm text-muted-foreground">
+                {selectedClient.logos.length} logos disponibles
+              </p>
+            </div>
+            <Button 
+              onClick={() => router.push(`/logos/new?client=${selectedClient.id}&clientName=${encodeURIComponent(selectedClient.name)}`)}
+              size="sm"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Logo
+            </Button>
+          </div>
+        )}
+
         {/* Search and Filters */}
         <div className="flex items-center gap-4 mb-6">
           <div className="relative flex-1 max-w-md">
@@ -833,34 +863,6 @@ export default function LogosPage() {
             selectedClient ? (
               // Vista de logos de un cliente específico
               <div className="space-y-6">
-                {/* Header del Cliente Seleccionado */}
-                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleBackToClients}
-                    className="mr-2"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                    <Building2 className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold">{selectedClient.name}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedClient.logos.length} logos disponibles
-                    </p>
-                  </div>
-                  <Button 
-                    onClick={() => router.push(`/logos/new?client=${selectedClient.id}&clientName=${encodeURIComponent(selectedClient.name)}`)}
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Agregar Logo
-                  </Button>
-                </div>
-                
                 {/* Grid de Logos del Cliente */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {selectedClient.logos.map((logo) => (
