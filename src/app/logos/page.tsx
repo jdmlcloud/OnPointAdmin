@@ -1056,7 +1056,7 @@ export default function LogosPage() {
                 {/* Grid de Logos del Cliente */}
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-items-center">
                   {selectedClient.logos.map((logo) => (
-                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden max-w-xs">
                       {/* Imagen centrada en la parte superior */}
                       <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                         {logo.thumbnailUrl ? (
@@ -1254,7 +1254,7 @@ export default function LogosPage() {
                       {/* Grid de Logos del Cliente */}
                       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-items-center">
                         {client.logos.map((logo) => (
-                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
+                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden max-w-xs">
                             {/* Imagen centrada en la parte superior */}
                             <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                               {logo.thumbnailUrl ? (

@@ -224,7 +224,7 @@ export function AssetCard({
 
   return (
     <Card 
-      className={`hover:border-2 hover:border-foreground transition-all duration-300 ease-out flex flex-col h-72 overflow-hidden cursor-pointer group ${maxWidth} ${className}`}
+      className={`hover:border-2 hover:border-foreground transition-all duration-300 ease-out flex flex-col h-80 overflow-hidden cursor-pointer group ${maxWidth} ${className}`}
       onClick={onClick}
     >
       {/* Imagen/Thumbnail */}
