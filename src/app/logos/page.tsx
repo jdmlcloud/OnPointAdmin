@@ -358,7 +358,7 @@ export default function LogosPage() {
   })
 
   // Agrupar logos filtrados por cliente usando el campo brand
-  const logosByClient = filteredLogos.reduce((acc, logo) => {
+  const filteredLogosByClient = filteredLogos.reduce((acc, logo) => {
     const clientKey = logo.brand || 'Sin Marca'
     if (!acc[clientKey]) {
       acc[clientKey] = {
