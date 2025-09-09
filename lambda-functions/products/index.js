@@ -7,7 +7,15 @@ const client = new DynamoDBClient({
 });
 const dynamodb = DynamoDBDocumentClient.from(client);
 
-const TABLE_NAME = process.env.DYNAMODB_PRODUCTS_TABLE || 'OnPointAdmin-Products-sandbox';
+// Detectar entorno dinámicamente
+const detectEnvironment = () => {
+  const environment = process.env.ENVIRONMENT || 'sandbox';
+  return environment;
+};
+
+const getTableName = (environment) => {
+  return `OnPointAdmin-Products-${environment}`;
+};
 
 // Helper para crear respuestas con CORS
 const createResponse = (statusCode, body) => ({
@@ -26,6 +34,10 @@ const createResponse = (statusCode, body) => ({
 exports.handler = async (event) => {
   console.log('🔍 Event:', JSON.stringify(event, null, 2));
   
+  const environment = detectEnvironment();
+  const tableName = getTableName(environment);
+  console.log(`🌍 Environment: ${environment}, Table: ${tableName}`);
+  
   try {
     // Manejar OPTIONS para CORS
     if (event.httpMethod === 'OPTIONS') {
@@ -34,7 +46,7 @@ exports.handler = async (event) => {
 
     if (event.httpMethod === 'GET') {
       const params = {
-        TableName: TABLE_NAME
+        TableName: tableName
       };
 
       const result = await dynamodb.send(new ScanCommand(params));
@@ -66,7 +78,7 @@ exports.handler = async (event) => {
       };
 
       const params = {
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Item: product
       };
 
@@ -92,7 +104,7 @@ exports.handler = async (event) => {
       const updateData = JSON.parse(event.body);
       
       const params = {
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Key: { id: productId },
         UpdateExpression: 'SET #name = :name, #description = :description, #category = :category, #price = :price, #currency = :currency, #stock = :stock, #status = :status, #updatedAt = :updatedAt',
         ExpressionAttributeNames: {
@@ -138,7 +150,7 @@ exports.handler = async (event) => {
       }
 
       const params = {
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Key: { id: productId }
       };
 

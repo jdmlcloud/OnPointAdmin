@@ -1,0 +1,73 @@
+# Configuración de entornos para CI/CD
+environments:
+  sandbox:
+    name: "Sandbox Environment"
+    description: "Entorno de pruebas y desarrollo"
+    aws_region: "us-east-1"
+    api_gateway_url: "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox"
+    amplify_app_id: "d3ts6pwgn7uyyh"
+    lambda_functions:
+      - "OnPointAdmin-Products-sandbox"
+      - "OnPointAdmin-Users-sandbox"
+      - "OnPointAdmin-Providers-sandbox"
+    dynamodb_tables:
+      - "OnPointAdmin-Products-sandbox"
+      - "OnPointAdmin-Users-sandbox"
+      - "OnPointAdmin-Providers-sandbox"
+    deployment_strategy: "immediate"
+    auto_deploy: true
+    
+  production:
+    name: "Production Environment"
+    description: "Entorno de producción"
+    aws_region: "us-east-1"
+    api_gateway_url: "https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod"
+    amplify_app_id: "d3ts6pwgn7uyyh"
+    lambda_functions:
+      - "OnPointAdmin-Products-prod"
+      - "OnPointAdmin-Users-prod"
+      - "OnPointAdmin-Providers-prod"
+    dynamodb_tables:
+      - "OnPointAdmin-Products-prod"
+      - "OnPointAdmin-Users-prod"
+      - "OnPointAdmin-Providers-prod"
+    deployment_strategy: "manual"
+    auto_deploy: false
+    requires_approval: true
+
+# Configuración de ramas
+branches:
+  main:
+    environment: "production"
+    auto_deploy: false
+    requires_approval: true
+    
+  sandbox:
+    environment: "sandbox"
+    auto_deploy: true
+    requires_approval: false
+    
+  frontend-stable:
+    environment: "sandbox"
+    auto_deploy: true
+    requires_approval: false
+
+# Configuración de paths para deploy selectivo
+deploy_paths:
+  backend:
+    - "lambda-functions/**"
+    - "scripts/**"
+    - ".github/workflows/ci-cd.yml"
+    
+  frontend:
+    - "src/**"
+    - "public/**"
+    - "package.json"
+    - "next.config.js"
+    - "tailwind.config.js"
+    - "tsconfig.json"
+    
+  infrastructure:
+    - "infra/**"
+    - "terraform/**"
+    - "cloudformation/**"

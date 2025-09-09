@@ -1,0 +1,130 @@
+name: Frontend Deploy
+
+on:
+  push:
+    branches: [main, sandbox, frontend-stable]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.js'
+      - 'tailwind.config.js'
+      - 'tsconfig.json'
+  pull_request:
+    branches: [main, sandbox]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'next.config.js'
+      - 'tailwind.config.js'
+      - 'tsconfig.json'
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  # Job de validación del frontend
+  validate-frontend:
+    name: Validar Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Instalar dependencias
+        run: npm ci
+        
+      - name: Lint TypeScript
+        run: npx tsc --noEmit
+        
+      - name: Lint código
+        run: npx eslint src/ --ext .ts,.tsx --max-warnings 0
+        
+      - name: Build del frontend
+        run: npm run build
+        
+      - name: Verificar build
+        run: |
+          echo "🔍 Verificando build del frontend..."
+          ls -la .next/
+          echo "✅ Build del frontend exitoso"
+
+  # Job de deploy a sandbox (Amplify)
+  deploy-sandbox-frontend:
+    name: Deploy Frontend a Sandbox
+    runs-on: ubuntu-latest
+    needs: validate-frontend
+    if: |
+      github.ref == 'refs/heads/sandbox' || 
+      github.ref == 'refs/heads/frontend-stable' ||
+      contains(github.event.head_commit.message, '[deploy-frontend]')
+    
+    environment: sandbox-frontend
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Instalar dependencias
+        run: npm ci
+        
+      - name: Build para sandbox
+        run: |
+          echo "🏗️ Building para sandbox..."
+          npm run build
+          
+      - name: Notificar deploy a sandbox
+        run: |
+          echo "✅ Frontend listo para deploy a sandbox"
+          echo "🌐 Amplify se encargará del deploy automático"
+
+  # Job de deploy a producción (Amplify)
+  deploy-production-frontend:
+    name: Deploy Frontend a Producción
+    runs-on: ubuntu-latest
+    needs: validate-frontend
+    if: |
+      github.ref == 'refs/heads/main' && 
+      github.event_name == 'push' &&
+      contains(github.event.head_commit.message, '[deploy-prod-frontend]')
+    
+    environment: production-frontend
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Instalar dependencias
+        run: npm ci
+        
+      - name: Build para producción
+        run: |
+          echo "🏗️ Building para producción..."
+          NODE_ENV=production npm run build
+          
+      - name: Notificar deploy a producción
+        run: |
+          echo "✅ Frontend listo para deploy a producción"
+          echo "🌐 Amplify se encargará del deploy automático"
