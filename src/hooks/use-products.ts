@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface Product {
   id: string
@@ -35,16 +34,13 @@ export function useProducts(): UseProductsReturn {
       setIsLoading(true)
       setError(null)
       
-      const data = await apiRequest<{
-        success: boolean
-        products: Product[]
-        message: string
-      }>(API_CONFIG.ENDPOINTS.PRODUCTS)
+      const response = await fetch('/api/products')
+      const data = await response.json()
       
       if (data.success) {
         setProducts(data.products || [])
       } else {
-        throw new Error('Error al obtener productos desde la API')
+        throw new Error(data.message || 'Error al obtener productos')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
@@ -59,20 +55,21 @@ export function useProducts(): UseProductsReturn {
     try {
       setError(null)
       
-      const data = await apiRequest<{
-        success: boolean
-        product: Product
-        message: string
-      }>(API_CONFIG.ENDPOINTS.PRODUCTS, {
+      const response = await fetch('/api/products', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(productData),
       })
+      
+      const data = await response.json()
       
       if (data.success) {
         setProducts(prev => [...prev, data.product])
         return true
       } else {
-        throw new Error('Error al crear producto')
+        throw new Error(data.message || 'Error al crear producto')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear producto')
@@ -85,20 +82,21 @@ export function useProducts(): UseProductsReturn {
     try {
       setError(null)
       
-      const data = await apiRequest<{
-        success: boolean
-        product: Product
-        message: string
-      }>(`${API_CONFIG.ENDPOINTS.PRODUCTS}/${id}`, {
+      const response = await fetch(`/api/products/${id}`, {
         method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify(productData),
       })
+      
+      const data = await response.json()
       
       if (data.success) {
         setProducts(prev => prev.map(product => product.id === id ? data.product : product))
         return true
       } else {
-        throw new Error('Error al actualizar producto')
+        throw new Error(data.message || 'Error al actualizar producto')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar producto')
@@ -111,18 +109,17 @@ export function useProducts(): UseProductsReturn {
     try {
       setError(null)
       
-      const data = await apiRequest<{
-        success: boolean
-        message: string
-      }>(`${API_CONFIG.ENDPOINTS.PRODUCTS}/${id}`, {
+      const response = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
       })
+      
+      const data = await response.json()
       
       if (data.success) {
         setProducts(prev => prev.filter(product => product.id !== id))
         return true
       } else {
-        throw new Error('Error al eliminar producto')
+        throw new Error(data.message || 'Error al eliminar producto')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar producto')

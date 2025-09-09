@@ -34,11 +34,11 @@ const createResponse = (statusCode, body) => ({
 exports.handler = async (event) => {
   console.log('🔍 Event:', JSON.stringify(event, null, 2));
   
-  const environment = detectEnvironment();
-  const tableName = getTableName(environment);
-  console.log(`🌍 Environment: ${environment}, Table: ${tableName}`);
-  
   try {
+    const environment = detectEnvironment();
+    const tableName = getTableName(environment);
+    console.log(`🌍 Environment: ${environment}, Table: ${tableName}`);
+    
     // Manejar OPTIONS para CORS
     if (event.httpMethod === 'OPTIONS') {
       return createResponse(200, { message: 'CORS preflight' });
@@ -59,7 +59,21 @@ exports.handler = async (event) => {
     }
 
     if (event.httpMethod === 'POST') {
-      const productData = JSON.parse(event.body);
+      console.log('📝 POST request received');
+      console.log('Event body:', event.body);
+      
+      let productData;
+      try {
+        productData = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+        console.log('Parsed product data:', productData);
+      } catch (parseError) {
+        console.error('Error parsing JSON:', parseError);
+        return createResponse(400, {
+          success: false,
+          error: 'Invalid JSON',
+          message: 'El cuerpo de la petición no es un JSON válido'
+        });
+      }
       
       // Validar datos requeridos
       if (!productData.name || !productData.category || !productData.price) {
@@ -72,7 +86,15 @@ exports.handler = async (event) => {
 
       const product = {
         id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        ...productData,
+        name: productData.name,
+        description: productData.description || '',
+        category: productData.category,
+        price: Number(productData.price),
+        currency: productData.currency || 'USD',
+        stock: productData.stock || 0,
+        images: productData.images || [],
+        status: productData.status || 'active',
+        providerName: productData.providerName || '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -82,6 +104,7 @@ exports.handler = async (event) => {
         Item: product
       };
 
+      console.log('Saving product to DynamoDB:', params);
       await dynamodb.send(new PutCommand(params));
       
       return createResponse(201, {
@@ -169,10 +192,11 @@ exports.handler = async (event) => {
 
   } catch (error) {
     console.error('❌ Error:', error);
+    console.error('❌ Error stack:', error.stack);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor',
-      message: error.message
+      message: error.message || 'Error desconocido'
     });
   }
 };

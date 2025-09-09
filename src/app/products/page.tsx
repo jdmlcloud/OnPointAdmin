@@ -11,6 +11,7 @@ import { AnimatedButton } from "@/components/ui/animated-button"
 import { ActionModal } from "@/components/ui/action-modal"
 import { useCardActions } from "@/hooks/use-card-actions"
 import { useProducts } from "@/hooks/use-products"
+import { ProductListSkeleton } from "@/components/ui/product-skeleton"
 import { 
   Plus, 
   Search, 
@@ -23,7 +24,12 @@ import {
   Eye,
   Upload,
   Download,
-  Share
+  Share,
+  Star,
+  ShoppingCart,
+  Tag,
+  Calendar,
+  TrendingUp
 } from "lucide-react"
 
 interface Product {
@@ -43,8 +49,11 @@ interface Product {
 export default function ProductsPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
+  const [activeFilters, setActiveFilters] = useState<string[]>([])
+  const [showFilters, setShowFilters] = useState(false)
   const {
     modals,
+    setModals,
     handleView,
     handleEdit,
     handleDelete,
@@ -56,24 +65,143 @@ export default function ProductsPage() {
   } = useCardActions()
 
   // Usar hook de productos para datos reales de DynamoDB
-  const { products, isLoading, error, refreshProducts } = useProducts()
+  const { products, isLoading, error, refreshProducts, createProduct, updateProduct, deleteProduct } = useProducts()
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (product.providerName && product.providerName.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  const filteredProducts = products.filter(product => {
+    const searchLower = searchTerm.toLowerCase()
+    
+    // Aplicar filtros activos
+    for (const filter of activeFilters) {
+      switch (filter) {
+        case 'status:active':
+          if (product.status !== 'active') return false
+          break
+        case 'status:inactive':
+          if (product.status !== 'inactive') return false
+          break
+        case 'stock:low':
+          if ((product.stock || 0) > 10) return false
+          break
+        case 'stock:out':
+          if ((product.stock || 0) > 0) return false
+          break
+        case 'price:high':
+          if (product.price < 100) return false
+          break
+        case 'price:low':
+          if (product.price >= 100) return false
+          break
+        default:
+          // Filtro por categoría específica
+          if (filter.startsWith('category:')) {
+            const categoryFilter = filter.replace('category:', '')
+            if (!product.category.toLowerCase().includes(categoryFilter.toLowerCase())) return false
+          }
+      }
+    }
+    
+    // Filtro de búsqueda
+    return (
+      product.name.toLowerCase().includes(searchLower) ||
+      product.category.toLowerCase().includes(searchLower) ||
+      (product.description && product.description.toLowerCase().includes(searchLower)) ||
+      (product.providerName && product.providerName.toLowerCase().includes(searchLower))
+    )
+  })
 
-  // Recargar datos cuando se regrese de crear un producto
-  useEffect(() => {
-    refreshProducts()
-  }, [])
+  // Función personalizada para guardar cambios
+  const handleSaveProduct = async (productData: any) => {
+    try {
+      // Recopilar datos del formulario
+      const formData = {
+        name: (document.getElementById('edit-name') as HTMLInputElement)?.value || productData.name,
+        description: (document.getElementById('edit-description') as HTMLTextAreaElement)?.value || productData.description,
+        category: (document.getElementById('edit-category') as HTMLInputElement)?.value || productData.category,
+        price: Number((document.getElementById('edit-price') as HTMLInputElement)?.value || productData.price),
+        currency: (document.getElementById('edit-currency') as HTMLSelectElement)?.value || productData.currency || 'USD',
+        stock: Number((document.getElementById('edit-stock') as HTMLInputElement)?.value || productData.stock || 0),
+        providerName: (document.getElementById('edit-provider') as HTMLInputElement)?.value || productData.providerName,
+        status: (document.getElementById('edit-status') as HTMLSelectElement)?.value || productData.status,
+        images: productData.images || []
+      }
+
+      const success = await updateProduct(productData.id, formData)
+      if (success) {
+        closeModal('edit')
+        await refreshProducts()
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Error saving product:', error)
+      return false
+    }
+  }
+
+  // Función personalizada para eliminar
+  const handleDeleteProduct = async (productData: any) => {
+    try {
+      const success = await deleteProduct(productData.id)
+      if (success) {
+        closeModal('delete')
+        await refreshProducts()
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      return false
+    }
+  }
+
+  // Función para formatear precio
+  const formatPrice = (price: number, currency: string = 'USD') => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: currency
+    }).format(price)
+  }
+
+  // Función para obtener el color del badge de estado
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'active': return 'default'
+      case 'inactive': return 'secondary'
+      case 'discontinued': return 'destructive'
+      default: return 'outline'
+    }
+  }
+
+  // Función para obtener el texto del estado
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'active': return 'Activo'
+      case 'inactive': return 'Inactivo'
+      case 'discontinued': return 'Descontinuado'
+      default: return status
+    }
+  }
+
+  // Obtener categorías únicas para filtros
+  const categories = [...new Set(products.map(p => p.category))]
 
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <div className="flex flex-col h-full">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold">Gestión de Productos</h1>
+              <p className="text-muted-foreground">
+                Administra tu catálogo de productos
+              </p>
+            </div>
+            <Button onClick={() => router.push('/products/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Producto
+            </Button>
+          </div>
+          <ProductListSkeleton />
         </div>
       </MainLayout>
     )
@@ -84,8 +212,12 @@ export default function ProductsPage() {
       <MainLayout>
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <p className="text-red-500 mb-4">Error al cargar productos: {error}</p>
-            <Button onClick={refreshProducts}>Reintentar</Button>
+            <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Error al cargar productos</h2>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={refreshProducts}>
+              Intentar de nuevo
+            </Button>
           </div>
         </div>
       </MainLayout>
@@ -94,148 +226,226 @@ export default function ProductsPage() {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Gestión de Productos</h1>
             <p className="text-muted-foreground">
-              CRUD de productos, variantes y precios escalonados
+              Administra tu catálogo de productos ({filteredProducts.length} productos)
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => router.push('/products/import')}>
-              <Upload className="h-4 w-4 mr-2" />
-              Importar CSV
-            </Button>
-            <Button onClick={() => router.push('/products/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Producto
-            </Button>
-          </div>
-        </div>
-        {/* Search and Filters */}
-        <div className="mb-8">
-          <div className="flex gap-4 items-center">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Buscar productos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              Filtros
-            </Button>
-          </div>
+          <Button onClick={() => router.push('/products/new')}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo Producto
+          </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Package className="h-8 w-8 text-blue-500" />
-                <div>
-                  <p className="text-2xl font-bold">{products.length}</p>
-                  <p className="text-sm text-muted-foreground">Total Productos</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <DollarSign className="h-8 w-8 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    ${products.reduce((sum, p) => sum + (p.price || 0), 0).toFixed(2)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Valor Total</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <BarChart3 className="h-8 w-8 text-purple-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {products.reduce((sum, p) => sum + (p.stock || 0), 0)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Stock Total</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Package className="h-8 w-8 text-orange-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {products.filter(p => (p.stock || 0) < 10).length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Stock Bajo</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Search and Filters */}
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Buscar productos por nombre, categoría o proveedor..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button 
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filtros {activeFilters.length > 0 && `(${activeFilters.length})`}
+          </Button>
         </div>
+
+        {/* Filtros Activos */}
+        {showFilters && (
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg border">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-muted-foreground">Filtros Disponibles</h3>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setActiveFilters([])}
+                className="text-xs"
+              >
+                Limpiar todos
+              </Button>
+            </div>
+            
+            {/* Filtros Predefinidos */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {[
+                { key: 'status:active', label: 'Activos', icon: '✅' },
+                { key: 'status:inactive', label: 'Inactivos', icon: '❌' },
+                { key: 'stock:low', label: 'Stock bajo', icon: '⚠️' },
+                { key: 'stock:out', label: 'Sin stock', icon: '🚫' },
+                { key: 'price:high', label: 'Precio alto', icon: '💰' },
+                { key: 'price:low', label: 'Precio bajo', icon: '💵' }
+              ].map((filter) => (
+                <button
+                  key={filter.key}
+                  onClick={() => {
+                    if (activeFilters.includes(filter.key)) {
+                      setActiveFilters(activeFilters.filter(f => f !== filter.key))
+                    } else {
+                      setActiveFilters([...activeFilters, filter.key])
+                    }
+                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    activeFilters.includes(filter.key)
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-background border border-border hover:bg-muted'
+                  }`}
+                >
+                  {filter.icon} {filter.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Filtros por Categoría */}
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => {
+                      const filterKey = `category:${category}`
+                      if (activeFilters.includes(filterKey)) {
+                        setActiveFilters(activeFilters.filter(f => f !== filterKey))
+                      } else {
+                        setActiveFilters([...activeFilters, filterKey])
+                      }
+                    }}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                      activeFilters.includes(`category:${category}`)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background border border-border hover:bg-muted'
+                    }`}
+                  >
+                    🏷️ {category}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Filtros Activos Seleccionados */}
+        {activeFilters.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm text-muted-foreground">Filtros activos:</span>
+              {activeFilters.map((filter) => (
+                <div
+                  key={filter}
+                  className="flex items-center gap-1 px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-medium"
+                >
+                  <span>
+                    {filter === 'status:active' && '✅ Activos'}
+                    {filter === 'status:inactive' && '❌ Inactivos'}
+                    {filter === 'stock:low' && '⚠️ Stock bajo'}
+                    {filter === 'stock:out' && '🚫 Sin stock'}
+                    {filter === 'price:high' && '💰 Precio alto'}
+                    {filter === 'price:low' && '💵 Precio bajo'}
+                    {filter.startsWith('category:') && `🏷️ ${filter.replace('category:', '')}`}
+                  </span>
+                  <button
+                    onClick={() => setActiveFilters(activeFilters.filter(f => f !== filter))}
+                    className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex-1 overflow-auto scrollbar-hide">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Package className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg">{product.name}</CardTitle>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline">{product.category}</Badge>
-                        <Badge variant={product.status === "active" ? "default" : "secondary"}>
-                          {product.status === "active" ? "Activo" : "Inactivo"}
-                        </Badge>
-                      </div>
-                    </div>
+            <Card key={product.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
+              {/* Imagen centrada en la parte superior */}
+              <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                {product.images && product.images.length > 0 ? (
+                  <img 
+                    src={product.images[0]} 
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <Package className="h-16 w-16 mb-2" />
+                    <span className="text-sm font-medium">Sin imagen</span>
                   </div>
+                )}
+                
+                {/* Badge de estado superpuesto */}
+                <div className="absolute top-3 right-3">
+                  <Badge variant={getStatusBadgeVariant(product.status)} className="text-xs">
+                    {getStatusText(product.status)}
+                  </Badge>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="mb-4">
+
+                {/* Badge de stock si es bajo */}
+                {(product.stock || 0) <= 10 && (product.stock || 0) > 0 && (
+                  <div className="absolute top-3 left-3">
+                    <Badge variant="destructive" className="text-xs">
+                      Stock bajo
+                    </Badge>
+                  </div>
+                )}
+
+                {/* Badge de sin stock */}
+                {(product.stock || 0) === 0 && (
+                  <div className="absolute top-3 left-3">
+                    <Badge variant="outline" className="text-xs bg-red-500 text-white">
+                      Sin stock
+                    </Badge>
+                  </div>
+                )}
+              </div>
+
+              {/* Contenido de la card */}
+              <CardContent className="flex-1 flex flex-col p-4">
+                {/* Nombre y categoría */}
+                <div className="mb-3">
+                  <CardTitle className="text-lg mb-1 line-clamp-1">{product.name}</CardTitle>
+                  <Badge variant="outline" className="text-xs">
+                    {product.category}
+                  </Badge>
+                </div>
+
+                {/* Descripción */}
+                <CardDescription className="mb-4 line-clamp-2 text-sm">
                   {product.description || "Sin descripción"}
                 </CardDescription>
                 
-                <div className="space-y-2 mb-4">
-                  {product.providerName && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Proveedor:</span>
-                      <span className="font-medium">{product.providerName}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Precio:</span>
-                    <span className="font-medium">${product.price} {product.currency || 'USD'}</span>
+                {/* Información de precio y stock */}
+                <div className="space-y-2 mb-4 flex-1">
+                  <div className="flex items-center gap-2 text-sm">
+                    <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="font-semibold text-lg">{formatPrice(product.price, product.currency)}</span>
                   </div>
-                  {product.stock !== undefined && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Stock:</span>
-                      <span className={`font-medium ${product.stock < 10 ? 'text-red-500' : 'text-green-500'}`}>
-                        {product.stock} unidades
-                      </span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="truncate">Stock: {product.stock || 0} unidades</span>
+                  </div>
+                  {product.providerName && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{product.providerName}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex gap-2">
+                {/* Botones fijos en la parte inferior */}
+                <div className="flex gap-2 mt-auto">
                   <AnimatedButton 
                     variant="outline" 
                     size="sm" 
@@ -268,21 +478,8 @@ export default function ProductsPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12">
-            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No hay productos</h3>
-            <p className="text-muted-foreground mb-4">
-              {searchTerm ? "No se encontraron productos con ese criterio de búsqueda." : "Comienza agregando tu primer producto."}
-            </p>
-            <Button onClick={() => router.push('/products/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Agregar Producto
-            </Button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Modales */}
@@ -290,71 +487,71 @@ export default function ProductsPage() {
         isOpen={modals.view.isOpen}
         onClose={() => closeModal('view')}
         title="Detalles del Producto"
-        description="Información completa del producto"
-        type="view"
+        size="lg"
       >
         {modals.view.data && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-lg bg-primary/10">
-                <Package className="h-8 w-8 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold">{modals.view.data.name}</h3>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">{modals.view.data.category}</Badge>
-                  <Badge variant={modals.view.data.isActive ? "default" : "secondary"}>
-                    {modals.view.data.isActive ? "Activo" : "Inactivo"}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Descripción</label>
-                <p className="text-sm">{modals.view.data.description || "Sin descripción"}</p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Proveedor</label>
-                  <p className="text-sm">{modals.view.data.providerName}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Precio</label>
-                  <p className="text-sm font-semibold">${modals.view.data.price} {modals.view.data.currency}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Stock</label>
-                  <p className={`text-sm font-semibold ${modals.view.data.stock < 10 ? 'text-red-500' : 'text-green-500'}`}>
-                    {modals.view.data.stock} unidades
-                  </p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Fecha de Creación</label>
-                  <p className="text-sm">{new Date(modals.view.data.createdAt).toLocaleDateString()}</p>
-                </div>
-              </div>
-              
-              {modals.view.data.images && modals.view.data.images.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Imágenes</label>
-                  <div className="flex gap-2 mt-2">
-                    {modals.view.data.images.map((image: string, index: number) => (
-                      <img 
-                        key={index}
-                        src={image} 
-                        alt={`${modals.view.data.name} ${index + 1}`}
-                        className="w-16 h-16 rounded-lg object-cover border"
-                      />
-                    ))}
-                  </div>
+          <div className="space-y-6">
+            {/* Imagen del producto */}
+            <div className="flex justify-center">
+              {modals.view.data.images && modals.view.data.images.length > 0 ? (
+                <img 
+                  src={modals.view.data.images[0]} 
+                  alt={modals.view.data.name}
+                  className="w-48 h-48 object-cover rounded-lg"
+                />
+              ) : (
+                <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center">
+                  <Package className="h-16 w-16 text-muted-foreground" />
                 </div>
               )}
+            </div>
+
+            {/* Información básica */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Nombre</label>
+                <p className="text-lg font-semibold">{modals.view.data.name}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Categoría</label>
+                <p className="text-lg">{modals.view.data.category}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Precio</label>
+                <p className="text-lg font-semibold text-green-600">{formatPrice(modals.view.data.price, modals.view.data.currency)}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Stock</label>
+                <p className="text-lg">{modals.view.data.stock || 0} unidades</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Estado</label>
+                <Badge variant={getStatusBadgeVariant(modals.view.data.status)}>
+                  {getStatusText(modals.view.data.status)}
+                </Badge>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Proveedor</label>
+                <p className="text-lg">{modals.view.data.providerName || 'No especificado'}</p>
+              </div>
+            </div>
+
+            {/* Descripción */}
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Descripción</label>
+              <p className="text-lg">{modals.view.data.description || 'Sin descripción'}</p>
+            </div>
+
+            {/* Fechas */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Creado</label>
+                <p className="text-sm">{new Date(modals.view.data.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Actualizado</label>
+                <p className="text-sm">{new Date(modals.view.data.updatedAt || modals.view.data.createdAt).toLocaleDateString()}</p>
+              </div>
             </div>
           </div>
         )}
@@ -364,63 +561,90 @@ export default function ProductsPage() {
         isOpen={modals.edit.isOpen}
         onClose={() => closeModal('edit')}
         title="Editar Producto"
-        description="Modifica la información del producto"
-        type="edit"
-        onConfirm={() => handleSave(modals.edit.data)}
-        loadingKey="save-item"
+        size="lg"
+        onSave={() => handleSaveProduct(modals.edit.data)}
       >
         {modals.edit.data && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Nombre</label>
-                <Input 
+                <label htmlFor="edit-name" className="block text-sm font-medium mb-2">Nombre *</label>
+                <Input
+                  id="edit-name"
                   defaultValue={modals.edit.data.name}
-                  className="mt-1"
+                  placeholder="Nombre del producto"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Categoría</label>
-                <Input 
+                <label htmlFor="edit-category" className="block text-sm font-medium mb-2">Categoría *</label>
+                <Input
+                  id="edit-category"
                   defaultValue={modals.edit.data.category}
-                  className="mt-1"
+                  placeholder="Categoría del producto"
                 />
+              </div>
+              <div>
+                <label htmlFor="edit-price" className="block text-sm font-medium mb-2">Precio *</label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.01"
+                  defaultValue={modals.edit.data.price}
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-currency" className="block text-sm font-medium mb-2">Moneda</label>
+                <select
+                  id="edit-currency"
+                  defaultValue={modals.edit.data.currency || 'USD'}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md"
+                >
+                  <option value="USD">USD</option>
+                  <option value="MXN">MXN</option>
+                  <option value="EUR">EUR</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="edit-stock" className="block text-sm font-medium mb-2">Stock</label>
+                <Input
+                  id="edit-stock"
+                  type="number"
+                  defaultValue={modals.edit.data.stock || 0}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label htmlFor="edit-status" className="block text-sm font-medium mb-2">Estado</label>
+                <select
+                  id="edit-status"
+                  defaultValue={modals.edit.data.status}
+                  className="w-full px-3 py-2 border border-input bg-background rounded-md"
+                >
+                  <option value="active">Activo</option>
+                  <option value="inactive">Inactivo</option>
+                  <option value="discontinued">Descontinuado</option>
+                </select>
               </div>
             </div>
             
             <div>
-              <label className="text-sm font-medium">Descripción</label>
-              <textarea 
-                defaultValue={modals.edit.data.description}
-                className="w-full mt-1 p-2 border rounded-md resize-none h-20"
-                placeholder="Descripción del producto..."
+              <label htmlFor="edit-description" className="block text-sm font-medium mb-2">Descripción</label>
+              <textarea
+                id="edit-description"
+                defaultValue={modals.edit.data.description || ''}
+                placeholder="Descripción del producto"
+                className="w-full px-3 py-2 border border-input bg-background rounded-md min-h-[100px]"
               />
             </div>
-            
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="text-sm font-medium">Precio</label>
-                <Input 
-                  type="number"
-                  defaultValue={modals.edit.data.price}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Stock</label>
-                <Input 
-                  type="number"
-                  defaultValue={modals.edit.data.stock}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Moneda</label>
-                <Input 
-                  defaultValue={modals.edit.data.currency}
-                  className="mt-1"
-                />
-              </div>
+
+            <div>
+              <label htmlFor="edit-provider" className="block text-sm font-medium mb-2">Proveedor</label>
+              <Input
+                id="edit-provider"
+                defaultValue={modals.edit.data.providerName || ''}
+                placeholder="Nombre del proveedor"
+              />
             </div>
           </div>
         )}
@@ -430,34 +654,14 @@ export default function ProductsPage() {
         isOpen={modals.delete.isOpen}
         onClose={() => closeModal('delete')}
         title="Eliminar Producto"
-        description="¿Estás seguro de que quieres eliminar este producto? Esta acción no se puede deshacer."
-        type="delete"
-        onConfirm={() => handleDeleteConfirm(modals.delete.data)}
-        loadingKey="delete-item"
-        destructive
+        onSave={() => handleDeleteProduct(modals.delete.data)}
+        saveText="Eliminar"
+        saveVariant="destructive"
       >
         {modals.delete.data && (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <Package className="h-8 w-8 text-red-600" />
-              <div>
-                <h4 className="font-medium text-red-900 dark:text-red-100">
-                  {modals.delete.data.name}
-                </h4>
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  {modals.delete.data.category} - ${modals.delete.data.price} {modals.delete.data.currency}
-                </p>
-              </div>
-            </div>
-            
-            <div className="text-sm text-muted-foreground">
-              <p>Al eliminar este producto:</p>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Se eliminará de todas las cotizaciones pendientes</li>
-                <li>Se cancelarán las propuestas que lo incluyan</li>
-                <li>Esta acción no se puede deshacer</li>
-              </ul>
-            </div>
+            <p>¿Estás seguro de que quieres eliminar el producto <strong>{modals.delete.data.name}</strong>?</p>
+            <p className="text-sm text-muted-foreground">Esta acción no se puede deshacer.</p>
           </div>
         )}
       </ActionModal>
