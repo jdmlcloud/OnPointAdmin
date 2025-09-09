@@ -120,16 +120,17 @@ export default function LogosPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [logoDeleted, setLogoDeleted] = useState(false)
 
-  // Agrupar logos por cliente
+  // Agrupar logos por cliente usando el campo brand
   const logosByClient = logos.reduce((acc, logo) => {
-    if (!acc[logo.clientId]) {
-      acc[logo.clientId] = {
-        clientId: logo.clientId,
-        clientName: logo.clientName,
+    const clientKey = logo.brand || 'Sin Marca'
+    if (!acc[clientKey]) {
+      acc[clientKey] = {
+        clientId: clientKey.toLowerCase().replace(/\s+/g, '-'),
+        clientName: clientKey,
         logos: []
       }
     }
-    acc[logo.clientId].logos.push(logo)
+    acc[clientKey].logos.push(logo)
     return acc
   }, {} as Record<string, { clientId: string; clientName: string; logos: Logo[] }>)
 
@@ -281,7 +282,7 @@ export default function LogosPage() {
         default:
           if (filter.startsWith('client:')) {
             const clientName = filter.replace('client:', '')
-            if (!logo.clientName.toLowerCase().includes(clientName.toLowerCase())) return false
+            if (!logo.brand || !logo.brand.toLowerCase().includes(clientName.toLowerCase())) return false
           } else if (filter.startsWith('category:')) {
             const category = filter.replace('category:', '')
             if (!logo.category.toLowerCase().includes(category.toLowerCase())) return false
@@ -296,26 +297,26 @@ export default function LogosPage() {
     // Aplicar búsqueda
     return (
       logo.name.toLowerCase().includes(searchLower) ||
-      logo.clientName.toLowerCase().includes(searchLower) ||
+      (logo.brand && logo.brand.toLowerCase().includes(searchLower)) ||
       logo.category.toLowerCase().includes(searchLower) ||
       (logo.description && logo.description.toLowerCase().includes(searchLower)) ||
-      (logo.brand && logo.brand.toLowerCase().includes(searchLower)) ||
       (logo.tags && logo.tags.some((tag: string) => 
         tag.toLowerCase().includes(searchLower)
       ))
     )
   })
 
-  // Agrupar logos filtrados por cliente
+  // Agrupar logos filtrados por cliente usando el campo brand
   const filteredLogosByClient = filteredLogos.reduce((acc, logo) => {
-    if (!acc[logo.clientId]) {
-      acc[logo.clientId] = {
-        clientId: logo.clientId,
-        clientName: logo.clientName,
+    const clientKey = logo.brand || 'Sin Marca'
+    if (!acc[clientKey]) {
+      acc[clientKey] = {
+        clientId: clientKey.toLowerCase().replace(/\s+/g, '-'),
+        clientName: clientKey,
         logos: []
       }
     }
-    acc[logo.clientId].logos.push(logo)
+    acc[clientKey].logos.push(logo)
     return acc
   }, {} as Record<string, { clientId: string; clientName: string; logos: Logo[] }>)
 
@@ -359,11 +360,13 @@ export default function LogosPage() {
     return Array.from(tags).sort()
   }, [logos])
 
-  // Obtener todos los clientes únicos para filtros
+  // Obtener todos los clientes únicos para filtros usando el campo brand
   const allClients = useMemo(() => {
     const clients = new Set<string>()
     logos.forEach(logo => {
-      clients.add(logo.clientName)
+      if (logo.brand) {
+        clients.add(logo.brand)
+      }
     })
     return Array.from(clients).sort()
   }, [logos])
