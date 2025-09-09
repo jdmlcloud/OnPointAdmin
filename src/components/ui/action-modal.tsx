@@ -19,6 +19,8 @@ interface ActionModalProps {
   cancelText?: string
   loadingKey?: string
   destructive?: boolean
+  showFooter?: boolean
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
 export function ActionModal({
@@ -32,7 +34,9 @@ export function ActionModal({
   confirmText,
   cancelText = 'Cancelar',
   loadingKey,
-  destructive = false
+  destructive = false,
+  showFooter = true,
+  size = 'md'
 }: ActionModalProps) {
   const { isLoading } = useMicrointeractions()
 
@@ -68,9 +72,24 @@ export function ActionModal({
     return 'default'
   }
 
+  const getSizeClass = () => {
+    switch (size) {
+      case 'sm':
+        return 'sm:max-w-[400px]'
+      case 'md':
+        return 'sm:max-w-[700px]'
+      case 'lg':
+        return 'sm:max-w-[900px]'
+      case 'xl':
+        return 'sm:max-w-[1200px]'
+      default:
+        return 'sm:max-w-[700px]'
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
+      <DialogContent className={`${getSizeClass()} max-h-[90vh] flex flex-col`}>
         <DialogHeader className="flex-shrink-0">
           <div className="flex items-center gap-3">
             {getIcon()}
@@ -89,22 +108,24 @@ export function ActionModal({
           {children}
         </div>
 
-        <DialogFooter className="flex-shrink-0 gap-2 border-t pt-4">
-          <Button variant="outline" onClick={onClose}>
-            {cancelText}
-          </Button>
-          {onConfirm && (
-            <AnimatedButton
-              variant={getConfirmVariant()}
-              loading={loadingKey ? isLoading(loadingKey) : false}
-              loadingText="Procesando..."
-              onClick={onConfirm}
-              animation="pulse"
-            >
-              {getConfirmText()}
-            </AnimatedButton>
-          )}
-        </DialogFooter>
+        {showFooter && (
+          <DialogFooter className="flex-shrink-0 gap-2 border-t pt-4">
+            <Button variant="outline" onClick={onClose}>
+              {cancelText}
+            </Button>
+            {onConfirm && (
+              <AnimatedButton
+                variant={getConfirmVariant()}
+                loading={loadingKey ? isLoading(loadingKey) : false}
+                loadingText="Procesando..."
+                onClick={onConfirm}
+                animation="pulse"
+              >
+                {getConfirmText()}
+              </AnimatedButton>
+            )}
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   )

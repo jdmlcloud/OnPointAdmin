@@ -90,6 +90,10 @@ export function useClients(): UseClientsReturn {
       }
       
       setClients(prev => [...prev, newClient])
+      
+      // Refrescar la lista para que aparezca en la UI
+      await fetchClients()
+      
       return true
     } catch (err) {
       console.error('Error creating client:', err)

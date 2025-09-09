@@ -197,6 +197,22 @@ export default function LogosPage() {
     setEditingClient(null)
   }
 
+  const handleDeleteClient = async (client: { clientId: string; clientName: string; logos: Logo[] }) => {
+    if (confirm(`¿Estás seguro de que quieres eliminar el cliente "${client.clientName}" y todos sus ${client.logos.length} logos? Esta acción no se puede deshacer.`)) {
+      try {
+        // Eliminar todos los logos del cliente
+        for (const logo of client.logos) {
+          await deleteLogo(logo.id)
+        }
+        // Refrescar la lista
+        await refreshLogos()
+      } catch (error) {
+        console.error('Error deleting client:', error)
+        alert('Error al eliminar el cliente')
+      }
+    }
+  }
+
   // Funciones para manejar archivos de logo
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -753,6 +769,16 @@ export default function LogosPage() {
                           }}
                         >
                           <Plus className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteClient(client)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </CardContent>
@@ -1407,10 +1433,10 @@ export default function LogosPage() {
           isOpen={modals.delete.isOpen}
           onClose={() => closeModal('delete')}
           title="Eliminar Logo"
-          onSave={() => handleDeleteConfirm(selectedItem)}
-          saveText="Eliminar"
-          saveVariant="destructive"
-          showSaveButton={true}
+          type="delete"
+          onConfirm={() => handleDeleteConfirm(selectedItem)}
+          confirmText="Eliminar"
+          destructive={true}
         >
           {selectedItem && (
             <div className="space-y-4">
