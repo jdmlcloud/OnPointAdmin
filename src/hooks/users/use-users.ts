@@ -28,10 +28,20 @@ export const useUsers = (): UseUsersReturn => {
     {
       id: 'user-super-admin',
       email: 'superadmin@onpoint.com',
+      password: 'password123',
       firstName: 'Super',
       lastName: 'Administrador',
       phone: '+525512345678',
-      role: 'SUPER_ADMIN',
+      role: {
+        id: 'role-super-admin',
+        name: 'SUPER_ADMIN',
+        level: 1,
+        permissions: [],
+        description: 'Super Administrador',
+        createdAt: '2024-12-19T00:00:00.000Z',
+        updatedAt: '2024-12-19T00:00:00.000Z',
+        createdBy: 'system'
+      },
       department: 'Tecnología',
       position: 'Super Administrador',
       status: 'active',
@@ -42,10 +52,20 @@ export const useUsers = (): UseUsersReturn => {
     {
       id: 'user-admin',
       email: 'admin@onpoint.com',
+      password: 'password123',
       firstName: 'Admin',
       lastName: 'Usuario',
       phone: '+525512345679',
-      role: 'ADMIN',
+      role: {
+        id: 'role-admin',
+        name: 'ADMIN',
+        level: 2,
+        permissions: [],
+        description: 'Administrador',
+        createdAt: '2024-12-19T00:00:00.000Z',
+        updatedAt: '2024-12-19T00:00:00.000Z',
+        createdBy: 'system'
+      },
       department: 'Administración',
       position: 'Administrador',
       status: 'active',
@@ -56,10 +76,20 @@ export const useUsers = (): UseUsersReturn => {
     {
       id: 'user-executive',
       email: 'ejecutivo@onpoint.com',
+      password: 'password123',
       firstName: 'Ejecutivo',
       lastName: 'Usuario',
       phone: '+525512345680',
-      role: 'EXECUTIVE',
+      role: {
+        id: 'role-executive',
+        name: 'EXECUTIVE',
+        level: 3,
+        permissions: [],
+        description: 'Ejecutivo',
+        createdAt: '2024-12-19T00:00:00.000Z',
+        updatedAt: '2024-12-19T00:00:00.000Z',
+        createdBy: 'system'
+      },
       department: 'Ventas',
       position: 'Ejecutivo',
       status: 'active',
@@ -117,6 +147,16 @@ export const useUsers = (): UseUsersReturn => {
       const newUser: User = {
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         ...userData,
+        role: {
+          id: `role-${userData.role.toLowerCase()}`,
+          name: userData.role,
+          level: userData.role === 'SUPER_ADMIN' ? 1 : userData.role === 'ADMIN' ? 2 : 3,
+          permissions: [],
+          description: userData.role === 'SUPER_ADMIN' ? 'Super Administrador' : userData.role === 'ADMIN' ? 'Administrador' : 'Ejecutivo',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          createdBy: 'system'
+        },
         status: 'active',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -145,7 +185,21 @@ export const useUsers = (): UseUsersReturn => {
 
       setUsers(prev => prev.map(user => 
         user.id === userId 
-          ? { ...user, ...userData, updatedAt: new Date().toISOString() }
+          ? { 
+              ...user, 
+              ...userData, 
+              role: {
+                id: `role-${(userData.role as string).toLowerCase()}`,
+                name: userData.role as string,
+                level: userData.role === 'SUPER_ADMIN' ? 1 : userData.role === 'ADMIN' ? 2 : 3,
+                permissions: [],
+                description: userData.role === 'SUPER_ADMIN' ? 'Super Administrador' : userData.role === 'ADMIN' ? 'Administrador' : 'Ejecutivo',
+                createdAt: user.role.createdAt,
+                updatedAt: new Date().toISOString(),
+                createdBy: user.role.createdBy
+              },
+              updatedAt: new Date().toISOString() 
+            }
           : user
       ))
       return true

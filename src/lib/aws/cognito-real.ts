@@ -7,7 +7,7 @@ import {
   GetUserCommand,
   AuthFlowType
 } from '@aws-sdk/client-cognito-identity-provider'
-import { UserRole } from '@/hooks/use-roles'
+import { UserRole } from '@/types/users'
 
 export interface CognitoUser {
   id: string

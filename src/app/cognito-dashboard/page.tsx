@@ -354,7 +354,7 @@ export default function CognitoDashboardPage() {
               <div>
                 <p className="text-sm font-medium text-blue-900">Rol:</p>
                 <p className="text-sm text-blue-700">
-                  {cognitoUser?.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                  {cognitoUser?.role?.name === 'admin' ? 'Administrador' : 'Ejecutivo'}
                 </p>
               </div>
               <div>

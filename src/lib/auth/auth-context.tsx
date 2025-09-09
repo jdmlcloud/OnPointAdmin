@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { User, LoginRequest, LoginResponse, AuthContextType, UserRoleType } from '@/types/users'
-import { hasPermission, hasRole, canManageUser, canAssignRole, getAssignableRoles, canAccessRoute } from './permission-utils'
+import { hasPermission, hasUserRole, canManageUser, canAssignUserRole, getAssignableUserRoles, canAccessRoute } from './permission-utils'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -74,7 +74,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (data.success && data.user && data.token) {
         // Guardar token y usuario
         localStorage.setItem('auth_token', data.token)
-        setUser(data.user)
+        setUser(data.user as User)
         setIsAuthenticated(true)
         
         return {
@@ -111,7 +111,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const checkRole = (role: UserRoleType): boolean => {
-    return hasRole(user, role)
+    return hasUserRole(user, role)
   }
 
   const canManage = (targetUser: User | null): boolean => {
@@ -119,11 +119,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const canAssign = (targetRole: string): boolean => {
-    return canAssignRole(user, targetRole)
+    return canAssignUserRole(user, targetRole)
   }
 
   const getAssignable = (): string[] => {
-    return getAssignableRoles(user)
+    return getAssignableUserRoles(user)
   }
 
   const canAccess = (route: string): boolean => {

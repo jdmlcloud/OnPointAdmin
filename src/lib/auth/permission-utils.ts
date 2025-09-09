@@ -1,6 +1,6 @@
 'use client'
 
-import { User, Role, Permission } from '@/types/users'
+import { User, UserRole, Permission } from '@/types/users'
 
 // Jerarquía de roles (menor número = mayor privilegio)
 export const ROLE_HIERARCHY: Record<string, number> = {
@@ -42,10 +42,10 @@ export const hasPermission = (user: User | null, resource: string, action: strin
   if (!user) return false
 
   // Super Admin tiene todos los permisos
-  if (user.role === 'SUPER_ADMIN') return true
+  if (user.role.name === 'SUPER_ADMIN') return true
 
   // Verificar permisos por defecto del rol
-  const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role] || []
+  const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role.name] || []
   const permissionString = `${resource}:${action}`
   
   return rolePermissions.includes(permissionString)
@@ -54,11 +54,11 @@ export const hasPermission = (user: User | null, resource: string, action: strin
 /**
  * Verifica si un usuario tiene un rol específico o superior
  */
-export const hasRole = (user: User | null, requiredRole: string): boolean => {
+export const hasUserRole = (user: User | null, requiredUserRole: string): boolean => {
   if (!user) return false
 
-  const userLevel = ROLE_HIERARCHY[user.role] || 999
-  const requiredLevel = ROLE_HIERARCHY[requiredRole] || 999
+  const userLevel = ROLE_HIERARCHY[user.role.name] || 999
+  const requiredLevel = ROLE_HIERARCHY[requiredUserRole] || 999
 
   return userLevel <= requiredLevel
 }
@@ -72,8 +72,8 @@ export const canManageUser = (currentUser: User | null, targetUser: User | null)
   // No se puede gestionar a sí mismo
   if (currentUser.id === targetUser.id) return false
 
-  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
-  const targetLevel = ROLE_HIERARCHY[targetUser.role] || 999
+  const currentLevel = ROLE_HIERARCHY[currentUser.role.name] || 999
+  const targetLevel = ROLE_HIERARCHY[targetUser.role.name] || 999
 
   // Solo se puede gestionar usuarios de nivel inferior
   return currentLevel < targetLevel
@@ -82,11 +82,11 @@ export const canManageUser = (currentUser: User | null, targetUser: User | null)
 /**
  * Verifica si un usuario puede asignar un rol específico
  */
-export const canAssignRole = (currentUser: User | null, targetRole: string): boolean => {
+export const canAssignUserRole = (currentUser: User | null, targetUserRole: string): boolean => {
   if (!currentUser) return false
 
-  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
-  const targetLevel = ROLE_HIERARCHY[targetRole] || 999
+  const currentLevel = ROLE_HIERARCHY[currentUser.role.name] || 999
+  const targetLevel = ROLE_HIERARCHY[targetUserRole] || 999
 
   // Solo se puede asignar roles de nivel inferior
   return currentLevel < targetLevel
@@ -95,10 +95,10 @@ export const canAssignRole = (currentUser: User | null, targetRole: string): boo
 /**
  * Obtiene todos los roles que un usuario puede asignar
  */
-export const getAssignableRoles = (currentUser: User | null): string[] => {
+export const getAssignableUserRoles = (currentUser: User | null): string[] => {
   if (!currentUser) return []
 
-  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
+  const currentLevel = ROLE_HIERARCHY[currentUser.role.name] || 999
   
   return Object.entries(ROLE_HIERARCHY)
     .filter(([_, level]) => level > currentLevel)
@@ -128,7 +128,7 @@ export const getPermissionDescription = (permission: string): string => {
   
   const resourceNames: Record<string, string> = {
     'users': 'Usuarios',
-    'roles': 'Roles',
+    'roles': 'UserRoles',
     'permissions': 'Permisos',
     'providers': 'Proveedores',
     'products': 'Productos',
@@ -157,7 +157,7 @@ export const getPermissionCategory = (permission: string): string => {
   
   const resourceToCategory: Record<string, string> = {
     'users': 'Usuarios',
-    'roles': 'Roles',
+    'roles': 'UserRoles',
     'permissions': 'Permisos',
     'providers': 'Proveedores',
     'products': 'Productos',

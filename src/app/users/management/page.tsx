@@ -620,7 +620,7 @@ const UserManagementPage: React.FC = () => {
           isOpen={isCreateUserRoleDialogOpen}
           onClose={() => setIsCreateUserRoleDialogOpen(false)}
           onSubmit={handleCreateUserRoleSubmit}
-          currentUserUserRole={currentUser?.role?.name as any}
+          currentUserRole={currentUser?.role?.name as any}
         />
 
         <RoleForm
@@ -631,7 +631,7 @@ const UserManagementPage: React.FC = () => {
           }}
           onSubmit={handleEditUserRoleSubmit}
           role={selectedUserRole}
-          currentUserUserRole={currentUser?.role?.name as any}
+          currentUserRole={currentUser?.role?.name as any}
         />
 
         <PermissionForm

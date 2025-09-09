@@ -68,12 +68,12 @@ export const UserCard: React.FC<UserCardProps> = ({
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
               <span className="text-blue-600 font-semibold text-sm">
-                {(user.firstName || user.name || 'U')[0]}{(user.lastName || '')[0]}
+                {(user.firstName || 'U')[0]}{(user.lastName || '')[0]}
               </span>
             </div>
             <div>
               <CardTitle className="text-lg">
-                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.name || 'Usuario'}
+                {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Usuario'}
               </CardTitle>
               <CardDescription className="text-sm">
                 {user.email}
@@ -109,8 +109,8 @@ export const UserCard: React.FC<UserCardProps> = ({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Rol:</span>
-            <Badge className={getRoleColor(user.role)}>
-              {getRoleDisplayName(user.role)}
+            <Badge className={getRoleColor(user.role.name)}>
+              {getRoleDisplayName(user.role.name)}
             </Badge>
           </div>
           <div className="flex items-center justify-between">

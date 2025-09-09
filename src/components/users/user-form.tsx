@@ -32,7 +32,8 @@ export const UserForm: React.FC<UserFormProps> = ({
     phone: '',
     role: 'EXECUTIVE' as UserRoleType,
     department: '',
-    position: ''
+    position: '',
+    password: ''
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -45,9 +46,10 @@ export const UserForm: React.FC<UserFormProps> = ({
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
-        role: user.role as UserRoleType,
+        role: user.role.name as UserRoleType,
         department: user.department,
-        position: user.position
+        position: user.position,
+        password: ''
       })
     } else {
       setFormData({
@@ -57,7 +59,8 @@ export const UserForm: React.FC<UserFormProps> = ({
         phone: '',
         role: 'EXECUTIVE',
         department: '',
-        position: ''
+        position: '',
+        password: ''
       })
     }
     setErrors({})

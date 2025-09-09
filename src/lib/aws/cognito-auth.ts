@@ -1,5 +1,5 @@
 import { signIn, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth'
-import { UserRole } from '@/hooks/use-roles'
+import { UserRole } from '@/types/users'
 
 export interface CognitoUser {
   id: string
@@ -49,7 +49,16 @@ export class CognitoAuthService {
           id: user.userId,
           email: credentials.email,
           name: 'Usuario',
-          role: role as UserRole,
+          role: {
+            id: `role-${role}`,
+            name: role,
+            level: role === 'ejecutivo' ? 3 : 1,
+            permissions: [],
+            description: role === 'ejecutivo' ? 'Ejecutivo' : 'Administrador',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system'
+          },
           accessToken: session.tokens?.accessToken?.toString() || '',
           refreshToken: ''
         }
@@ -90,7 +99,16 @@ export class CognitoAuthService {
         id: user.userId,
         email: user.signInDetails?.loginId || '',
         name: 'Usuario',
-        role: role as UserRole,
+        role: {
+          id: `role-${role}`,
+          name: role,
+          level: role === 'ejecutivo' ? 3 : 1,
+          permissions: [],
+          description: role === 'ejecutivo' ? 'Ejecutivo' : 'Administrador',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          createdBy: 'system'
+        },
         accessToken: session.tokens?.accessToken?.toString() || '',
         refreshToken: ''
       }

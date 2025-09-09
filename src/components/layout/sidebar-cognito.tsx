@@ -235,7 +235,7 @@ export function SidebarCognito() {
                   variant="outline" 
                   className="text-xs mt-1"
                 >
-                  {user.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                  {user.role.name === 'admin' ? 'Administrador' : 'Ejecutivo'}
                 </Badge>
               </div>
             )}

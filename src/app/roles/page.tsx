@@ -253,7 +253,7 @@ const UserRolesPage: React.FC = () => {
           isOpen={isCreateDialogOpen}
           onClose={() => setIsCreateDialogOpen(false)}
           onSubmit={handleCreateUserRoleSubmit}
-          currentUserUserRole={currentUser?.role?.name as any}
+          currentUserRole={currentUser?.role?.name as any}
         />
 
         {/* Edit UserRole Dialog */}
@@ -265,7 +265,7 @@ const UserRolesPage: React.FC = () => {
           }}
           onSubmit={handleEditUserRoleSubmit}
           role={selectedUserRole}
-          currentUserUserRole={currentUser?.role?.name as any}
+          currentUserRole={currentUser?.role?.name as any}
         />
       </div>
     </ProtectedRoute>

@@ -1,31 +1,31 @@
 'use client'
 
 import React from 'react'
-import { User, Role, Permission } from '@/types/users'
+import { User, UserRole, Permission } from '@/types/users'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Shield, ShieldCheck, UserCheck, UserX, Crown, UserCog } from 'lucide-react'
 
 interface UserStatsProps {
   users: User[]
-  roles: Role[]
+  roles: UserRole[]
   permissions: Permission[]
 }
 
 export const UserStats: React.FC<UserStatsProps> = ({ users, roles, permissions }) => {
   const activeUsers = users.filter(user => user.status === 'active').length
   const inactiveUsers = users.filter(user => user.status === 'inactive').length
-  const systemRoles = roles.filter(role => role.isSystem).length
-  const customRoles = roles.filter(role => !role.isSystem).length
-  const systemPermissions = permissions.filter(permission => permission.isSystem).length
-  const customPermissions = permissions.filter(permission => !permission.isSystem).length
+  const systemUserRoles = roles.filter(role => role.level === 1).length
+  const customUserRoles = roles.filter(role => role.level > 1).length
+  const systemPermissions = permissions.filter(permission => permission.resource.startsWith('system')).length
+  const customPermissions = permissions.filter(permission => !permission.resource.startsWith('system')).length
 
-  const getRoleCount = (roleType: string) => {
-    return users.filter(user => user.role === roleType).length
+  const getUserRoleCount = (roleType: string) => {
+    return users.filter(user => user.role.name === roleType).length
   }
 
-  const superAdmins = getRoleCount('SUPER_ADMIN')
-  const admins = getRoleCount('ADMIN')
-  const executives = getRoleCount('EXECUTIVE')
+  const superAdmins = getUserRoleCount('SUPER_ADMIN')
+  const admins = getUserRoleCount('ADMIN')
+  const executives = getUserRoleCount('EXECUTIVE')
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -57,16 +57,16 @@ export const UserStats: React.FC<UserStatsProps> = ({ users, roles, permissions 
         </CardContent>
       </Card>
 
-      {/* Roles Personalizados */}
+      {/* UserRoles Personalizados */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Roles Personalizados</CardTitle>
+          <CardTitle className="text-sm font-medium">UserRoles Personalizados</CardTitle>
           <Shield className="h-4 w-4 text-blue-600" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-blue-600">{customRoles}</div>
+          <div className="text-2xl font-bold text-blue-600">{customUserRoles}</div>
           <p className="text-xs text-muted-foreground">
-            + {systemRoles} roles del sistema
+            + {systemUserRoles} roles del sistema
           </p>
         </CardContent>
       </Card>
@@ -85,10 +85,10 @@ export const UserStats: React.FC<UserStatsProps> = ({ users, roles, permissions 
         </CardContent>
       </Card>
 
-      {/* Distribución por Roles */}
+      {/* Distribución por UserRoles */}
       <Card className="md:col-span-2">
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Distribución por Roles</CardTitle>
+          <CardTitle className="text-sm font-medium">Distribución por UserRoles</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
@@ -129,7 +129,7 @@ export const UserStats: React.FC<UserStatsProps> = ({ users, roles, permissions 
               <span className="font-medium">{users.length}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Total de Roles:</span>
+              <span className="text-sm text-muted-foreground">Total de UserRoles:</span>
               <span className="font-medium">{roles.length}</span>
             </div>
             <div className="flex justify-between items-center">

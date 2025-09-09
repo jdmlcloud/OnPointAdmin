@@ -139,8 +139,8 @@ export default function CognitoRealDashboardPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Rol:</span>
-                <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                  {user.role}
+                <Badge variant={user.role.name === 'admin' ? 'default' : 'secondary'}>
+                  {user.role.name}
                 </Badge>
               </div>
               <div className="flex items-center justify-between">

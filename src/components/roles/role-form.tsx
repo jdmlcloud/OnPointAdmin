@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { UserUserRole, UserUserRoleType } from '@/types/users'
+import { UserRole, UserRoleType } from '@/types/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,7 +17,7 @@ interface UserRoleFormProps {
   onClose: () => void
   onSubmit: (roleData: any) => Promise<boolean>
   role?: UserRole | null
-  currentUserUserRole?: UserUserRoleType
+  currentUserRole?: UserRoleType
   isLoading?: boolean
 }
 
@@ -59,7 +59,7 @@ export const RoleForm: React.FC<UserRoleFormProps> = ({
   onClose,
   onSubmit,
   role,
-  currentUserUserRole,
+  currentUserRole,
   isLoading = false
 }) => {
   const [formData, setFormData] = useState({
@@ -76,7 +76,7 @@ export const RoleForm: React.FC<UserRoleFormProps> = ({
       setFormData({
         name: role.name,
         description: role.description,
-        permissions: role.permissions
+        permissions: role.permissions.map(p => p.id)
       })
     } else {
       setFormData({
@@ -146,7 +146,7 @@ export const RoleForm: React.FC<UserRoleFormProps> = ({
     setFormData(prev => ({
       ...prev,
       permissions: checked
-        ? [...new Set([...prev.permissions, ...permissionIds])]
+        ? Array.from(new Set([...prev.permissions, ...permissionIds]))
         : prev.permissions.filter(p => !permissionIds.includes(p))
     }))
   }

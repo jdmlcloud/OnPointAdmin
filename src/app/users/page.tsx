@@ -651,7 +651,7 @@ export default function UsersPage() {
           isOpen={isCreateRoleDialogOpen}
           onClose={() => setIsCreateRoleDialogOpen(false)}
           onSubmit={handleCreateRoleSubmit}
-          currentUserUserRole={currentUser?.role?.name as UserRoleType}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
         />
 
         <RoleForm
@@ -662,7 +662,7 @@ export default function UsersPage() {
           }}
           onSubmit={handleEditRoleSubmit}
           role={selectedRole}
-          currentUserUserRole={currentUser?.role?.name as UserRoleType}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
         />
 
         <PermissionForm
