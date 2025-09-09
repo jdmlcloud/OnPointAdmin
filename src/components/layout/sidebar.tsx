@@ -172,7 +172,7 @@ export function Sidebar() {
     } else {
       timeoutId = setTimeout(() => {
         setIsAutoHidden(true)
-      }, 3000) // 3 segundos
+      }, 2000) // 2 segundos
     }
 
     return () => {
