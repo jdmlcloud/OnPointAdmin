@@ -519,6 +519,69 @@ export default function LogosPage() {
           )}
         </div>
 
+        {/* Miniresumen de Logos */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Total de Logos */}
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Logos</p>
+                <p className="text-2xl font-bold">{logos.length}</p>
+                <p className="text-xs text-green-600">{filteredLogos.length} visibles</p>
+              </div>
+              <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                <Image className="h-5 w-5 text-blue-500" />
+              </div>
+            </div>
+          </div>
+
+          {/* Clientes con Logos */}
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Clientes</p>
+                <p className="text-2xl font-bold">{Object.keys(logosByClient).length}</p>
+                <p className="text-xs text-green-600">con logos</p>
+              </div>
+              <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                <Building2 className="h-5 w-5 text-purple-500" />
+              </div>
+            </div>
+          </div>
+
+          {/* Formatos Únicos */}
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Formatos</p>
+                <p className="text-2xl font-bold">
+                  {new Set(logos.map(logo => logo.fileType)).size}
+                </p>
+                <p className="text-xs text-green-600">únicos</p>
+              </div>
+              <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center">
+                <FileText className="h-5 w-5 text-green-500" />
+              </div>
+            </div>
+          </div>
+
+          {/* Logos Principales */}
+          <div className="bg-card border rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Principales</p>
+                <p className="text-2xl font-bold">
+                  {logos.filter(logo => logo.isPrimary).length}
+                </p>
+                <p className="text-xs text-yellow-600">destacados</p>
+              </div>
+              <div className="w-10 h-10 bg-yellow-500/10 rounded-lg flex items-center justify-center">
+                <Star className="h-5 w-5 text-yellow-500" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Search and Filters */}
         <div className="flex items-center gap-4 mb-6">
           <div className="relative flex-1 max-w-md">
@@ -831,7 +894,7 @@ export default function LogosPage() {
                       </div>
                       
                       {/* Botones de acción */}
-                      <div className="flex gap-1 pt-2 border-t border-border/50">
+                      <div className="flex gap-2 pt-3 border-t border-border/50">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -839,9 +902,9 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleClientClick(client)
                           }}
-                          className="h-6 px-2 text-xs flex-1"
+                          className="h-8 px-3 text-sm flex-1"
                         >
-                          <Eye className="h-3 w-3 mr-1" />
+                          <Eye className="h-4 w-4 mr-2" />
                           Ver
                         </Button>
                         <Button 
@@ -851,9 +914,9 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleAddLogoToClient(client)
                           }}
-                          className="h-6 px-2 text-xs"
+                          className="h-8 px-3 text-sm"
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="outline" 
@@ -862,9 +925,9 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleDeleteClient(client)
                           }}
-                          className="h-6 px-2 text-xs text-destructive hover:text-destructive"
+                          className="h-8 px-3 text-sm text-destructive hover:text-destructive"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </CardContent>
