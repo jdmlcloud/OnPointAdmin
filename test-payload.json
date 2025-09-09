@@ -1,5 +1,10 @@
 {
   "httpMethod": "GET",
-  "path": "/providers",
-  "queryStringParameters": {}
+  "resource": "/notifications",
+  "path": "/notifications",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": null,
+  "isBase64Encoded": false
 }
