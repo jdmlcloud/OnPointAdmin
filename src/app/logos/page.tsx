@@ -769,10 +769,10 @@ export default function LogosPage() {
                 {Object.values(logosByClient).map((client) => (
                   <Card 
                     key={client.clientId} 
-                    className="hover:shadow-lg transition-shadow cursor-pointer h-32 w-full"
+                    className="hover:shadow-lg transition-shadow cursor-pointer h-40 w-full"
                     onClick={() => handleClientClick(client)}
                   >
-                    <CardContent className="p-4 h-full flex flex-col">
+                    <CardContent className="p-4 h-full flex flex-col justify-between">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -788,10 +788,11 @@ export default function LogosPage() {
                         </Badge>
                       </div>
                       
-                      <div className="space-y-2 flex-1">
+                      {/* Contenido principal */}
+                      <div className="space-y-3 flex-1">
                         {/* Información de logos y formatos */}
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Image className="h-3 w-3" />
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Image className="h-4 w-4" />
                           <span>{client.logos.length} logos</span>
                           {client.logos.length > 0 && (
                             <>
@@ -813,7 +814,7 @@ export default function LogosPage() {
                                 return acc
                               }, {} as Record<string, number>)
                             ).map(([format, count]) => (
-                              <Badge key={format} variant="secondary" className="text-xs">
+                              <Badge key={format} variant="secondary" className="text-xs px-2 py-1">
                                 {format} {count > 1 ? `(${count})` : ''}
                               </Badge>
                             ))}
@@ -830,7 +831,7 @@ export default function LogosPage() {
                       </div>
                       
                       {/* Botones de acción */}
-                      <div className="flex gap-1 mt-2">
+                      <div className="flex gap-1 pt-2 border-t border-border/50">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -838,9 +839,10 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleClientClick(client)
                           }}
-                          className="h-6 px-2 text-xs"
+                          className="h-7 px-2 text-xs flex-1"
                         >
-                          <Eye className="h-3 w-3" />
+                          <Eye className="h-3 w-3 mr-1" />
+                          Ver
                         </Button>
                         <Button 
                           variant="outline" 
@@ -849,7 +851,7 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleAddLogoToClient(client)
                           }}
-                          className="h-6 px-2 text-xs"
+                          className="h-7 px-2 text-xs"
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
@@ -860,7 +862,7 @@ export default function LogosPage() {
                             e.stopPropagation()
                             handleDeleteClient(client)
                           }}
-                          className="h-6 px-2 text-xs text-destructive hover:text-destructive"
+                          className="h-7 px-2 text-xs text-destructive hover:text-destructive"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
