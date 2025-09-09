@@ -200,8 +200,8 @@ export function Sidebar() {
         <div className="flex items-center justify-between">
           {!shouldCollapse && (
             <div>
-              <h1 className="text-xl font-bold text-primary">OnPoint</h1>
-              <p className="text-xs text-muted-foreground">Admin Platform</p>
+              <h1 className="text-xl font-bold text-primary">JDML Cloud</h1>
+              <p className="text-xs text-muted-foreground">Servicios de Infraestructura</p>
             </div>
           )}
           <Button
