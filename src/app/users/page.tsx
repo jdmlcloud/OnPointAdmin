@@ -164,7 +164,6 @@ export default function UsersPage() {
     })
     setFilteredUsers(filtered)
   }, [userSearchTerm, users])
->>>>>>> feature/user-management-v1.1.0
 
   // Filtrar roles
   useEffect(() => {
