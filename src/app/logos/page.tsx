@@ -313,7 +313,7 @@ export default function LogosPage() {
       setSelectedClient(prev => prev ? {
         ...prev,
         logos: clientLogos,
-        primaryLogoId: clientLogos.find(logo => logo.isPrimary)?.id || null
+        primaryLogoId: clientLogos.find(logo => logo.isPrimary)?.id || undefined
       } : null)
     }
   }, [logos, selectedClient?.name])
@@ -1448,8 +1448,9 @@ export default function LogosPage() {
           isOpen={modals.edit.isOpen}
           onClose={() => closeModal('edit')}
           title="Editar Logo"
-          size="lg"
-          onSave={() => handleSave(selectedItem)}
+          type="edit"
+          onConfirm={() => handleSave(selectedItem)}
+          confirmText="Guardar"
         >
           {selectedItem && (
             <div className="space-y-6">
