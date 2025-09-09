@@ -268,76 +268,133 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Lista de Actividades Recientes */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Actividades Recientes
-              </CardTitle>
-              <CardDescription>
-                Últimas acciones y notificaciones importantes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg border-l-4 border-orange-500">
-                  <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
-                    <FileTextIcon className="h-4 w-4 text-white" />
+          {/* Notificaciones y Alertas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Notificaciones Urgentes */}
+            <Card className="border-red-200 dark:border-red-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-red-600">
+                  <AlertCircle className="h-5 w-5" />
+                  Urgentes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-6 w-6 rounded-full bg-red-500 flex items-center justify-center">
+                      <FileTextIcon className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Propuesta ABC</p>
+                      <p className="text-xs text-muted-foreground">Vence en 2 horas</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Nueva propuesta pendiente de aprobación</p>
-                    <p className="text-xs text-muted-foreground">Cliente: Empresa ABC - Hace 30 minutos</p>
-                  </div>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">Urgente</Badge>
+                  <Badge variant="destructive" className="text-xs">Urgente</Badge>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border-l-4 border-green-500">
-                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                    <UserPlus className="h-4 w-4 text-white" />
+                <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-950/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-6 w-6 rounded-full bg-red-500 flex items-center justify-center">
+                      <Calendar className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Cotización HBO</p>
+                      <p className="text-xs text-muted-foreground">Vence mañana</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Nuevo cliente registrado</p>
-                    <p className="text-xs text-muted-foreground">Netflix - Hace 1 hora</p>
+                  <Badge variant="destructive" className="text-xs">Vence</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mensajes y Comunicación */}
+            <Card className="border-blue-200 dark:border-blue-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-blue-600">
+                  <MessageSquare className="h-5 w-5" />
+                  Comunicación
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center">
+                      <MessageSquarePlus className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">WhatsApp +52 55 1234</p>
+                      <p className="text-xs text-muted-foreground">Hace 30 min</p>
+                    </div>
                   </div>
-                  <Badge variant="secondary" className="bg-green-100 text-green-800">Nuevo</Badge>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">Nuevo</Badge>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border-l-4 border-blue-500">
-                  <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                    <MessageSquarePlus className="h-4 w-4 text-white" />
+                <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className="h-6 w-6 rounded-full bg-blue-500 flex items-center justify-center">
+                      <Mail className="h-3 w-3 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Email Netflix</p>
+                      <p className="text-xs text-muted-foreground">Hace 1 hora</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Mensaje de WhatsApp sin responder</p>
-                    <p className="text-xs text-muted-foreground">+52 55 1234 5678 - Hace 2 horas</p>
-                  </div>
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800">Pendiente</Badge>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">Pendiente</Badge>
                 </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg border-l-4 border-purple-500">
-                  <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
-                    <Target className="h-4 w-4 text-white" />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Resumen de Productividad */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tareas Completadas Hoy */}
+            <Card className="border-green-200 dark:border-green-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-green-500 flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Tarea completada: Actualizar catálogo</p>
-                    <p className="text-xs text-muted-foreground">Productos - Hace 3 horas</p>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">5</p>
+                    <p className="text-sm text-muted-foreground">Tareas Completadas</p>
+                    <p className="text-xs text-gray-500">Hoy</p>
                   </div>
-                  <Badge variant="secondary" className="bg-purple-100 text-purple-800">Completado</Badge>
                 </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border-l-4 border-red-500">
-                  <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center">
-                    <AlertCircle className="h-4 w-4 text-white" />
+              </CardContent>
+            </Card>
+
+            {/* Clientes Contactados */}
+            <Card className="border-purple-200 dark:border-purple-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">Cotización vence mañana</p>
-                    <p className="text-xs text-muted-foreground">Cliente: HBO - Hace 4 horas</p>
+                  <div>
+                    <p className="text-2xl font-bold text-purple-600">8</p>
+                    <p className="text-sm text-muted-foreground">Clientes Contactados</p>
+                    <p className="text-xs text-gray-500">Esta semana</p>
                   </div>
-                  <Badge variant="secondary" className="bg-red-100 text-red-800">Vence pronto</Badge>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Propuestas Enviadas */}
+            <Card className="border-orange-200 dark:border-orange-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                    <FileTextIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-orange-600">12</p>
+                    <p className="text-sm text-muted-foreground">Propuestas Enviadas</p>
+                    <p className="text-xs text-gray-500">Este mes</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Accesos Rápidos */}
