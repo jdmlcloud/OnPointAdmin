@@ -606,7 +606,10 @@ export default function LogosPage() {
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              onClick={() => setViewMode('clients')}
+              onClick={() => {
+                setViewMode('clients')
+                // No limpiar selectedClient aquí para mantener la selección del cliente
+              }}
             >
               <Building2 className="h-4 w-4" />
               Clientes
@@ -617,7 +620,10 @@ export default function LogosPage() {
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
-              onClick={() => setViewMode('logos')}
+              onClick={() => {
+                setViewMode('logos')
+                setSelectedClient(null) // Limpiar cliente seleccionado
+              }}
             >
               <Image className="h-4 w-4" />
               Todos los Logos
