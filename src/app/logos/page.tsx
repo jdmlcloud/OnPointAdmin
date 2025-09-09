@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,16 +18,15 @@ import {
   Filter,
   Image,
   Download,
-  Upload,
   Edit,
   Trash2,
   Eye,
-  Share,
-  Tag,
-  Calendar,
   FileText,
   Palette,
-  Layers
+  Layers,
+  Building2,
+  ArrowLeft,
+  Star
 } from "lucide-react"
 
 interface Logo {
@@ -85,6 +84,8 @@ export default function LogosPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [activeFilters, setActiveFilters] = useState<string[]>([])
   const [showFilters, setShowFilters] = useState(false)
+  const [viewMode, setViewMode] = useState<'clients' | 'logos'>('clients')
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const {
     modals,
     setModals,
@@ -114,6 +115,27 @@ export default function LogosPage() {
     return acc
   }, {} as Record<string, { clientId: string; clientName: string; logos: Logo[] }>)
 
+  // Funciones para manejar la navegación entre vistas
+  const handleClientClick = (client: { clientId: string; clientName: string; logos: Logo[] }) => {
+    setSelectedClient({
+      id: client.clientId,
+      name: client.clientName,
+      description: `Cliente con ${client.logos.length} logos`,
+      industry: 'Entertainment',
+      contactEmail: `${client.clientName.toLowerCase()}@example.com`,
+      logos: client.logos,
+      primaryLogoId: client.logos.find(logo => logo.isPrimary)?.id,
+      createdAt: client.logos[0]?.createdAt || new Date().toISOString(),
+      updatedAt: client.logos[0]?.updatedAt || new Date().toISOString()
+    })
+    setViewMode('logos')
+  }
+
+  const handleBackToClients = () => {
+    setSelectedClient(null)
+    setViewMode('clients')
+  }
+
   const filteredLogos = logos.filter(logo => {
     const searchLower = searchTerm.toLowerCase()
     
@@ -138,40 +160,34 @@ export default function LogosPage() {
         case 'transparent:no':
           if (logo.isTransparent) return false
           break
-        case 'recent:used':
-          if (!logo.lastUsed) return false
-          break
-        case 'recent:unused':
-          if (logo.lastUsed) return false
-          break
         case 'primary:yes':
           if (!logo.isPrimary) return false
           break
         case 'primary:no':
           if (logo.isPrimary) return false
           break
+        case 'recent:used':
+          if (!logo.lastUsed) return false
+          break
+        case 'recent:unused':
+          if (logo.lastUsed) return false
+          break
         default:
-          // Filtro por categoría específica
-          if (filter.startsWith('category:')) {
-            const categoryFilter = filter.replace('category:', '')
-            if (!logo.category.toLowerCase().includes(categoryFilter.toLowerCase())) return false
-          }
-          // Filtro por etiqueta específica
-          if (filter.startsWith('tag:')) {
-            const tagFilter = filter.replace('tag:', '')
-            if (!logo.tags || !logo.tags.some((tag: string) => 
-              tag.toLowerCase().includes(tagFilter.toLowerCase())
-            )) return false
-          }
-          // Filtro por cliente específico
           if (filter.startsWith('client:')) {
-            const clientFilter = filter.replace('client:', '')
-            if (!logo.clientName.toLowerCase().includes(clientFilter.toLowerCase())) return false
+            const clientName = filter.replace('client:', '')
+            if (!logo.clientName.toLowerCase().includes(clientName.toLowerCase())) return false
+          } else if (filter.startsWith('category:')) {
+            const category = filter.replace('category:', '')
+            if (!logo.category.toLowerCase().includes(category.toLowerCase())) return false
+          } else if (filter.startsWith('tag:')) {
+            const tag = filter.replace('tag:', '')
+            if (!logo.tags || !logo.tags.some(t => t.toLowerCase().includes(tag.toLowerCase()))) return false
           }
+          break
       }
     }
     
-    // Filtro de búsqueda
+    // Aplicar búsqueda
     return (
       logo.name.toLowerCase().includes(searchLower) ||
       logo.clientName.toLowerCase().includes(searchLower) ||
@@ -226,25 +242,42 @@ export default function LogosPage() {
     }
   }
 
-  // Obtener categorías únicas para filtros
-  const categories = [...new Set(logos.map(l => l.category))]
-  const tags = [...new Set(logos.flatMap(l => l.tags || []))]
+  // Obtener todas las etiquetas únicas para filtros
+  const allTags = useMemo(() => {
+    const tags = new Set<string>()
+    logos.forEach(logo => {
+      if (logo.tags) {
+        logo.tags.forEach(tag => tags.add(tag))
+      }
+    })
+    return Array.from(tags).sort()
+  }, [logos])
+
+  // Obtener todos los clientes únicos para filtros
+  const allClients = useMemo(() => {
+    const clients = new Set<string>()
+    logos.forEach(logo => {
+      clients.add(logo.clientName)
+    })
+    return Array.from(clients).sort()
+  }, [logos])
+
+  // Obtener todas las categorías únicas para filtros
+  const allCategories = useMemo(() => {
+    const categories = new Set<string>()
+    logos.forEach(logo => {
+      categories.add(logo.category)
+    })
+    return Array.from(categories).sort()
+  }, [logos])
 
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Gestión de Logos</h1>
-              <p className="text-muted-foreground">
-                Centraliza y administra todos los logos oficiales
-              </p>
-            </div>
-            <Button onClick={() => router.push('/logos/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Logo
-            </Button>
+        <div className="flex-1 flex flex-col p-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold">Gestión de Logos</h1>
+            <p className="text-muted-foreground">Cargando logos...</p>
           </div>
           <LogoListSkeleton />
         </div>
@@ -255,14 +288,11 @@ export default function LogosPage() {
   if (error) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <Image className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">Error al cargar logos</h2>
             <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={refreshLogos}>
-              Intentar de nuevo
-            </Button>
+            <Button onClick={refreshLogos}>Reintentar</Button>
           </div>
         </div>
       </MainLayout>
@@ -271,13 +301,16 @@ export default function LogosPage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col h-full">
+      <div className="flex-1 flex flex-col p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Gestión de Logos</h1>
             <p className="text-muted-foreground">
-              Centraliza y administra todos los logos oficiales ({filteredLogos.length} logos)
+              {viewMode === 'clients' 
+                ? `Centraliza y administra logos por cliente (${Object.keys(logosByClient).length} clientes)`
+                : `Centraliza y administra todos los logos oficiales (${filteredLogos.length} logos)`
+              }
             </p>
           </div>
           <Button onClick={() => router.push('/logos/new')}>
@@ -291,12 +324,36 @@ export default function LogosPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Buscar logos por nombre, categoría, marca o etiquetas..."
+              placeholder={viewMode === 'clients' 
+                ? "Buscar clientes por nombre..." 
+                : "Buscar logos por nombre, categoría, marca o etiquetas..."
+              }
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
+          
+          {/* Botón de cambio de vista */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewMode === 'clients' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('clients')}
+            >
+              <Building2 className="h-4 w-4 mr-2" />
+              Clientes
+            </Button>
+            <Button
+              variant={viewMode === 'logos' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setViewMode('logos')}
+            >
+              <Image className="h-4 w-4 mr-2" />
+              Logos
+            </Button>
+          </div>
+          
           <Button 
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
@@ -324,16 +381,16 @@ export default function LogosPage() {
             {/* Filtros Predefinidos */}
             <div className="flex flex-wrap gap-2 mb-3">
               {[
-                { key: 'status:active', label: 'Activos', icon: '✅' },
-                { key: 'status:inactive', label: 'Inactivos', icon: '❌' },
-                { key: 'type:vector', label: 'Vectoriales', icon: '📐' },
-                { key: 'type:raster', label: 'Raster', icon: '🖼️' },
-                { key: 'transparent:yes', label: 'Con transparencia', icon: '🔍' },
-                { key: 'transparent:no', label: 'Sin transparencia', icon: '⬜' },
-                { key: 'primary:yes', label: 'Logos principales', icon: '⭐' },
-                { key: 'primary:no', label: 'Logos secundarios', icon: '🔹' },
-                { key: 'recent:used', label: 'Recientemente usados', icon: '🕒' },
-                { key: 'recent:unused', label: 'No usados', icon: '📅' }
+                { key: 'status:active', label: '✅ Activos' },
+                { key: 'status:inactive', label: '❌ Inactivos' },
+                { key: 'type:vector', label: '📐 Vectoriales' },
+                { key: 'type:raster', label: '🖼️ Raster' },
+                { key: 'transparent:yes', label: '🔍 Con transparencia' },
+                { key: 'transparent:no', label: '⬜ Sin transparencia' },
+                { key: 'primary:yes', label: '⭐ Logos principales' },
+                { key: 'primary:no', label: '🔹 Logos secundarios' },
+                { key: 'recent:used', label: '🕒 Recientemente usados' },
+                { key: 'recent:unused', label: '📅 No usados' }
               ].map((filter) => (
                 <button
                   key={filter.key}
@@ -350,21 +407,21 @@ export default function LogosPage() {
                       : 'bg-background border border-border hover:bg-muted'
                   }`}
                 >
-                  {filter.icon} {filter.label}
+                  {filter.label}
                 </button>
               ))}
             </div>
 
             {/* Filtros por Cliente */}
-            {Object.keys(logosByClient).length > 0 && (
+            {allClients.length > 0 && (
               <div className="mb-3">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Clientes</h4>
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">Clientes</h4>
                 <div className="flex flex-wrap gap-2">
-                  {Object.values(logosByClient).map((client) => (
+                  {allClients.map((client) => (
                     <button
-                      key={client.clientId}
+                      key={`client:${client}`}
                       onClick={() => {
-                        const filterKey = `client:${client.clientName}`
+                        const filterKey = `client:${client}`
                         if (activeFilters.includes(filterKey)) {
                           setActiveFilters(activeFilters.filter(f => f !== filterKey))
                         } else {
@@ -372,12 +429,12 @@ export default function LogosPage() {
                         }
                       }}
                       className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                        activeFilters.includes(`client:${client.clientName}`)
+                        activeFilters.includes(`client:${client}`)
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-background border border-border hover:bg-muted'
                       }`}
                     >
-                      🏢 {client.clientName} ({client.logos.length})
+                      🏢 {client}
                     </button>
                   ))}
                 </div>
@@ -385,13 +442,13 @@ export default function LogosPage() {
             )}
 
             {/* Filtros por Categoría */}
-            {categories.length > 0 && (
+            {allCategories.length > 0 && (
               <div className="mb-3">
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Categorías</h4>
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">Categorías</h4>
                 <div className="flex flex-wrap gap-2">
-                  {categories.map((category) => (
+                  {allCategories.map((category) => (
                     <button
-                      key={category}
+                      key={`category:${category}`}
                       onClick={() => {
                         const filterKey = `category:${category}`
                         if (activeFilters.includes(filterKey)) {
@@ -414,13 +471,13 @@ export default function LogosPage() {
             )}
 
             {/* Filtros por Etiquetas */}
-            {tags.length > 0 && (
+            {allTags.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Etiquetas</h4>
+                <h4 className="text-xs font-medium text-muted-foreground mb-2">Etiquetas</h4>
                 <div className="flex flex-wrap gap-2">
-                  {tags.slice(0, 10).map((tag) => (
+                  {allTags.slice(0, 10).map((tag) => (
                     <button
-                      key={tag}
+                      key={`tag:${tag}`}
                       onClick={() => {
                         const filterKey = `tag:${tag}`
                         if (activeFilters.includes(filterKey)) {
@@ -438,6 +495,11 @@ export default function LogosPage() {
                       🏷️ {tag}
                     </button>
                   ))}
+                  {allTags.length > 10 && (
+                    <span className="text-xs text-muted-foreground px-2 py-1">
+                      +{allTags.length - 10} más...
+                    </span>
+                  )}
                 </div>
               </div>
             )}
@@ -481,419 +543,514 @@ export default function LogosPage() {
           </div>
         )}
 
-        {/* Logos Grid - Agrupados por Cliente */}
+        {/* Contenido Principal */}
         <div className="flex-1 overflow-auto scrollbar-hide">
-          {Object.keys(filteredLogosByClient).length === 0 ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <Image className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No se encontraron logos</h2>
-                <p className="text-muted-foreground mb-4">
-                  {searchTerm || activeFilters.length > 0 
-                    ? 'No hay logos que coincidan con los filtros aplicados'
-                    : 'Aún no hay logos registrados'
-                  }
-                </p>
-                <Button onClick={() => router.push('/logos/new')}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Agregar primer logo
-                </Button>
+          {viewMode === 'clients' ? (
+            // Vista de Cards de Clientes
+            Object.keys(filteredLogosByClient).length === 0 ? (
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <Building2 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">No se encontraron clientes</h2>
+                  <p className="text-muted-foreground mb-4">
+                    {searchTerm || activeFilters.length > 0 
+                      ? 'No hay clientes que coincidan con los filtros aplicados'
+                      : 'Aún no hay logos registrados'
+                    }
+                  </p>
+                  <Button onClick={() => router.push('/logos/new')}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar primer logo
+                  </Button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {Object.values(filteredLogosByClient).map((client) => (
-                <div key={client.clientId} className="space-y-4">
-                  {/* Header del Cliente */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-xl font-semibold">{client.clientName}</h3>
-                      <Badge variant="outline" className="text-sm">
-                        {client.logos.length} logo{client.logos.length !== 1 ? 's' : ''}
-                      </Badge>
-                      {client.logos.some(logo => logo.isPrimary) && (
-                        <Badge variant="default" className="text-sm">
-                          ⭐ Tiene logo principal
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Object.values(filteredLogosByClient).map((client) => (
+                  <Card 
+                    key={client.clientId} 
+                    className="hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => handleClientClick(client)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <Building2 className="h-6 w-6 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold">{client.clientName}</h3>
+                            <p className="text-sm text-muted-foreground">Cliente</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-sm">
+                          {client.logos.length} logo{client.logos.length !== 1 ? 's' : ''}
                         </Badge>
-                      )}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => router.push(`/logos/new?client=${client.clientId}`)}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar logo
-                    </Button>
-                  </div>
-
-                  {/* Grid de Logos del Cliente */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {client.logos.map((logo) => (
-            <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
-              {/* Imagen centrada en la parte superior */}
-              <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
-                {logo.thumbnailUrl ? (
-                  <img 
-                    src={logo.thumbnailUrl} 
-                    alt={logo.name}
-                    className="w-full h-full object-contain p-4"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Image className="h-16 w-16 mb-2" />
-                    <span className="text-sm font-medium">Sin vista previa</span>
-                  </div>
-                )}
-                
-                {/* Badge de estado superpuesto */}
-                <div className="absolute top-3 right-3">
-                  <Badge variant={getStatusBadgeVariant(logo.status)} className="text-xs">
-                    {getStatusText(logo.status)}
-                  </Badge>
-                </div>
-
-                {/* Badge de tipo de archivo */}
-                <div className="absolute top-3 left-3">
-                  <Badge variant="outline" className="text-xs">
-                    {logo.fileType.toUpperCase()}
-                  </Badge>
-                </div>
-
-                {/* Badge de vector si es vectorial */}
-                {logo.isVector && (
-                  <div className="absolute bottom-3 left-3">
-                    <Badge variant="secondary" className="text-xs">
-                      <Layers className="h-3 w-3 mr-1" />
-                      Vector
-                    </Badge>
-                  </div>
-                )}
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Image className="h-4 w-4 text-muted-foreground" />
+                          <span>{client.logos.length} logos disponibles</span>
+                        </div>
+                        
+                        {client.logos.some(logo => logo.isPrimary) && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Star className="h-4 w-4 text-yellow-500" />
+                            <span>Tiene logo principal</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-2 text-sm">
+                          <Palette className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            {new Set(client.logos.map(logo => logo.fileType)).size} formatos
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {client.logos.slice(0, 3).map((logo, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {logo.fileType}
+                          </Badge>
+                        ))}
+                        {client.logos.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{client.logos.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <Button 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleClientClick(client)
+                        }}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Logos
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-
-              {/* Contenido de la card */}
-              <CardContent className="flex-1 flex flex-col p-4">
-                {/* Nombre y variante */}
-                <div className="mb-3">
-                  <CardTitle className="text-lg mb-1 line-clamp-1">{logo.name}</CardTitle>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-xs">
-                      {logo.category}
-                    </Badge>
-                    {logo.variant && (
-                      <Badge variant="secondary" className="text-xs">
-                        {logo.variant}
-                      </Badge>
-                    )}
-                    {logo.isPrimary && (
-                      <Badge variant="default" className="text-xs">
-                        ⭐ Principal
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-
-                {/* Descripción */}
-                <CardDescription className="mb-4 line-clamp-2 text-sm">
-                  {logo.description || "Sin descripción"}
-                </CardDescription>
-                
-                {/* Información del archivo */}
-                <div className="space-y-2 mb-4 flex-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">{formatFileSize(logo.fileSize)}</span>
-                  </div>
-                  
-                  {logo.brand && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Palette className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{logo.brand}</span>
-                    </div>
-                  )}
-                  
-                  {logo.dimensions && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Layers className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{logo.dimensions.width} x {logo.dimensions.height}px</span>
-                    </div>
-                  )}
-                  
-                  {logo.downloadCount && logo.downloadCount > 0 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Download className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{logo.downloadCount} descargas</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Etiquetas */}
-                {logo.tags && logo.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {logo.tags.slice(0, 3).map((tag: string, index: number) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                    {logo.tags.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
-                        +{logo.tags.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-                )}
-
-                {/* Botones fijos en la parte inferior */}
-                <div className="flex gap-2 mt-auto">
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleView(logo)}
-                    animation="pulse"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver
-                  </AnimatedButton>
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleEdit(logo)}
-                    animation="pulse"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Editar
-                  </AnimatedButton>
-                  <AnimatedButton 
-                    variant="outline" 
+            )
+          ) : (
+            // Vista de Logos (modo original)
+            selectedClient ? (
+              // Vista de logos de un cliente específico
+              <div className="space-y-6">
+                {/* Header del Cliente Seleccionado */}
+                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                  <Button
+                    variant="ghost"
                     size="sm"
-                    onClick={() => handleDelete(logo)}
-                    animation="pulse"
+                    onClick={handleBackToClients}
+                    className="mr-2"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </AnimatedButton>
-                </div>
-              </CardContent>
-            </Card>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Modales */}
-      <ActionModal
-        isOpen={modals.view.isOpen}
-        onClose={() => closeModal('view')}
-        title="Detalles del Logo"
-        size="lg"
-      >
-        {modals.view.data && (
-          <div className="space-y-6">
-            {/* Imagen del logo */}
-            <div className="flex justify-center">
-              {modals.view.data.thumbnailUrl ? (
-                <img 
-                  src={modals.view.data.thumbnailUrl} 
-                  alt={modals.view.data.name}
-                  className="max-w-md max-h-64 object-contain"
-                />
-              ) : (
-                <div className="w-64 h-64 bg-muted rounded-lg flex items-center justify-center">
-                  <Image className="h-16 w-16 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-
-            {/* Información básica */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Nombre</label>
-                <p className="text-lg font-semibold">{modals.view.data.name}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Categoría</label>
-                <p className="text-lg">{modals.view.data.category}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Tipo de Archivo</label>
-                <p className="text-lg font-mono">{modals.view.data.fileType.toUpperCase()}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Tamaño</label>
-                <p className="text-lg">{formatFileSize(modals.view.data.fileSize)}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Estado</label>
-                <Badge variant={getStatusBadgeVariant(modals.view.data.status)}>
-                  {getStatusText(modals.view.data.status)}
-                </Badge>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Marca</label>
-                <p className="text-lg">{modals.view.data.brand || 'No especificado'}</p>
-              </div>
-            </div>
-
-            {/* Especificaciones técnicas */}
-            {(modals.view.data.dimensions || modals.view.data.dpi || modals.view.data.isVector) && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Especificaciones Técnicas</label>
-                <div className="grid grid-cols-3 gap-4 mt-2">
-                  {modals.view.data.dimensions && (
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Volver a Clientes
+                  </Button>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Building2 className="h-5 w-5 text-primary" />
+                    </div>
                     <div>
-                      <p className="text-sm font-medium">Dimensiones</p>
+                      <h2 className="text-xl font-semibold">{selectedClient.name}</h2>
                       <p className="text-sm text-muted-foreground">
-                        {modals.view.data.dimensions.width} x {modals.view.data.dimensions.height}px
+                        {selectedClient.logos.length} logos disponibles
                       </p>
                     </div>
-                  )}
-                  {modals.view.data.dpi && (
-                    <div>
-                      <p className="text-sm font-medium">DPI</p>
-                      <p className="text-sm text-muted-foreground">{modals.view.data.dpi}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium">Tipo</p>
-                    <p className="text-sm text-muted-foreground">
-                      {modals.view.data.isVector ? 'Vectorial' : 'Raster'}
-                    </p>
                   </div>
                 </div>
-              </div>
-            )}
+                
+                {/* Grid de Logos del Cliente */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {selectedClient.logos.map((logo) => (
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
+                      {/* Imagen centrada en la parte superior */}
+                      <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                        {logo.thumbnailUrl ? (
+                          <img
+                            src={logo.thumbnailUrl}
+                            alt={logo.name}
+                            className="w-full h-full object-contain p-4"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center text-muted-foreground">
+                            <Image className="h-16 w-16 mb-2" />
+                            <span className="text-sm font-medium">Sin vista previa</span>
+                          </div>
+                        )}
 
-            {/* Etiquetas */}
-            {modals.view.data.tags && modals.view.data.tags.length > 0 && (
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Etiquetas</label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {modals.view.data.tags.map((tag: string, index: number) => (
-                    <Badge key={index} variant="outline">{tag}</Badge>
+                        {/* Badge de estado superpuesto */}
+                        <div className="absolute top-3 right-3">
+                          <Badge variant={getStatusBadgeVariant(logo.status)} className="text-xs">
+                            {getStatusText(logo.status)}
+                          </Badge>
+                        </div>
+
+                        {/* Badge de tipo de archivo */}
+                        <div className="absolute top-3 left-3">
+                          <Badge variant="outline" className="text-xs">
+                            {logo.fileType.toUpperCase()}
+                          </Badge>
+                        </div>
+
+                        {/* Badge de vector si es vectorial */}
+                        {logo.isVector && (
+                          <div className="absolute bottom-3 left-3">
+                            <Badge variant="secondary" className="text-xs">
+                              <Layers className="h-3 w-3 mr-1" />
+                              Vector
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Contenido de la card */}
+                      <CardContent className="flex-1 flex flex-col p-4">
+                        {/* Nombre y variante */}
+                        <div className="mb-3">
+                          <CardTitle className="text-lg mb-1 line-clamp-1">{logo.name}</CardTitle>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {logo.category}
+                            </Badge>
+                            {logo.variant && (
+                              <Badge variant="secondary" className="text-xs">
+                                {logo.variant}
+                              </Badge>
+                            )}
+                            {logo.isPrimary && (
+                              <Badge variant="default" className="text-xs">
+                                ⭐ Principal
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Descripción */}
+                        <CardDescription className="mb-4 line-clamp-2 text-sm">
+                          {logo.description || "Sin descripción"}
+                        </CardDescription>
+
+                        {/* Información del archivo */}
+                        <div className="space-y-2 mb-4 flex-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{formatFileSize(logo.fileSize)}</span>
+                          </div>
+
+                          {logo.brand && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Palette className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="truncate">{logo.brand}</span>
+                            </div>
+                          )}
+
+                          {logo.dimensions && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Layers className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="truncate">{logo.dimensions.width} x {logo.dimensions.height}px</span>
+                            </div>
+                          )}
+
+                          {logo.downloadCount && logo.downloadCount > 0 && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Download className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                              <span className="truncate">{logo.downloadCount} descargas</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Etiquetas */}
+                        {logo.tags && logo.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {logo.tags.slice(0, 3).map((tag: string, index: number) => (
+                              <Badge key={index} variant="secondary" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {logo.tags.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{logo.tags.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Botones fijos en la parte inferior */}
+                        <div className="flex gap-2 mt-auto">
+                          <AnimatedButton
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleView(logo)}
+                            animation="pulse"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver
+                          </AnimatedButton>
+                          <AnimatedButton
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => handleEdit(logo)}
+                            animation="pulse"
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </AnimatedButton>
+                          <AnimatedButton
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDelete(logo)}
+                            animation="pulse"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </AnimatedButton>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </div>
-            )}
+            ) : (
+              // Vista original de logos agrupados por cliente
+              Object.keys(filteredLogosByClient).length === 0 ? (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center">
+                    <Image className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                    <h2 className="text-xl font-semibold mb-2">No se encontraron logos</h2>
+                    <p className="text-muted-foreground mb-4">
+                      {searchTerm || activeFilters.length > 0 
+                        ? 'No hay logos que coincidan con los filtros aplicados'
+                        : 'Aún no hay logos registrados'
+                      }
+                    </p>
+                    <Button onClick={() => router.push('/logos/new')}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Agregar primer logo
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {Object.values(filteredLogosByClient).map((client) => (
+                    <div key={client.clientId} className="space-y-4">
+                      {/* Header del Cliente */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <h3 className="text-xl font-semibold">{client.clientName}</h3>
+                          <Badge variant="outline" className="text-sm">
+                            {client.logos.length} logo{client.logos.length !== 1 ? 's' : ''}
+                          </Badge>
+                          {client.logos.some(logo => logo.isPrimary) && (
+                            <Badge variant="default" className="text-sm">
+                              ⭐ Tiene logo principal
+                            </Badge>
+                          )}
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => router.push(`/logos/new?client=${client.clientId}`)}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Agregar logo
+                        </Button>
+                      </div>
 
-            {/* Descripción */}
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Descripción</label>
-              <p className="text-lg">{modals.view.data.description || 'Sin descripción'}</p>
-            </div>
+                      {/* Grid de Logos del Cliente */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {client.logos.map((logo) => (
+                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
+                            {/* Imagen centrada en la parte superior */}
+                            <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                              {logo.thumbnailUrl ? (
+                                <img
+                                  src={logo.thumbnailUrl}
+                                  alt={logo.name}
+                                  className="w-full h-full object-contain p-4"
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                  <Image className="h-16 w-16 mb-2" />
+                                  <span className="text-sm font-medium">Sin vista previa</span>
+                                </div>
+                              )}
 
-            {/* Fechas */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Creado</label>
-                <p className="text-sm">{new Date(modals.view.data.createdAt).toLocaleDateString()}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Última actualización</label>
-                <p className="text-sm">{new Date(modals.view.data.updatedAt || modals.view.data.createdAt).toLocaleDateString()}</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </ActionModal>
+                              {/* Badge de estado superpuesto */}
+                              <div className="absolute top-3 right-3">
+                                <Badge variant={getStatusBadgeVariant(logo.status)} className="text-xs">
+                                  {getStatusText(logo.status)}
+                                </Badge>
+                              </div>
 
-      <ActionModal
-        isOpen={modals.edit.isOpen}
-        onClose={() => closeModal('edit')}
-        title="Editar Logo"
-        size="lg"
-        onSave={() => handleSaveLogo(modals.edit.data)}
-      >
-        {modals.edit.data && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="edit-name" className="block text-sm font-medium mb-2">Nombre *</label>
-                <Input
-                  id="edit-name"
-                  defaultValue={modals.edit.data.name}
-                  placeholder="Nombre del logo"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-category" className="block text-sm font-medium mb-2">Categoría *</label>
-                <Input
-                  id="edit-category"
-                  defaultValue={modals.edit.data.category}
-                  placeholder="Categoría del logo"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-brand" className="block text-sm font-medium mb-2">Marca</label>
-                <Input
-                  id="edit-brand"
-                  defaultValue={modals.edit.data.brand || ''}
-                  placeholder="Nombre de la marca"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-version" className="block text-sm font-medium mb-2">Versión</label>
-                <Input
-                  id="edit-version"
-                  defaultValue={modals.edit.data.version || ''}
-                  placeholder="v1.0"
-                />
-              </div>
-              <div>
-                <label htmlFor="edit-status" className="block text-sm font-medium mb-2">Estado</label>
-                <select
-                  id="edit-status"
-                  defaultValue={modals.edit.data.status}
-                  className="w-full px-3 py-2 border border-input bg-background rounded-md"
-                >
-                  <option value="active">Activo</option>
-                  <option value="inactive">Inactivo</option>
-                  <option value="archived">Archivado</option>
-                </select>
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="edit-description" className="block text-sm font-medium mb-2">Descripción</label>
-              <textarea
-                id="edit-description"
-                defaultValue={modals.edit.data.description || ''}
-                placeholder="Descripción del logo"
-                className="w-full px-3 py-2 border border-input bg-background rounded-md min-h-[100px]"
-              />
-            </div>
+                              {/* Badge de tipo de archivo */}
+                              <div className="absolute top-3 left-3">
+                                <Badge variant="outline" className="text-xs">
+                                  {logo.fileType.toUpperCase()}
+                                </Badge>
+                              </div>
 
-            <div>
-              <label htmlFor="edit-tags" className="block text-sm font-medium mb-2">Etiquetas</label>
-              <Input
-                id="edit-tags"
-                defaultValue={modals.edit.data.tags ? modals.edit.data.tags.join(', ') : ''}
-                placeholder="Etiquetas separadas por comas"
-              />
-            </div>
-          </div>
-        )}
-      </ActionModal>
+                              {/* Badge de vector si es vectorial */}
+                              {logo.isVector && (
+                                <div className="absolute bottom-3 left-3">
+                                  <Badge variant="secondary" className="text-xs">
+                                    <Layers className="h-3 w-3 mr-1" />
+                                    Vector
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
 
-      <ActionModal
-        isOpen={modals.delete.isOpen}
-        onClose={() => closeModal('delete')}
-        title="Eliminar Logo"
-        onSave={() => handleDeleteLogo(modals.delete.data)}
-        saveText="Eliminar"
-        saveVariant="destructive"
-      >
-        {modals.delete.data && (
-          <div className="space-y-4">
-            <p>¿Estás seguro de que quieres eliminar el logo <strong>{modals.delete.data.name}</strong>?</p>
-            <p className="text-sm text-muted-foreground">Esta acción no se puede deshacer y eliminará el archivo del almacenamiento.</p>
-          </div>
-        )}
-      </ActionModal>
+                            {/* Contenido de la card */}
+                            <CardContent className="flex-1 flex flex-col p-4">
+                              {/* Nombre y variante */}
+                              <div className="mb-3">
+                                <CardTitle className="text-lg mb-1 line-clamp-1">{logo.name}</CardTitle>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <Badge variant="outline" className="text-xs">
+                                    {logo.category}
+                                  </Badge>
+                                  {logo.variant && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      {logo.variant}
+                                    </Badge>
+                                  )}
+                                  {logo.isPrimary && (
+                                    <Badge variant="default" className="text-xs">
+                                      ⭐ Principal
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Descripción */}
+                              <CardDescription className="mb-4 line-clamp-2 text-sm">
+                                {logo.description || "Sin descripción"}
+                              </CardDescription>
+
+                              {/* Información del archivo */}
+                              <div className="space-y-2 mb-4 flex-1">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <FileText className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                  <span className="truncate">{formatFileSize(logo.fileSize)}</span>
+                                </div>
+
+                                {logo.brand && (
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Palette className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                    <span className="truncate">{logo.brand}</span>
+                                  </div>
+                                )}
+
+                                {logo.dimensions && (
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Layers className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                    <span className="truncate">{logo.dimensions.width} x {logo.dimensions.height}px</span>
+                                  </div>
+                                )}
+
+                                {logo.downloadCount && logo.downloadCount > 0 && (
+                                  <div className="flex items-center gap-2 text-sm">
+                                    <Download className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                    <span className="truncate">{logo.downloadCount} descargas</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Etiquetas */}
+                              {logo.tags && logo.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-4">
+                                  {logo.tags.slice(0, 3).map((tag: string, index: number) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                      {tag}
+                                    </Badge>
+                                  ))}
+                                  {logo.tags.length > 3 && (
+                                    <Badge variant="outline" className="text-xs">
+                                      +{logo.tags.length - 3}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Botones fijos en la parte inferior */}
+                              <div className="flex gap-2 mt-auto">
+                                <AnimatedButton
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => handleView(logo)}
+                                  animation="pulse"
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Ver
+                                </AnimatedButton>
+                                <AnimatedButton
+                                  variant="outline"
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => handleEdit(logo)}
+                                  animation="pulse"
+                                >
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Editar
+                                </AnimatedButton>
+                                <AnimatedButton
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDelete(logo)}
+                                  animation="pulse"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </AnimatedButton>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            )
+          )}
+        </div>
+
+        {/* Modales */}
+        <ActionModal
+          isOpen={modals.view}
+          onClose={() => closeModal('view')}
+          mode="view"
+          title="Ver Logo"
+          data={modals.selectedItem}
+        />
+
+        <ActionModal
+          isOpen={modals.edit}
+          onClose={() => closeModal('edit')}
+          mode="edit"
+          title="Editar Logo"
+          data={modals.selectedItem}
+          onSave={handleSave}
+        />
+
+        <ActionModal
+          isOpen={modals.delete}
+          onClose={() => closeModal('delete')}
+          mode="delete"
+          title="Eliminar Logo"
+          data={modals.selectedItem}
+          onConfirm={handleDeleteConfirm}
+        />
+      </div>
     </MainLayout>
   )
 }
