@@ -95,8 +95,8 @@ jobs:
       - name: Update API Gateway
         run: |
           echo "🌐 Actualizando API Gateway..."
-          chmod +x scripts/setup-api-gateway.sh
-          ./scripts/setup-api-gateway.sh prod
+          chmod +x scripts/setup-api-gateway-prod.sh
+          ./scripts/setup-api-gateway-prod.sh
 
       - name: Run health checks
         run: |
@@ -149,12 +149,20 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Notify deployment status
+      - name: Check deployment status
         run: |
+          echo "🔍 Verificando estado del despliegue..."
+          echo "Lambda deployment: ${{ needs.deploy-lambda.result }}"
+          echo "Frontend deployment: ${{ needs.deploy-frontend.result }}"
+          
           if [ "${{ needs.deploy-lambda.result }}" == "success" ] && [ "${{ needs.deploy-frontend.result }}" == "success" ]; then
             echo "✅ Despliegue a producción completado exitosamente"
-            # Aquí podrías agregar notificaciones a Slack, Discord, etc.
+            echo "🚀 Sistema listo para producción"
+          elif [ "${{ needs.deploy-lambda.result }}" == "skipped" ] && [ "${{ needs.deploy-frontend.result }}" == "skipped" ]; then
+            echo "⚠️ Despliegue omitido (no es branch main o production)"
           else
             echo "❌ Despliegue a producción falló"
+            echo "Lambda: ${{ needs.deploy-lambda.result }}"
+            echo "Frontend: ${{ needs.deploy-frontend.result }}"
             exit 1
           fi
