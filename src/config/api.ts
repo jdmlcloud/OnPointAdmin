@@ -2,8 +2,8 @@
 export const API_CONFIG = {
   // URLs base de la API Gateway por entorno
   BASE_URLS: {
-    local: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox', // Local usa sandbox
-    sandbox: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
+    local: 'https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox', // Local usa sandbox
+    sandbox: 'https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox',
     prod: 'https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod'
   },
   
