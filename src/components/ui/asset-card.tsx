@@ -224,7 +224,7 @@ export function AssetCard({
 
   return (
     <Card 
-      className={`hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden ${maxWidth} ${className}`}
+      className={`hover:shadow-xl hover:scale-105 transition-all duration-300 ease-in-out flex flex-col h-72 overflow-hidden cursor-pointer ${maxWidth} ${className}`}
       onClick={onClick}
     >
       {/* Imagen/Thumbnail */}
@@ -269,7 +269,7 @@ export function AssetCard({
                   e.stopPropagation()
                   onView()
                 }}
-                className="flex-1 h-8"
+                className="flex-1 h-8 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-colors duration-200"
               >
                 <Eye className="h-4 w-4" />
               </Button>
@@ -282,7 +282,7 @@ export function AssetCard({
                   e.stopPropagation()
                   onEdit()
                 }}
-                className="h-8 px-2"
+                className="h-8 px-2 hover:bg-green-50 hover:border-green-300 hover:text-green-600 transition-colors duration-200"
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -295,7 +295,7 @@ export function AssetCard({
                   e.stopPropagation()
                   onDownload()
                 }}
-                className="h-8 px-2"
+                className="h-8 px-2 hover:bg-purple-50 hover:border-purple-300 hover:text-purple-600 transition-colors duration-200"
               >
                 <Download className="h-4 w-4" />
               </Button>
@@ -308,7 +308,7 @@ export function AssetCard({
                   e.stopPropagation()
                   onDelete()
                 }}
-                className="h-8 px-2 text-destructive hover:text-destructive"
+                className="h-8 px-2 text-destructive hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors duration-200"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
