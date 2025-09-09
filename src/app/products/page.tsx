@@ -12,6 +12,7 @@ import { ActionModal } from "@/components/ui/action-modal"
 import { useCardActions } from "@/hooks/use-card-actions"
 import { useProducts } from "@/hooks/use-products"
 import { ProductListSkeleton } from "@/components/ui/product-skeleton"
+import { AssetCard } from "@/components/ui/asset-card"
 import { 
   Plus, 
   Search, 
@@ -416,156 +417,26 @@ export default function ProductsPage() {
         <div className="flex-1 overflow-auto scrollbar-hide">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
-            <Card key={product.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
-              {/* Imagen centrada en la parte superior */}
-              <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
-                {product.images && product.images.length > 0 ? (
-                  <img 
-                    src={product.images[0]} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Package className="h-16 w-16 mb-2" />
-                    <span className="text-sm font-medium">Sin imagen</span>
-                  </div>
-                )}
-                
-                {/* Badge de estado superpuesto */}
-                <div className="absolute top-3 right-3">
-                  <Badge variant={getStatusBadgeVariant(product.status)} className="text-xs">
-                    {getStatusText(product.status)}
-                  </Badge>
-                </div>
-
-                {/* Badge de stock si es bajo */}
-                {(product.stock || 0) <= 10 && (product.stock || 0) > 0 && (
-                  <div className="absolute top-3 left-3">
-                    <Badge variant="destructive" className="text-xs">
-                      Stock bajo
-                    </Badge>
-                  </div>
-                )}
-
-                {/* Badge de sin stock */}
-                {(product.stock || 0) === 0 && (
-                  <div className="absolute top-3 left-3">
-                    <Badge variant="outline" className="text-xs bg-red-500 text-white">
-                      Sin stock
-                    </Badge>
-                  </div>
-                )}
-              </div>
-
-              {/* Contenido de la card */}
-              <CardContent className="flex-1 flex flex-col p-4">
-                {/* Nombre y categoría */}
-                <div className="mb-3">
-                  <CardTitle className="text-lg mb-1 line-clamp-1">{product.name}</CardTitle>
-                  <Badge variant="outline" className="text-xs">
-                    {product.category}
-                  </Badge>
-                </div>
-
-                {/* Descripción */}
-                <CardDescription className="mb-4 line-clamp-2 text-sm">
-                  {product.description || "Sin descripción"}
-                </CardDescription>
-                
-                {/* Información de precio y stock */}
-                <div className="space-y-2 mb-4 flex-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="font-semibold text-lg">{formatPrice(product.price, product.currency)}</span>
-                  </div>
-                  
-                  {/* SKU */}
-                  {product.sku && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Tag className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate font-mono text-xs">{product.sku}</span>
-                    </div>
-                  )}
-                  
-                  {/* Stock total */}
-                  <div className="flex items-center gap-2 text-sm">
-                    <ShoppingCart className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">Stock total: {product.stock || 0} unidades</span>
-                  </div>
-                  
-                  {/* Colores disponibles */}
-                  {product.colors && product.colors.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="flex gap-1">
-                        {product.colors.slice(0, 3).map((color, index) => (
-                          <div
-                            key={index}
-                            className="w-4 h-4 rounded-full border border-gray-300"
-                            style={{ backgroundColor: color.hex }}
-                            title={`${color.name} (${color.stock})`}
-                          />
-                        ))}
-                        {product.colors.length > 3 && (
-                          <span className="text-xs text-muted-foreground">+{product.colors.length - 3}</span>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {product.colors.length} colores
-                      </span>
-                    </div>
-                  )}
-                  
-                  {/* Capacidad */}
-                  {product.capacity && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{product.capacity}</span>
-                    </div>
-                  )}
-                  
-                  {/* Proveedor */}
-                  {product.providerName && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Building2 className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{product.providerName}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Botones fijos en la parte inferior */}
-                <div className="flex gap-2 mt-auto">
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleView(product)}
-                    animation="pulse"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver
-                  </AnimatedButton>
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleEdit(product)}
-                    animation="pulse"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Editar
-                  </AnimatedButton>
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleDelete(product)}
-                    animation="pulse"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </AnimatedButton>
-                </div>
-              </CardContent>
-            </Card>
+            <AssetCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              description={product.description}
+              thumbnailUrl={product.images?.[0]}
+              fallbackText="Sin imagen"
+              type="product"
+              productData={{
+                category: product.category,
+                price: product.price,
+                status: product.status,
+                tags: product.tags
+              }}
+              onView={() => handleView(product)}
+              onEdit={() => handleEdit(product)}
+              onDelete={() => handleDelete(product)}
+              className="h-full"
+              maxWidth="max-w-none"
+            />
           ))}
           </div>
         </div>

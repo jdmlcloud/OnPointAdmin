@@ -15,6 +15,7 @@ import { useTags } from "@/hooks/use-tags"
 import { TagSelector } from "@/components/ui/tag-selector"
 import { TagBadge } from "@/components/ui/tag-badge"
 import { ProviderListSkeleton } from "@/components/ui/provider-skeleton"
+import { AssetCard } from "@/components/ui/asset-card"
 import { Provider } from "@/lib/db/repositories/dynamodb-provider-repository"
 import { 
   Plus, 
@@ -529,116 +530,25 @@ export default function ProvidersPage() {
         <div className="flex-1 overflow-auto scrollbar-hide">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProviders.map((provider) => (
-            <Card key={provider.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
-              {/* Imagen centrada en la parte superior */}
-              <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
-                {provider.logo ? (
-                  <img 
-                    src={provider.logo} 
-                    alt={provider.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Building2 className="h-16 w-16 mb-2" />
-                    <span className="text-sm font-medium">Sin logo</span>
-                  </div>
-                )}
-                
-                {/* Badge de estado superpuesto */}
-                <div className="absolute top-3 right-3">
-                  <Badge variant={provider.status === "active" ? "default" : "secondary"} className="text-xs">
-                    {provider.status === "active" ? "Activo" : "Inactivo"}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Contenido de la card */}
-              <CardContent className="flex-1 flex flex-col p-4">
-                {/* Nombre y empresa */}
-                <div className="mb-3">
-                  <CardTitle className="text-lg mb-1 line-clamp-1">{provider.name}</CardTitle>
-                  {provider.company && (
-                    <Badge variant="outline" className="text-xs">
-                      {provider.company}
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Descripción */}
-                <CardDescription className="mb-4 line-clamp-2 text-sm">
-                  {provider.description || "Sin descripción"}
-                </CardDescription>
-                
-                {/* Información de contacto */}
-                <div className="space-y-2 mb-4 flex-1">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="truncate">{provider.email}</span>
-                  </div>
-                  {provider.phone && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="truncate">{provider.phone}</span>
-                    </div>
-                  )}
-                  {provider.website && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <a 
-                        href={provider.website.startsWith('http') ? provider.website : `https://${provider.website}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline truncate"
-                      >
-                        {provider.website}
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                {/* Etiquetas */}
-                {provider.tags && provider.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {provider.tags.map((tag: string, index: number) => (
-                      <TagBadge key={index} tag={tag} />
-                    ))}
-                  </div>
-                )}
-
-                {/* Botones fijos en la parte inferior */}
-                <div className="flex gap-2 mt-auto">
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleView(provider)}
-                    animation="pulse"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver
-                  </AnimatedButton>
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm" 
-                    className="flex-1"
-                    onClick={() => handleEdit(provider)}
-                    animation="pulse"
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Editar
-                  </AnimatedButton>
-                  <AnimatedButton 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleDelete(provider)}
-                    animation="pulse"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </AnimatedButton>
-                </div>
-              </CardContent>
-            </Card>
+            <AssetCard
+              key={provider.id}
+              id={provider.id}
+              name={provider.name}
+              description={provider.description}
+              thumbnailUrl={provider.logo}
+              fallbackText="Sin logo"
+              type="provider"
+              providerData={{
+                industry: provider.company,
+                contactEmail: provider.email,
+                status: provider.status
+              }}
+              onView={() => handleView(provider)}
+              onEdit={() => handleEdit(provider)}
+              onDelete={() => handleDelete(provider)}
+              className="h-full"
+              maxWidth="max-w-none"
+            />
           ))}
           </div>
         </div>
