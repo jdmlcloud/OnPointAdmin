@@ -2,9 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
-  Bell, 
   Search, 
   Settings, 
   LogOut,
@@ -15,9 +13,7 @@ import {
 import { useTheme } from "next-themes"
 import { Input } from "@/components/ui/input"
 import { NotificationDropdown } from "@/components/notifications/notification-dropdown"
-import { RoleSwitcher } from "@/components/role-switcher"
 import { useAuthContext } from "@/lib/auth/auth-context"
-import { getVersionString } from "@/lib/version"
 
 export function Header() {
   const { user, logout } = useAuthContext()
@@ -87,30 +83,16 @@ export function Header() {
             <Settings className="h-4 w-4" />
           </Button>
 
-          {/* Role Switcher */}
-          <RoleSwitcher />
-
-          {/* User Profile */}
+          {/* User Profile - Solo para Super Administrador */}
           <div className="flex items-center gap-3 pl-4 border-l">
             <div className="text-right">
               <p className="text-sm font-medium">
-                {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Usuario"}
+                Super Administrador
               </p>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  {typeof user?.role === 'string' ? user.role : user?.role?.name || "usuario"}
-                </Badge>
-                <Badge variant="secondary" className="text-xs">
-                  {getVersionString()}
-                </Badge>
-              </div>
+              <Badge variant="outline" className="text-xs">
+                SUPER_ADMIN
+              </Badge>
             </div>
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="" />
-              <AvatarFallback>
-                {(user?.firstName?.charAt(0) || user?.lastName?.charAt(0) || "U").toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
             <Button
               variant="ghost"
               size="sm"

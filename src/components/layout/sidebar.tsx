@@ -29,6 +29,7 @@ import {
 } from "lucide-react"
 import { useAuthContext } from "@/lib/auth/auth-context"
 import { useState, useEffect } from "react"
+import { getVersionString } from "@/lib/version"
 
 const navigation = [
   {
@@ -307,6 +308,21 @@ export function Sidebar() {
           >
             <LogOut className="h-4 w-4" />
           </Button>
+        </div>
+      </div>
+
+      {/* Versión */}
+      <div className="p-4 border-t">
+        <div className={cn(
+          "flex items-center justify-center",
+          shouldCollapse ? "text-xs" : "text-sm"
+        )}>
+          {!shouldCollapse && (
+            <span className="text-muted-foreground">Versión</span>
+          )}
+          <Badge variant="outline" className="text-xs ml-2">
+            {getVersionString()}
+          </Badge>
         </div>
       </div>
     </div>
