@@ -788,47 +788,82 @@ export default function LogosPage() {
                         </Badge>
                       </div>
                       
-                      <div className="flex-1 flex items-center justify-between">
+                      <div className="space-y-2 flex-1">
+                        {/* Información de logos y formatos */}
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Image className="h-3 w-3" />
                           <span>{client.logos.length} logos</span>
+                          {client.logos.length > 0 && (
+                            <>
+                              <span>•</span>
+                              <span>
+                                {new Set(client.logos.map(logo => logo.fileType)).size} formatos
+                              </span>
+                            </>
+                          )}
                         </div>
                         
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleClientClick(client)
-                            }}
-                            className="h-6 px-2 text-xs"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleAddLogoToClient(client)
-                            }}
-                            className="h-6 px-2 text-xs"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteClient(client)
-                            }}
-                            className="h-6 px-2 text-xs text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        {/* Etiquetas de formatos agrupados */}
+                        {client.logos.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {Object.entries(
+                              client.logos.reduce((acc, logo) => {
+                                const type = logo.fileType || 'UNKNOWN'
+                                acc[type] = (acc[type] || 0) + 1
+                                return acc
+                              }, {} as Record<string, number>)
+                            ).map(([format, count]) => (
+                              <Badge key={format} variant="secondary" className="text-xs">
+                                {format} {count > 1 ? `(${count})` : ''}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Indicador de logo principal */}
+                        {client.logos.some(logo => logo.isPrimary) && (
+                          <div className="flex items-center gap-1 text-xs text-yellow-600">
+                            <Star className="h-3 w-3" />
+                            <span>Logo principal</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Botones de acción */}
+                      <div className="flex gap-1 mt-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleClientClick(client)
+                          }}
+                          className="h-6 px-2 text-xs"
+                        >
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAddLogoToClient(client)
+                          }}
+                          className="h-6 px-2 text-xs"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteClient(client)
+                          }}
+                          className="h-6 px-2 text-xs text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
