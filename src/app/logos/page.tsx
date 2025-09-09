@@ -490,20 +490,25 @@ export default function LogosPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">Gestión de Logos</h1>
-            <p className="text-muted-foreground">
-              {viewMode === 'clients' 
-                ? `Centraliza y administra logos por cliente (${Object.keys(logosByClient).length} clientes)`
-                : `Centraliza y administra todos los logos oficiales (${filteredLogos.length} logos)`
-              }
-            </p>
-            {/* Debug: Mostrar información de logos */}
-            <div className="text-xs text-gray-500 mt-2">
-              <div>🔍 DEBUG ARQUITECTURA:</div>
-              <div>• Total logos: {logos.length}</div>
-              <div>• Clientes agrupados: {Object.keys(logosByClient).length}</div>
-              <div>• View mode: {viewMode}</div>
-              <div>• Fuente: Solo logos (arquitectura limpia)</div>
-            </div>
+            {/* Subtítulo y debug solo se muestran cuando no hay cliente seleccionado */}
+            {!selectedClient && (
+              <>
+                <p className="text-muted-foreground">
+                  {viewMode === 'clients' 
+                    ? `Centraliza y administra logos por cliente (${Object.keys(logosByClient).length} clientes)`
+                    : `Centraliza y administra todos los logos oficiales (${filteredLogos.length} logos)`
+                  }
+                </p>
+                {/* Debug: Mostrar información de logos */}
+                <div className="text-xs text-gray-500 mt-2">
+                  <div>🔍 DEBUG ARQUITECTURA:</div>
+                  <div>• Total logos: {logos.length}</div>
+                  <div>• Clientes agrupados: {Object.keys(logosByClient).length}</div>
+                  <div>• View mode: {viewMode}</div>
+                  <div>• Fuente: Solo logos (arquitectura limpia)</div>
+                </div>
+              </>
+            )}
           </div>
           {viewMode === 'clients' && (
             <div className="flex gap-2">
