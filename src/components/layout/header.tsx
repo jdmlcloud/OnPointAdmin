@@ -1,10 +1,8 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { 
   Search, 
-  Settings, 
   LogOut,
   Moon,
   Sun,
@@ -78,20 +76,13 @@ export function Header() {
           {/* Notifications */}
           <NotificationDropdown />
 
-          {/* Settings */}
-          <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
-            <Settings className="h-4 w-4" />
-          </Button>
 
-          {/* User Profile - Solo para Super Administrador */}
+          {/* User Profile */}
           <div className="flex items-center gap-3 pl-4 border-l">
             <div className="text-right">
               <p className="text-sm font-medium">
-                Super Administrador
+                {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Usuario"}
               </p>
-              <Badge variant="outline" className="text-xs">
-                SUPER_ADMIN
-              </Badge>
             </div>
             <Button
               variant="ghost"
