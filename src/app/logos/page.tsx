@@ -458,7 +458,7 @@ export default function LogosPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex-1 flex flex-col p-6">
+        <div className="flex-1 flex flex-col px-6 pb-6">
           <div className="mb-6">
             <h1 className="text-3xl font-bold">Gestión de Logos</h1>
             <p className="text-muted-foreground">Cargando logos...</p>
@@ -485,7 +485,7 @@ export default function LogosPage() {
 
   return (
     <MainLayout>
-      <div className="flex-1 flex flex-col p-6">
+      <div className="flex-1 flex flex-col px-6 pb-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -635,8 +635,9 @@ export default function LogosPage() {
           </div>
           
           {/* Botón de cambio de vista */}
-          {/* Pestañas de Vista */}
-          <div className="flex space-x-1 bg-muted p-1 rounded-lg">
+          {/* Pestañas de Vista - Solo se muestran cuando no hay cliente seleccionado */}
+          {!selectedClient && (
+            <div className="flex space-x-1 bg-muted p-1 rounded-lg">
             <button
               className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 viewMode === 'clients'
@@ -666,6 +667,7 @@ export default function LogosPage() {
               Todos los Logos
             </button>
           </div>
+          )}
           
           <Button 
             variant="outline"
