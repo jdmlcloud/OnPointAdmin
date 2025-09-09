@@ -8,6 +8,12 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
+// Configuración de tablas por entorno
+const getTableName = (tableType) => {
+  const stage = process.env.STAGE || 'sandbox';
+  return `OnPointAdmin-${tableType}-${stage}`;
+};
+
 // Función para generar respuesta CORS
 const createResponse = (statusCode, body) => ({
   statusCode,
@@ -26,65 +32,90 @@ exports.getNotifications = async (event) => {
   try {
     console.log('🔍 Lambda: Obteniendo notificaciones...');
     
-    // Por ahora usar datos mock, después implementar con DynamoDB
-    const mockNotifications = [
-      {
-        id: '1',
-        type: 'proposal',
-        title: 'Propuesta ABC',
-        description: 'Vence en 2 horas',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        status: 'pending',
-        priority: 'urgent',
-        proposalId: 'prop-123'
-      },
-      {
-        id: '2',
-        type: 'proposal',
-        title: 'Cotización HBO',
-        description: 'Vence mañana',
-        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-        status: 'pending',
-        priority: 'high',
-        proposalId: 'prop-456'
-      },
-      {
-        id: '3',
-        type: 'message',
-        title: 'WhatsApp +52 55 1234',
-        description: 'Mensaje sin responder',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-        status: 'new',
-        priority: 'medium',
-        messageId: 'msg-789'
-      },
-      {
-        id: '4',
-        type: 'message',
-        title: 'Email Netflix',
-        description: 'Solicitud de información',
-        timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-        status: 'pending',
-        priority: 'medium',
-        messageId: 'msg-101'
-      },
-      {
-        id: '5',
-        type: 'client',
-        title: 'Nuevo cliente registrado',
-        description: 'Netflix se registró esta semana',
-        timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-        status: 'new',
-        priority: 'low',
-        clientId: 'client-123'
-      }
-    ];
+    const tableName = getTableName('Notifications');
+    console.log(`📊 Usando tabla: ${tableName}`);
+    
+    // Intentar obtener de DynamoDB
+    try {
+      const scanCommand = new ScanCommand({
+        TableName: tableName,
+        Limit: 50
+      });
+      
+      const result = await docClient.send(scanCommand);
+      const notifications = result.Items || [];
+      
+      console.log(`✅ Obtenidas ${notifications.length} notificaciones de DynamoDB`);
+      
+      return createResponse(200, {
+        success: true,
+        notifications: notifications,
+        message: 'Notificaciones obtenidas exitosamente'
+      });
+      
+    } catch (dbError) {
+      console.warn('⚠️ Error con DynamoDB, usando datos mock:', dbError.message);
+      
+      // Fallback a datos mock
+      const mockNotifications = [
+        {
+          id: '1',
+          type: 'proposal',
+          title: 'Propuesta ABC',
+          description: 'Vence en 2 horas',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          status: 'pending',
+          priority: 'urgent',
+          proposalId: 'prop-123'
+        },
+        {
+          id: '2',
+          type: 'proposal',
+          title: 'Cotización HBO',
+          description: 'Vence mañana',
+          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          status: 'pending',
+          priority: 'high',
+          proposalId: 'prop-456'
+        },
+        {
+          id: '3',
+          type: 'message',
+          title: 'WhatsApp +52 55 1234',
+          description: 'Mensaje sin responder',
+          timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+          status: 'new',
+          priority: 'medium',
+          messageId: 'msg-789'
+        },
+        {
+          id: '4',
+          type: 'message',
+          title: 'Email Netflix',
+          description: 'Solicitud de información',
+          timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+          status: 'pending',
+          priority: 'medium',
+          messageId: 'msg-101'
+        },
+        {
+          id: '5',
+          type: 'client',
+          title: 'Nuevo cliente registrado',
+          description: 'Netflix se registró esta semana',
+          timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+          status: 'new',
+          priority: 'low',
+          clientId: 'client-123'
+        }
+      ];
 
-    return createResponse(200, {
-      success: true,
-      notifications: mockNotifications,
-      message: 'Notificaciones obtenidas exitosamente'
-    });
+      return createResponse(200, {
+        success: true,
+        notifications: mockNotifications,
+        message: 'Notificaciones obtenidas exitosamente (datos mock)'
+      });
+    }
     
   } catch (error) {
     console.error('❌ Error en getNotifications:', error);

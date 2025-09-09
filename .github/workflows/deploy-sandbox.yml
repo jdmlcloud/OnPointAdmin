@@ -1,0 +1,136 @@
+name: Deploy to Sandbox
+
+on:
+  push:
+    branches: [ sandbox, develop ]
+  pull_request:
+    branches: [ sandbox ]
+
+env:
+  AWS_REGION: us-east-1
+  STAGE: sandbox
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run type checking
+        run: npm run type-check
+
+      - name: Run tests
+        run: npm run test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: .next/
+
+  deploy-lambda:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/sandbox' || github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy Lambda functions
+        run: |
+          echo "🚀 Desplegando Lambda functions a sandbox..."
+          chmod +x scripts/deploy-lambda-functions.sh
+          ./scripts/deploy-lambda-functions.sh sandbox
+
+      - name: Update API Gateway
+        run: |
+          echo "🌐 Actualizando API Gateway..."
+          chmod +x scripts/setup-api-gateway.sh
+          ./scripts/setup-api-gateway.sh sandbox
+
+  deploy-frontend:
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/sandbox' || github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Deploy to AWS Amplify
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to S3
+        run: |
+          echo "📦 Desplegando frontend a S3..."
+          aws s3 sync .next/static s3://onpoint-admin-sandbox/static --delete
+          aws s3 sync public s3://onpoint-admin-sandbox/ --delete
+
+  notify:
+    needs: [deploy-lambda, deploy-frontend]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Notify deployment status
+        run: |
+          if [ "${{ needs.deploy-lambda.result }}" == "success" ] && [ "${{ needs.deploy-frontend.result }}" == "success" ]; then
+            echo "✅ Despliegue a sandbox completado exitosamente"
+          else
+            echo "❌ Despliegue a sandbox falló"
+            exit 1
+          fi
