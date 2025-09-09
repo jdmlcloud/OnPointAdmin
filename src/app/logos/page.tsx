@@ -230,6 +230,18 @@ export default function LogosPage() {
     setIsClientModalOpen(true)
   }
 
+  const handleSaveClientWithLogo = async (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>) => {
+    if (editingClient) {
+      // Si estamos editando un cliente existente, solo actualizar el cliente
+      await updateClient(editingClient.id, clientData)
+    } else {
+      // Si es un cliente nuevo, crear el cliente
+      await createClient(clientData)
+    }
+    setIsClientModalOpen(false)
+    setEditingClient(null)
+  }
+
   const handleConfirmDeleteClient = async () => {
     if (!deletingClient) return
     
@@ -1523,7 +1535,7 @@ export default function LogosPage() {
         <ClientModal
           isOpen={isClientModalOpen}
           onClose={handleCloseClientModal}
-          onSave={handleSaveClient}
+          onSave={includeLogoForm ? handleSaveClientWithLogo : handleSaveClient}
           client={editingClient}
           title={editingClient ? 'Editar Cliente' : (includeLogoForm ? 'Nuevo Cliente + Logo' : 'Nuevo Cliente')}
           includeLogoForm={includeLogoForm}

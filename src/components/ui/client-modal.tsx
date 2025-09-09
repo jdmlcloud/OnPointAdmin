@@ -124,7 +124,7 @@ export function ClientModal({ isOpen, onClose, onSave, client, title, includeLog
             name: logoFormData.name,
             description: logoFormData.description,
             category: logoFormData.category,
-            clientId: `client-${formData.name.toLowerCase().replace(/\s+/g, '-')}`,
+            clientId: client?.id || `client-${formData.name.toLowerCase().replace(/\s+/g, '-')}`,
             clientName: formData.name,
             variant: logoFormData.variant,
             brand: formData.name, // Usar el nombre del cliente como marca
