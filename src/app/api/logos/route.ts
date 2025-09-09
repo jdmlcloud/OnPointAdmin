@@ -93,7 +93,11 @@ export async function POST(request: NextRequest) {
       colorVariants: logoData.colorVariants || [],
       usageRights: logoData.usageRights || [],
       lastUsed: logoData.lastUsed || null,
-      downloadCount: logoData.downloadCount || 0
+      downloadCount: logoData.downloadCount || 0,
+      // Agregar contenido del archivo para Lambda
+      fileContent: logoData.fileContent,
+      fileName: logoData.fileName,
+      fileContentType: logoData.fileContentType
     }
     
     const response = await fetch(`${lambdaUrl}/logos`, {

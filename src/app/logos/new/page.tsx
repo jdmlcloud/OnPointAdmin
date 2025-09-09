@@ -189,7 +189,7 @@ export default function NewLogoPage() {
         variant: formData.variant,
         brand: formData.clientName, // Usar clientName como brand
         version: formData.version,
-        tags: selectedTags,
+        tags: selectedTags.length > 0 ? selectedTags : [],
         status: formData.status,
         isPrimary: formData.isPrimary
       }
