@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLogos } from "@/hooks/use-logos"
+import { useClients } from "@/hooks/use-clients"
 import { ArrowLeft, Image, Save, X, Upload, FileText } from "lucide-react"
 
 const LOGO_CATEGORIES = [
@@ -45,6 +46,7 @@ const LOGO_VARIANTS = [
 export default function NewLogoPage() {
   const router = useRouter()
   const { createLogo } = useLogos()
+  const { createClient } = useClients()
   const [isLoading, setIsLoading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
@@ -174,12 +176,17 @@ export default function NewLogoPage() {
 
     setIsLoading(true)
     
-    // Debug: mostrar datos que se van a enviar
-    console.log('🔍 Datos del formulario:', formData)
-    console.log('🔍 Etiquetas seleccionadas:', selectedTags)
-    console.log('🔍 Archivo seleccionado:', selectedFile)
-    
     try {
+      // 1. Crear el cliente primero (igual que en el modal)
+      const clientData = {
+        name: formData.clientName,
+        industry: 'Other' // Valor por defecto
+      }
+      
+      console.log('🚀 Creando cliente:', clientData)
+      await createClient(clientData)
+      
+      // 2. Crear el logo después (igual que en el modal)
       const logoData = {
         name: formData.name,
         description: formData.description,
@@ -194,18 +201,18 @@ export default function NewLogoPage() {
         isPrimary: formData.isPrimary
       }
       
-      console.log('🚀 Enviando datos del logo:', logoData)
-      
+      console.log('🚀 Creando logo:', logoData)
       const success = await createLogo(logoData, selectedFile)
       
       if (success) {
+        console.log('✅ Cliente y logo creados exitosamente')
         router.push('/logos')
       } else {
-        alert('Error al crear el logo')
+        alert('Cliente creado pero hubo un error al crear el logo')
       }
     } catch (error) {
-      console.error('Error creating logo:', error)
-      alert('Error al crear el logo')
+      console.error('Error creating client or logo:', error)
+      alert('Error al crear el cliente o el logo')
     } finally {
       setIsLoading(false)
     }
