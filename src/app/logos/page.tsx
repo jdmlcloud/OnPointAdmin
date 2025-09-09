@@ -115,6 +115,7 @@ export default function LogosPage() {
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [deletingClient, setDeletingClient] = useState<{ clientId: string; clientName: string; logos: Logo[] } | null>(null)
+  const [includeLogoForm, setIncludeLogoForm] = useState(false)
   
   // Estado para archivo de logo en edición
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -193,6 +194,13 @@ export default function LogosPage() {
   // Funciones para gestión de clientes
   const handleCreateClient = () => {
     setEditingClient(null)
+    setIncludeLogoForm(false)
+    setIsClientModalOpen(true)
+  }
+
+  const handleCreateClientWithLogo = () => {
+    setEditingClient(null)
+    setIncludeLogoForm(true)
     setIsClientModalOpen(true)
   }
 
@@ -479,10 +487,16 @@ export default function LogosPage() {
             </p>
           </div>
           {viewMode === 'clients' && (
-            <Button onClick={handleCreateClient} variant="outline">
-              <Building2 className="h-4 w-4 mr-2" />
-              Nuevo Cliente
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleCreateClient} variant="outline">
+                <Building2 className="h-4 w-4 mr-2" />
+                Nuevo Cliente
+              </Button>
+              <Button onClick={handleCreateClientWithLogo} variant="default">
+                <Plus className="h-4 w-4 mr-2" />
+                Cliente + Logo
+              </Button>
+            </div>
           )}
         </div>
 
@@ -1508,7 +1522,8 @@ export default function LogosPage() {
           onClose={handleCloseClientModal}
           onSave={handleSaveClient}
           client={editingClient}
-          title={editingClient ? 'Editar Cliente' : 'Nuevo Cliente'}
+          title={editingClient ? 'Editar Cliente' : (includeLogoForm ? 'Nuevo Cliente + Logo' : 'Nuevo Cliente')}
+          includeLogoForm={includeLogoForm}
         />
 
         {/* Modal de Eliminar Cliente */}
