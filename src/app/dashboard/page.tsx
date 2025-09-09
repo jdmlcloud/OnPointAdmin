@@ -15,17 +15,21 @@ import {
   ArrowRight
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRoles } from "@/hooks/use-roles"
+import { useAuthRoles } from "@/hooks/use-auth-roles"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useStats } from "@/hooks/use-stats"
+import { useRoles as useRolesData } from "@/hooks/use-roles"
+import { usePermissions } from "@/hooks/use-permissions"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { currentRole, hasPermission } = useRoles()
+  const { currentRole, hasPermission } = useAuthRoles()
   const { users, loading: usersLoading } = useUsers()
   const { providers, loading: providersLoading } = useProviders()
   const { stats, loading: statsLoading } = useStats()
+  const { roles, systemRoles, customRoles, loading: rolesLoading } = useRolesData()
+  const { permissions, systemPermissions, customPermissions, loading: permissionsLoading } = usePermissions()
 
   const modules = [
     {
@@ -141,6 +145,89 @@ export default function DashboardPage() {
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Proveedor
           </Button>
+        </div>
+
+        {/* Stats Cards - Dinámicas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Usuarios Activos */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-green-600">
+                    {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Usuarios Activos</p>
+                  <p className="text-xs text-gray-500">
+                    de {usersLoading ? "..." : users.length} usuarios totales
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Usuarios Inactivos */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center">
+                  <Users className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-red-600">
+                    {usersLoading ? "..." : users.filter(u => u.status === 'inactive').length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Usuarios Inactivos</p>
+                  <p className="text-xs text-gray-500">
+                    {usersLoading ? "..." : users.filter(u => u.status === 'inactive').length === 0 ? "Todos activos" : `${users.filter(u => u.status === 'inactive').length} inactivos`}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Roles Personalizados */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                  <Settings className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {rolesLoading ? "..." : customRoles.length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Roles Personalizados</p>
+                  <p className="text-xs text-gray-500">
+                    + {rolesLoading ? "..." : systemRoles.length} roles del sistema
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Permisos Personalizados */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+                  <Settings className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {permissionsLoading ? "..." : customPermissions.length}
+                  </p>
+                  <p className="text-sm text-muted-foreground">Permisos Personalizados</p>
+                  <p className="text-xs text-gray-500">
+                    + {permissionsLoading ? "..." : systemPermissions.length} permisos del sistema
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Modules Grid */}

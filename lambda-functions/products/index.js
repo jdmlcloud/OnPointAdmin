@@ -1,15 +1,15 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, ScanCommand, PutCommand, GetCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, ScanCommand, PutCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 
-// Configuración de DynamoDB
+// Configurar DynamoDB
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || 'us-east-1'
-  // No especificar credenciales - usar el rol IAM de Lambda
 });
+const dynamodb = DynamoDBDocumentClient.from(client);
 
-const docClient = DynamoDBDocumentClient.from(client);
+const TABLE_NAME = process.env.DYNAMODB_PRODUCTS_TABLE || 'OnPointAdmin-Products-sandbox';
 
-// Función para generar respuesta CORS
+// Helper para crear respuestas con CORS
 const createResponse = (statusCode, body) => ({
   statusCode,
   headers: {
@@ -22,259 +22,145 @@ const createResponse = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
-// GET /products
-exports.getProducts = async (event) => {
-  try {
-    console.log('🔍 Lambda: Obteniendo productos...');
-    
-    const { page = 1, limit = 10, status } = event.queryStringParameters || {};
-    
-    const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Limit: parseInt(limit),
-      ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
-    };
-    
-    if (status) {
-      params.FilterExpression = '#status = :status';
-      params.ExpressionAttributeNames = { '#status': 'status' };
-      params.ExpressionAttributeValues = { ':status': status };
-    }
-    
-    const result = await docClient.send(new ScanCommand(params));
-    
-    return createResponse(200, {
-      success: true,
-      products: result.Items || [],
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total: result.Count || 0
-      }
-    });
-  } catch (error) {
-    console.error('❌ Error obteniendo productos:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error interno del servidor'
-    });
-  }
-};
-
-// GET /products/{id}
-exports.getProduct = async (event) => {
-  try {
-    const { id } = event.pathParameters || {};
-    
-    if (!id) {
-      return createResponse(400, {
-        success: false,
-        error: 'ID de producto requerido'
-      });
-    }
-    
-    console.log(`🔍 Lambda: Obteniendo producto ${id}...`);
-    
-    const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Key: { id }
-    };
-    
-    const result = await docClient.send(new GetCommand(params));
-    
-    if (!result.Item) {
-      return createResponse(404, {
-        success: false,
-        error: 'Producto no encontrado'
-      });
-    }
-    
-    return createResponse(200, {
-      success: true,
-      product: result.Item
-    });
-  } catch (error) {
-    console.error('❌ Error obteniendo producto:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error interno del servidor'
-    });
-  }
-};
-
-// POST /products
-exports.createProduct = async (event) => {
-  try {
-    const productData = JSON.parse(event.body || '{}');
-    
-    if (!productData.name || !productData.description) {
-      return createResponse(400, {
-        success: false,
-        error: 'Nombre y descripción son requeridos'
-      });
-    }
-    
-    console.log('➕ Lambda: Creando producto...');
-    
-    const product = {
-      id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...productData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: 'active'
-    };
-    
-    const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Item: product
-    };
-    
-    await docClient.send(new PutCommand(params));
-    
-    return createResponse(201, {
-      success: true,
-      product,
-      message: 'Producto creado exitosamente'
-    });
-  } catch (error) {
-    console.error('❌ Error creando producto:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error interno del servidor'
-    });
-  }
-};
-
-// PUT /products/{id}
-exports.updateProduct = async (event) => {
-  try {
-    const { id } = event.pathParameters || {};
-    const updateData = JSON.parse(event.body || '{}');
-    
-    if (!id) {
-      return createResponse(400, {
-        success: false,
-        error: 'ID de producto requerido'
-      });
-    }
-    
-    console.log(`✏️ Lambda: Actualizando producto ${id}...`);
-    
-    const updateExpression = [];
-    const expressionAttributeNames = {};
-    const expressionAttributeValues = {};
-    
-    Object.keys(updateData).forEach(key => {
-      if (key !== 'id' && key !== 'createdAt') {
-        updateExpression.push(`#${key} = :${key}`);
-        expressionAttributeNames[`#${key}`] = key;
-        expressionAttributeValues[`:${key}`] = updateData[key];
-      }
-    });
-    
-    if (updateExpression.length === 0) {
-      return createResponse(400, {
-        success: false,
-        error: 'No hay campos para actualizar'
-      });
-    }
-    
-    updateExpression.push('#updatedAt = :updatedAt');
-    expressionAttributeNames['#updatedAt'] = 'updatedAt';
-    expressionAttributeValues[':updatedAt'] = new Date().toISOString();
-    
-    const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Key: { id },
-      UpdateExpression: `SET ${updateExpression.join(', ')}`,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
-      ReturnValues: 'ALL_NEW'
-    };
-    
-    const result = await docClient.send(new UpdateCommand(params));
-    
-    return createResponse(200, {
-      success: true,
-      product: result.Attributes,
-      message: 'Producto actualizado exitosamente'
-    });
-  } catch (error) {
-    console.error('❌ Error actualizando producto:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error interno del servidor'
-    });
-  }
-};
-
-// DELETE /products/{id}
-exports.deleteProduct = async (event) => {
-  try {
-    const { id } = event.pathParameters || {};
-    
-    if (!id) {
-      return createResponse(400, {
-        success: false,
-        error: 'ID de producto requerido'
-      });
-    }
-    
-    console.log(`🗑️ Lambda: Eliminando producto ${id}...`);
-    
-    const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Key: { id }
-    };
-    
-    await docClient.send(new DeleteCommand(params));
-    
-    return createResponse(200, {
-      success: true,
-      message: 'Producto eliminado exitosamente'
-    });
-  } catch (error) {
-    console.error('❌ Error eliminando producto:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error interno del servidor'
-    });
-  }
-};
-
-// Handler principal
+// GET /products - Obtener todos los productos
 exports.handler = async (event) => {
-  console.log('📦 Lambda Products - Evento recibido:', JSON.stringify(event, null, 2));
-  
-  const { httpMethod, pathParameters, queryStringParameters } = event;
+  console.log('🔍 Event:', JSON.stringify(event, null, 2));
   
   try {
-    switch (httpMethod) {
-      case 'GET':
-        if (pathParameters && pathParameters.id) {
-          return await exports.getProduct(event);
-        } else {
-          return await exports.getProducts(event);
-        }
-      case 'POST':
-        return await exports.createProduct(event);
-      case 'PUT':
-        return await exports.updateProduct(event);
-      case 'DELETE':
-        return await exports.deleteProduct(event);
-      case 'OPTIONS':
-        return createResponse(200, { message: 'CORS preflight' });
-      default:
-        return createResponse(405, {
-          success: false,
-          error: 'Método no permitido'
-        });
+    // Manejar OPTIONS para CORS
+    if (event.httpMethod === 'OPTIONS') {
+      return createResponse(200, { message: 'CORS preflight' });
     }
+
+    if (event.httpMethod === 'GET') {
+      const params = {
+        TableName: TABLE_NAME
+      };
+
+      const result = await dynamodb.send(new ScanCommand(params));
+      
+      return createResponse(200, {
+        success: true,
+        products: result.Items || [],
+        message: 'Productos obtenidos exitosamente'
+      });
+    }
+
+    if (event.httpMethod === 'POST') {
+      const productData = JSON.parse(event.body);
+      
+      // Validar datos requeridos
+      if (!productData.name || !productData.category || !productData.price) {
+        return createResponse(400, {
+          success: false,
+          error: 'Faltan campos requeridos',
+          message: 'name, category y price son obligatorios'
+        });
+      }
+
+      const product = {
+        id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        ...productData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const params = {
+        TableName: TABLE_NAME,
+        Item: product
+      };
+
+      await dynamodb.send(new PutCommand(params));
+      
+      return createResponse(201, {
+        success: true,
+        product,
+        message: 'Producto creado exitosamente'
+      });
+    }
+
+    // PUT /products/{id} - Actualizar producto
+    if (event.httpMethod === 'PUT') {
+      const productId = event.pathParameters?.id;
+      if (!productId) {
+        return createResponse(400, {
+          success: false,
+          error: 'ID de producto requerido'
+        });
+      }
+
+      const updateData = JSON.parse(event.body);
+      
+      const params = {
+        TableName: TABLE_NAME,
+        Key: { id: productId },
+        UpdateExpression: 'SET #name = :name, #description = :description, #category = :category, #price = :price, #currency = :currency, #stock = :stock, #status = :status, #updatedAt = :updatedAt',
+        ExpressionAttributeNames: {
+          '#name': 'name',
+          '#description': 'description',
+          '#category': 'category',
+          '#price': 'price',
+          '#currency': 'currency',
+          '#stock': 'stock',
+          '#status': 'status',
+          '#updatedAt': 'updatedAt'
+        },
+        ExpressionAttributeValues: {
+          ':name': updateData.name,
+          ':description': updateData.description || '',
+          ':category': updateData.category,
+          ':price': updateData.price,
+          ':currency': updateData.currency || 'USD',
+          ':stock': updateData.stock || 0,
+          ':status': updateData.status || 'active',
+          ':updatedAt': new Date().toISOString()
+        },
+        ReturnValues: 'ALL_NEW'
+      };
+
+      const result = await dynamodb.send(new UpdateCommand(params));
+      
+      return createResponse(200, {
+        success: true,
+        product: result.Attributes,
+        message: 'Producto actualizado exitosamente'
+      });
+    }
+
+    // DELETE /products/{id} - Eliminar producto
+    if (event.httpMethod === 'DELETE') {
+      const productId = event.pathParameters?.id;
+      if (!productId) {
+        return createResponse(400, {
+          success: false,
+          error: 'ID de producto requerido'
+        });
+      }
+
+      const params = {
+        TableName: TABLE_NAME,
+        Key: { id: productId }
+      };
+
+      await dynamodb.send(new DeleteCommand(params));
+      
+      return createResponse(200, {
+        success: true,
+        message: 'Producto eliminado exitosamente'
+      });
+    }
+
+    return createResponse(405, {
+      success: false,
+      error: 'Método no permitido'
+    });
+
   } catch (error) {
-    console.error('❌ Error en handler principal:', error);
+    console.error('❌ Error:', error);
     return createResponse(500, {
       success: false,
-      error: 'Error interno del servidor'
+      error: 'Error interno del servidor',
+      message: error.message
     });
   }
 };

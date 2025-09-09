@@ -10,11 +10,23 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimatedButton } from "@/components/ui/animated-button"
 import { ActionModal } from "@/components/ui/action-modal"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
 import { useCardActions } from "@/hooks/use-card-actions"
-import { useUsers } from "@/hooks/use-users"
+import { useAuthContext } from "@/lib/auth/auth-context"
+import { useUsersApi } from "@/hooks/use-users-api"
+import { useRolesApi } from "@/hooks/use-roles-api"
+import { usePermissionsApi } from "@/hooks/use-permissions-api"
+import { User, UserRole, Permission, UserRoleType } from "@/types/users"
+import { UserForm } from "@/components/users/user-form"
+import { RoleForm } from "@/components/roles/role-form"
+import { PermissionForm } from "@/components/permissions/permission-form"
+import { UserCard } from "@/components/users/user-card"
+import { RoleCard } from "@/components/roles/role-card"
+import { PermissionCard } from "@/components/permissions/permission-card"
+import { UserStats } from "@/components/users/user-stats"
 import { 
   Users, 
   Plus, 
@@ -24,7 +36,7 @@ import {
   Edit,
   Trash2,
   Shield,
-  User,
+  User as UserIcon,
   Mail,
   Phone,
   Calendar,
@@ -43,750 +55,740 @@ import {
   UserPlus,
   UserMinus,
   Activity,
-  BarChart3
+  BarChart3,
+  ShieldCheck
 } from "lucide-react"
-
-interface User {
-  id: string
-  name: string
-  email: string
-  phone?: string
-  role: 'admin' | 'ejecutivo' | 'cliente'
-  status: 'active' | 'inactive' | 'pending' | 'suspended'
-  avatar?: string
-  department?: string
-  position?: string
-  lastLogin?: string
-  createdAt: string
-  updatedAt?: string
-  permissions?: {
-    canManageUsers: boolean
-    canManageProviders: boolean
-    canManageProducts: boolean
-    canManageQuotations: boolean
-    canManageProposals: boolean
-    canManageWhatsApp: boolean
-    canManageSettings: boolean
-    canViewAnalytics: boolean
-    canManageSystem: boolean
-    canGeneratePDFs: boolean
-    canManageTemplates: boolean
-    canViewReports: boolean
-    canManageIntegrations: boolean
-  }
-  stats?: {
-    quotationsCreated: number
-    proposalsGenerated: number
-    messagesProcessed: number
-    lastActivity: string
-  }
-}
 
 export default function UsersPage() {
   const { isLoading, simulateAction } = useMicrointeractions()
-  const {
-    modals,
-    handleView,
-    handleEdit,
-    handleDelete,
-    handleSave,
-    handleDeleteConfirm,
-    handleDownload,
-    handleShare,
-    closeModal
-  } = useCardActions()
+  const { user: currentUser, hasPermission } = useAuthContext()
+  const [activeTab, setActiveTab] = useState('users')
   
-  // Usar hook de usuarios para datos reales de DynamoDB
-  const { users, loading: usersLoading, error, refreshUsers } = useUsers()
+  // API hooks
+  const usersApi = useUsersApi()
+  const rolesApi = useRolesApi()
+  const permissionsApi = usePermissionsApi()
+  
+  // Estados para usuarios
+  const [users, setUsers] = useState<User[]>([])
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([])
+  const [userSearchTerm, setUserSearchTerm] = useState('')
+  const [isCreateUserDialogOpen, setIsCreateUserDialogOpen] = useState(false)
+  const [isEditUserDialogOpen, setIsEditUserDialogOpen] = useState(false)
+  const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  
+  // Estados para roles
+  const [roles, setRoles] = useState<UserRole[]>([])
+  const [filteredRoles, setFilteredRoles] = useState<UserRole[]>([])
+  const [roleSearchTerm, setRoleSearchTerm] = useState('')
+  const [isCreateRoleDialogOpen, setIsCreateRoleDialogOpen] = useState(false)
+  const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = useState(false)
+  const [isDeleteRoleDialogOpen, setIsDeleteRoleDialogOpen] = useState(false)
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
+  
+  // Estados para permisos
+  const [permissions, setPermissions] = useState<Permission[]>([])
+  const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>([])
+  const [permissionSearchTerm, setPermissionSearchTerm] = useState('')
+  const [selectedPermissionCategory, setSelectedPermissionCategory] = useState<string>('all')
+  const [isCreatePermissionDialogOpen, setIsCreatePermissionDialogOpen] = useState(false)
+  const [isEditPermissionDialogOpen, setIsEditPermissionDialogOpen] = useState(false)
+  const [isDeletePermissionDialogOpen, setIsDeletePermissionDialogOpen] = useState(false)
+  const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null)
+  
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedRole, setSelectedRole] = useState("all")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedDepartment, setSelectedDepartment] = useState("all")
+  // Solo datos de AWS - no más datos de prueba
 
-  // Recargar datos cuando se regrese de crear un usuario
+  const categories = [
+    { id: 'all', name: 'Todas', icon: Shield },
+    { id: 'Usuarios', name: 'Usuarios', icon: Users },
+    { id: 'Roles', name: 'Roles', icon: Shield },
+    { id: 'Permisos', name: 'Permisos', icon: Settings },
+    { id: 'Proveedores', name: 'Proveedores', icon: Users },
+    { id: 'Productos', name: 'Productos', icon: Users },
+    { id: 'Reportes', name: 'Reportes', icon: Users },
+    { id: 'Configuración', name: 'Configuración', icon: Settings }
+  ]
+
+  // Cargar datos
   useEffect(() => {
-    refreshUsers()
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        setError('')
+        
+        // Cargar usuarios desde API
+        const usersData = await usersApi.fetchUsers()
+        setUsers(usersData)
+        setFilteredUsers(usersData)
+        console.log('✅ Usuarios cargados desde API:', usersData.length)
+        
+        // Cargar roles desde API
+        const rolesData = await rolesApi.fetchRoles()
+        setRoles(rolesData)
+        setFilteredRoles(rolesData)
+        console.log('✅ Roles cargados desde API:', rolesData.length)
+        console.log('📋 Roles cargados:', rolesData.map(r => ({ id: r.id, name: r.name })))
+        
+        // Cargar permissions desde API
+        const permissionsData = await permissionsApi.fetchPermissions()
+        setPermissions(permissionsData)
+        setFilteredPermissions(permissionsData)
+        console.log('✅ Permissions cargados desde API:', permissionsData.length)
+        console.log('📋 Permissions cargados:', permissionsData.map(p => ({ id: p.id, name: p.name })))
+      } catch (error) {
+        setError('Error al cargar datos')
+        console.error('Error loading data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
   }, [])
 
-  const filteredUsers = users.filter(user => {
-    // Verificar que el usuario tenga las propiedades necesarias
-    if (!user || !user.name || !user.email) {
+  // Filtrar usuarios
+  useEffect(() => {
+    const filtered = users.filter(user => {
+      const searchTerm = userSearchTerm.toLowerCase()
+      return (
+        (user.firstName || '').toLowerCase().includes(searchTerm) ||
+        (user.lastName || '').toLowerCase().includes(searchTerm) ||
+        (user.firstName || '').toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm) ||
+        (user.department || '').toLowerCase().includes(searchTerm)
+      )
+    })
+    setFilteredUsers(filtered)
+  }, [userSearchTerm, users])
+>>>>>>> feature/user-management-v1.1.0
+
+  // Filtrar roles
+  useEffect(() => {
+    const filtered = roles.filter(role =>
+      role.name.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
+      role.description.toLowerCase().includes(roleSearchTerm.toLowerCase())
+    )
+    setFilteredRoles(filtered)
+  }, [roleSearchTerm, roles])
+
+  // Filtrar permisos
+  useEffect(() => {
+    let filtered = permissions.filter(permission =>
+      permission.name.toLowerCase().includes(permissionSearchTerm.toLowerCase()) ||
+      permission.description.toLowerCase().includes(permissionSearchTerm.toLowerCase()) ||
+      permission.resource.toLowerCase().includes(permissionSearchTerm.toLowerCase())
+    )
+
+    if (selectedPermissionCategory !== 'all') {
+      filtered = filtered.filter(permission => permission.resource === selectedPermissionCategory)
+    }
+
+    setFilteredPermissions(filtered)
+  }, [permissionSearchTerm, selectedPermissionCategory, permissions])
+
+  // Handlers para usuarios
+  const handleCreateUser = () => setIsCreateUserDialogOpen(true)
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user)
+    setIsEditUserDialogOpen(true)
+  }
+  const handleDeleteUser = (user: User) => {
+    setSelectedUser(user)
+    setIsDeleteUserDialogOpen(true)
+  }
+
+  const handleCreateUserSubmit = async (userData: any) => {
+    try {
+      const newUser = await usersApi.createUser({
+        ...userData,
+        status: 'active',
+        createdBy: currentUser?.id || 'current-user'
+      })
+      
+      setUsers(prev => [...prev, newUser])
+      setFilteredUsers(prev => [...prev, newUser])
+      setIsCreateUserDialogOpen(false)
+      return true
+    } catch (error) {
+      console.error('Error creating user:', error)
+      
+      // Mostrar mensaje de error específico
+      if (error instanceof Error) {
+        if (error.message.includes('El usuario ya existe')) {
+          alert('Error: Ya existe un usuario con este email. Por favor, usa un email diferente.')
+        } else if (error.message.includes('Todos los campos son requeridos')) {
+          alert('Error: Por favor, completa todos los campos requeridos.')
+        } else {
+          alert(`Error al crear usuario: ${error.message}`)
+        }
+      } else {
+        alert('Error inesperado al crear usuario. Por favor, intenta de nuevo.')
+      }
+      
       return false
     }
-    
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole = selectedRole === "all" || user.role === selectedRole
-    const matchesStatus = selectedStatus === "all" || user.status === selectedStatus
-    const matchesDepartment = selectedDepartment === "all" || (user as any).department === selectedDepartment
-    return matchesSearch && matchesRole && matchesStatus && matchesDepartment
-  })
-
-  if (usersLoading) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-        </div>
-      </MainLayout>
-    )
   }
 
-  if (error) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <p className="text-red-500 mb-4">Error al cargar usuarios: {error}</p>
-            <Button onClick={refreshUsers}>Reintentar</Button>
-          </div>
-        </div>
-      </MainLayout>
-    )
-  }
-
-  const getStatusColor = (status: User['status']) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-      case 'suspended':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusText = (status: User['status']) => {
-    switch (status) {
-      case 'active':
-        return 'Activo'
-      case 'inactive':
-        return 'Inactivo'
-      case 'pending':
-        return 'Pendiente'
-      case 'suspended':
-        return 'Suspendido'
-      default:
-        return 'Desconocido'
-    }
-  }
-
-  const getStatusIcon = (status: User['status']) => {
-    switch (status) {
-      case 'active':
-        return <CheckCircle className="h-4 w-4" />
-      case 'inactive':
-        return <XCircle className="h-4 w-4" />
-      case 'pending':
-        return <Clock className="h-4 w-4" />
-      case 'suspended':
-        return <AlertCircle className="h-4 w-4" />
-      default:
-        return <User className="h-4 w-4" />
-    }
-  }
-
-  const getRoleIcon = (role: User['role']) => {
-    switch (role) {
-      case 'admin':
-        return <Shield className="h-4 w-4" />
-      case 'ejecutivo':
-        return <User className="h-4 w-4" />
-      case 'cliente':
-        return <Users className="h-4 w-4" />
-      default:
-        return <User className="h-4 w-4" />
-    }
-  }
-
-  const getRoleText = (role: User['role']) => {
-    switch (role) {
-      case 'admin':
-        return 'Administrador'
-      case 'ejecutivo':
-        return 'Ejecutivo'
-      case 'cliente':
-        return 'Cliente'
-      default:
-        return 'Usuario'
-    }
-  }
-
-  const handleCreateUser = async () => {
-    await simulateAction(
-      'create-user',
-      async () => {
-        // Simular creación de usuario
-        await new Promise(resolve => setTimeout(resolve, 2000))
-      },
-      {
-        successMessage: "Usuario creado exitosamente",
-        notification: {
-          type: 'success',
-          title: 'Usuario Creado',
-          message: 'El nuevo usuario ha sido creado y se ha enviado un email de bienvenida'
+  const handleEditUserSubmit = async (userData: any) => {
+    if (selectedUser) {
+      try {
+        const updatedUser = await usersApi.updateUser(selectedUser.id, userData)
+        
+        setUsers(prev => prev.map(user => 
+          user.id === selectedUser.id ? updatedUser : user
+        ))
+        setFilteredUsers(prev => prev.map(user => 
+          user.id === selectedUser.id ? updatedUser : user
+        ))
+        setIsEditUserDialogOpen(false)
+        setSelectedUser(null)
+        return true
+      } catch (error) {
+        console.error('Error updating user:', error)
+        
+        // Mostrar mensaje de error específico
+        if (error instanceof Error) {
+          if (error.message.includes('El usuario ya existe')) {
+            alert('Error: Ya existe un usuario con este email. Por favor, usa un email diferente.')
+          } else if (error.message.includes('Todos los campos son requeridos')) {
+            alert('Error: Por favor, completa todos los campos requeridos.')
+          } else {
+            alert(`Error al actualizar usuario: ${error.message}`)
+          }
+        } else {
+          alert('Error inesperado al actualizar usuario. Por favor, intenta de nuevo.')
         }
+        
+        return false
       }
-    )
+    }
+    return false
   }
 
-  const handleToggleUserStatus = async (userId: string, currentStatus: User['status']) => {
-    const newStatus = currentStatus === 'active' ? 'inactive' : 'active'
-    await simulateAction(
-      `toggle-user-${userId}`,
-      async () => {
-        // Simular cambio de estado
-        await new Promise(resolve => setTimeout(resolve, 1500))
-      },
-      {
-        successMessage: `Usuario ${newStatus === 'active' ? 'activado' : 'desactivado'} exitosamente`,
-        notification: {
-          type: 'success',
-          title: 'Estado Actualizado',
-          message: `El usuario ha sido ${newStatus === 'active' ? 'activado' : 'desactivado'}`
-        }
+  const handleDeleteUserConfirm = async () => {
+    if (selectedUser) {
+      try {
+        await usersApi.deleteUser(selectedUser.id)
+        
+        setUsers(prev => prev.filter(u => u.id !== selectedUser.id))
+        setFilteredUsers(prev => prev.filter(u => u.id !== selectedUser.id))
+        setIsDeleteUserDialogOpen(false)
+        setSelectedUser(null)
+      } catch (error) {
+        console.error('Error deleting user:', error)
       }
-    )
+    }
   }
 
-  const handleResetPassword = async (userId: string) => {
-    await simulateAction(
-      `reset-password-${userId}`,
-      async () => {
-        // Simular reset de contraseña
-        await new Promise(resolve => setTimeout(resolve, 1500))
-      },
-      {
-        successMessage: "Contraseña reseteada exitosamente",
-        notification: {
-          type: 'success',
-          title: 'Contraseña Reseteada',
-          message: 'Se ha enviado un email con las instrucciones para crear una nueva contraseña'
-        }
-      }
-    )
+  // Handlers para roles
+  const handleCreateRole = () => setIsCreateRoleDialogOpen(true)
+  const handleEditRole = (role: UserRole) => {
+    setSelectedRole(role)
+    setIsEditRoleDialogOpen(true)
+  }
+  const handleDeleteRole = (role: UserRole) => {
+    // Los roles del sistema se identifican por level 1
+    if (role.level === 1) {
+      alert('No se pueden eliminar roles del sistema')
+      return
+    }
+    setSelectedRole(role)
+    setIsDeleteRoleDialogOpen(true)
   }
 
-  const handleExportUsers = async (format: 'csv' | 'excel') => {
-    await simulateAction(
-      'export-users',
-      async () => {
-        // Simular exportación
-        await new Promise(resolve => setTimeout(resolve, 2000))
-      },
-      {
-        successMessage: `Lista de usuarios exportada como ${format.toUpperCase()}`,
-        notification: {
-          type: 'success',
-          title: 'Exportación Completada',
-          message: `El archivo ${format.toUpperCase()} se está descargando`
-        }
-      }
-    )
+  const handleCreateRoleSubmit = async (roleData: any) => {
+    try {
+      const newRole = await rolesApi.createRole({
+        name: roleData.name,
+        description: roleData.description,
+        level: 4,
+        permissions: roleData.permissions || []
+      })
+      
+      setRoles(prev => [...prev, newRole])
+      setFilteredRoles(prev => [...prev, newRole])
+      setIsCreateRoleDialogOpen(false)
+      return true
+    } catch (error) {
+      console.error('Error creating role:', error)
+      alert('Error al crear el rol. Verifica los datos e intenta nuevamente.')
+      return false
+    }
   }
+
+  const handleEditRoleSubmit = async (roleData: any) => {
+    if (selectedRole) {
+      try {
+        const updatedRole = await rolesApi.updateRole(selectedRole.id, roleData)
+        
+        setRoles(prev => prev.map(role => 
+          role.id === selectedRole.id ? updatedRole : role
+        ))
+        setFilteredRoles(prev => prev.map(role => 
+          role.id === selectedRole.id ? updatedRole : role
+        ))
+        setIsEditRoleDialogOpen(false)
+        setSelectedRole(null)
+        return true
+      } catch (error) {
+        console.error('Error updating role:', error)
+        alert('Error al actualizar el rol. Verifica los datos e intenta nuevamente.')
+        return false
+      }
+    }
+    return false
+  }
+
+  const handleDeleteRoleConfirm = async () => {
+    if (selectedRole) {
+      try {
+        await rolesApi.deleteRole(selectedRole.id)
+        
+        setRoles(prev => prev.filter(r => r.id !== selectedRole.id))
+        setFilteredRoles(prev => prev.filter(r => r.id !== selectedRole.id))
+        setIsDeleteRoleDialogOpen(false)
+        setSelectedRole(null)
+      } catch (error) {
+        console.error('Error deleting role:', error)
+        alert('Error al eliminar el rol. Intenta nuevamente.')
+      }
+    }
+  }
+
+  // Handlers para permisos
+  const handleCreatePermission = () => setIsCreatePermissionDialogOpen(true)
+  const handleEditPermission = (permission: Permission) => {
+    setSelectedPermission(permission)
+    setIsEditPermissionDialogOpen(true)
+  }
+  const handleDeletePermission = (permission: Permission) => {
+    // Los permisos del sistema se identifican por ser básicos
+    if (permission.resource === 'users' && permission.action === 'read') {
+      alert('No se pueden eliminar permisos del sistema')
+      return
+    }
+    setSelectedPermission(permission)
+    setIsDeletePermissionDialogOpen(true)
+  }
+
+  const handleCreatePermissionSubmit = async (permissionData: any) => {
+    try {
+      const newPermission = await permissionsApi.createPermission({
+        name: permissionData.name,
+        resource: permissionData.resource,
+        action: permissionData.action,
+        description: permissionData.description
+      })
+      
+      setPermissions(prev => [...prev, newPermission])
+      setFilteredPermissions(prev => [...prev, newPermission])
+      setIsCreatePermissionDialogOpen(false)
+      return true
+    } catch (error) {
+      console.error('Error creating permission:', error)
+      alert('Error al crear el permiso. Verifica los datos e intenta nuevamente.')
+      return false
+    }
+  }
+
+  const handleEditPermissionSubmit = async (permissionData: any) => {
+    if (selectedPermission) {
+      try {
+        const updatedPermission = await permissionsApi.updatePermission(selectedPermission.id, permissionData)
+        
+        setPermissions(prev => prev.map(permission => 
+          permission.id === selectedPermission.id ? updatedPermission : permission
+        ))
+        setFilteredPermissions(prev => prev.map(permission => 
+          permission.id === selectedPermission.id ? updatedPermission : permission
+        ))
+        setIsEditPermissionDialogOpen(false)
+        setSelectedPermission(null)
+        return true
+      } catch (error) {
+        console.error('Error updating permission:', error)
+        alert('Error al actualizar el permiso. Verifica los datos e intenta nuevamente.')
+        return false
+      }
+    }
+    return false
+  }
+
+  const handleDeletePermissionConfirm = async () => {
+    if (selectedPermission) {
+      try {
+        await permissionsApi.deletePermission(selectedPermission.id)
+        
+        setPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
+        setFilteredPermissions(prev => prev.filter(p => p.id !== selectedPermission.id))
+        setIsDeletePermissionDialogOpen(false)
+        setSelectedPermission(null)
+      } catch (error) {
+        console.error('Error deleting permission:', error)
+        alert('Error al eliminar el permiso. Intenta nuevamente.')
+      }
+    }
+  }
+
+  const canManageUsers = hasPermission('users', 'manage')
+  const canManageRoles = hasPermission('roles', 'manage')
+  const canManagePermissions = hasPermission('permissions', 'manage')
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Gestión de Usuarios</h1>
             <p className="text-muted-foreground">
-              Administra usuarios internos, roles y permisos del sistema
+              Administra usuarios, roles y permisos del sistema
             </p>
           </div>
-          <div className="flex gap-2">
-            <AnimatedButton 
-              variant="outline"
-              loading={isLoading('export-users')}
-              loadingText="Exportando..."
-              onClick={() => handleExportUsers('csv')}
-              animation="pulse"
+          <div className="flex items-center space-x-4">
+            <AnimatedButton
+              onClick={() => setActiveTab('users')}
+              variant={activeTab === 'users' ? 'default' : 'outline'}
+              size="sm"
             >
-              <Download className="h-4 w-4 mr-2" />
-              Exportar
+              <Users className="h-4 w-4 mr-2" />
+              Usuarios ({users.length})
             </AnimatedButton>
             <AnimatedButton 
-              loading={isLoading('create-user')}
-              loadingText="Creando..."
-              onClick={handleCreateUser}
-              animation="pulse"
+              onClick={() => setActiveTab('roles')}
+              variant={activeTab === 'roles' ? 'default' : 'outline'}
+              size="sm"
             >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Nuevo Usuario
+              <Shield className="h-4 w-4 mr-2" />
+              Roles ({roles.length})
+            </AnimatedButton>
+            <AnimatedButton 
+              onClick={() => setActiveTab('permissions')}
+              variant={activeTab === 'permissions' ? 'default' : 'outline'}
+              size="sm"
+            >
+              <ShieldCheck className="h-4 w-4 mr-2" />
+              Permisos ({permissions.length})
             </AnimatedButton>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-blue-500" />
-                <div>
-                  <p className="text-2xl font-bold">{users.length}</p>
-                  <p className="text-sm text-muted-foreground">Total Usuarios</p>
+        {/* Estadísticas */}
+        <UserStats users={users} roles={roles} permissions={permissions} />
+
+        {/* Contenido principal */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="users" className="flex items-center space-x-2">
+              <Users className="h-4 w-4" />
+              <span>Usuarios ({users.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="roles" className="flex items-center space-x-2">
+              <Shield className="h-4 w-4" />
+              <span>Roles ({roles.length})</span>
+            </TabsTrigger>
+            <TabsTrigger value="permissions" className="flex items-center space-x-2">
+              <ShieldCheck className="h-4 w-4" />
+              <span>Permisos ({permissions.length})</span>
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Tab de Usuarios */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar usuarios..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <CheckCircle className="h-8 w-8 text-green-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.status === 'active').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Activos</p>
+              {canManageUsers && (
+                <AnimatedButton onClick={handleCreateUser}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo Usuario
+                </AnimatedButton>
+              )}
+            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-4 text-gray-600">Cargando usuarios...</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Shield className="h-8 w-8 text-purple-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.role === 'admin').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Administradores</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredUsers.map((user) => (
+                  <UserCard
+                    key={user.id}
+                    user={user}
+                    onEdit={handleEditUser}
+                    onDelete={handleDeleteUser}
+                    canManage={canManageUsers}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Tab de Roles */}
+          <TabsContent value="roles" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Buscar roles..."
+                    value={roleSearchTerm}
+                    onChange={(e) => setRoleSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Clock className="h-8 w-8 text-orange-500" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.status === 'pending').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Pendientes</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              {canManageRoles && (
+                <AnimatedButton onClick={handleCreateRole}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo Rol
+                </AnimatedButton>
+              )}
         </div>
 
-        {/* Search and Filters */}
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredRoles.map((role) => (
+                <RoleCard
+                  key={role.id}
+                  role={role}
+                  onEdit={handleEditRole}
+                  onDelete={handleDeleteRole}
+                  canManage={canManageRoles}
+                />
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Tab de Permisos */}
+          <TabsContent value="permissions" className="space-y-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Buscar usuarios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Buscar permisos..."
+                    value={permissionSearchTerm}
+                    onChange={(e) => setPermissionSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
-          <Select value={selectedRole} onValueChange={setSelectedRole}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Rol" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los roles</SelectItem>
-              <SelectItem value="admin">Administrador</SelectItem>
-              <SelectItem value="ejecutivo">Ejecutivo</SelectItem>
-              <SelectItem value="cliente">Cliente</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos los estados</SelectItem>
-              <SelectItem value="active">Activo</SelectItem>
-              <SelectItem value="inactive">Inactivo</SelectItem>
-              <SelectItem value="pending">Pendiente</SelectItem>
-              <SelectItem value="suspended">Suspendido</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
-          </Button>
         </div>
+              <div className="flex gap-2 flex-wrap">
+                {categories.map((category) => {
+                  const IconComponent = category.icon
+                  return (
+                      <AnimatedButton 
+                      key={category.id}
+                      variant={selectedPermissionCategory === category.id ? "default" : "outline"}
+                        size="sm"
+                      onClick={() => setSelectedPermissionCategory(category.id)}
+                      className="flex items-center space-x-2 whitespace-nowrap"
+                      >
+                      <IconComponent className="h-4 w-4" />
+                      <span>{category.name}</span>
+                      </AnimatedButton>
+                  )
+                })}
+              </div>
+              {canManagePermissions && (
+                <AnimatedButton onClick={handleCreatePermission}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nuevo Permiso
+                        </AnimatedButton>
+                      )}
+                    </div>
 
-        {/* Users List */}
-        <div className="space-y-4">
-          {filteredUsers.map((user) => (
-            <Card key={user.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      {user.avatar ? (
-                        <img 
-                          src={user.avatar} 
-                          alt={user.name}
-                          className="w-12 h-12 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-6 w-6 text-primary" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{user.name}</h3>
-                      <p className="text-sm text-muted-foreground">{user.email}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          {getRoleIcon(user.role)}
-                          {getRoleText(user.role)}
-                        </span>
-                        {(user as any).department && (
-                          <span>{(user as any).department}</span>
-                        )}
-                        {(user as any).position && (
-                          <span>{(user as any).position}</span>
-                        )}
-                        <span>Último acceso: {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Nunca'}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <Badge className={getStatusColor(user.status)}>
-                      <div className="flex items-center gap-1">
-                        {getStatusIcon(user.status)}
-                        {getStatusText(user.status)}
-                      </div>
-                    </Badge>
-                    
-                    <div className="flex gap-2">
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        animation="pulse"
-                        onClick={() => handleView(user)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Ver
-                      </AnimatedButton>
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        animation="pulse"
-                        onClick={() => handleEdit(user)}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Editar
-                      </AnimatedButton>
-                      {user.status === 'active' ? (
-                        <AnimatedButton 
-                          variant="outline" 
-                          size="sm"
-                          loading={isLoading(`toggle-user-${user.id}`)}
-                          loadingText="Desactivando..."
-                          onClick={() => handleToggleUserStatus(user.id, user.status)}
-                          animation="pulse"
-                        >
-                          <UserMinus className="h-4 w-4 mr-2" />
-                          Desactivar
-                        </AnimatedButton>
-                      ) : (
-                        <AnimatedButton 
-                          size="sm"
-                          loading={isLoading(`toggle-user-${user.id}`)}
-                          loadingText="Activando..."
-                          onClick={() => handleToggleUserStatus(user.id, user.status)}
-                          animation="pulse"
-                        >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Activar
-                        </AnimatedButton>
-                      )}
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        loading={isLoading(`reset-password-${user.id}`)}
-                        loadingText="Reseteando..."
-                        onClick={() => handleResetPassword(user.id)}
-                        animation="pulse"
-                      >
-                        <Key className="h-4 w-4 mr-2" />
-                        Reset Password
-                      </AnimatedButton>
-                      <AnimatedButton 
-                        variant="outline" 
-                        size="sm"
-                        animation="pulse"
-                        onClick={() => handleDelete(user)}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Eliminar
-                      </AnimatedButton>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredPermissions.map((permission) => (
+                <PermissionCard
+                  key={permission.id}
+                  permission={permission}
+                  onEdit={handleEditPermission}
+                  onDelete={handleDeletePermission}
+                  canManage={canManagePermissions}
+                />
           ))}
         </div>
+          </TabsContent>
+        </Tabs>
 
-        {/* Modales */}
+        {/* Dialogs */}
+        <UserForm
+          isOpen={isCreateUserDialogOpen}
+          onClose={() => setIsCreateUserDialogOpen(false)}
+          onSubmit={handleCreateUserSubmit}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
+        />
+
+        <UserForm
+          isOpen={isEditUserDialogOpen}
+          onClose={() => {
+            setIsEditUserDialogOpen(false)
+            setSelectedUser(null)
+          }}
+          onSubmit={handleEditUserSubmit}
+          user={selectedUser}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
+        />
+
+        <RoleForm
+          isOpen={isCreateRoleDialogOpen}
+          onClose={() => setIsCreateRoleDialogOpen(false)}
+          onSubmit={handleCreateRoleSubmit}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
+        />
+
+        <RoleForm
+          isOpen={isEditRoleDialogOpen}
+          onClose={() => {
+            setIsEditRoleDialogOpen(false)
+            setSelectedRole(null)
+          }}
+          onSubmit={handleEditRoleSubmit}
+          role={selectedRole}
+          currentUserRole={currentUser?.role?.name as UserRoleType}
+        />
+
+        <PermissionForm
+          isOpen={isCreatePermissionDialogOpen}
+          onClose={() => setIsCreatePermissionDialogOpen(false)}
+          onSubmit={handleCreatePermissionSubmit}
+        />
+
+        <PermissionForm
+          isOpen={isEditPermissionDialogOpen}
+          onClose={() => {
+            setIsEditPermissionDialogOpen(false)
+            setSelectedPermission(null)
+          }}
+          onSubmit={handleEditPermissionSubmit}
+          permission={selectedPermission}
+        />
+
+        {/* Delete Modals */}
         <ActionModal
-          isOpen={modals.view.isOpen}
-          onClose={() => closeModal('view')}
-          title="Detalles del Usuario"
-          description="Información completa del usuario"
-          type="view"
-        >
-          {modals.view.data && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  {modals.view.data.avatar ? (
-                    <img 
-                      src={modals.view.data.avatar} 
-                      alt={modals.view.data.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <User className="h-8 w-8 text-primary" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold">{modals.view.data.name}</h3>
-                  <p className="text-muted-foreground">{modals.view.data.email}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge className={getStatusColor(modals.view.data.status)}>
-                      {getStatusText(modals.view.data.status)}
-                    </Badge>
-                    <Badge variant="outline">
-                      {getRoleText(modals.view.data.role)}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h4 className="font-medium">Información Personal</h4>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Email</label>
-                      <p className="text-sm">{modals.view.data.email}</p>
-                    </div>
-                    {modals.view.data.phone && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Teléfono</label>
-                        <p className="text-sm">{modals.view.data.phone}</p>
-                      </div>
-                    )}
-                    {modals.view.data.department && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Departamento</label>
-                        <p className="text-sm">{modals.view.data.department}</p>
-                      </div>
-                    )}
-                    {modals.view.data.position && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Posición</label>
-                        <p className="text-sm">{modals.view.data.position}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <h4 className="font-medium">Estadísticas</h4>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Cotizaciones Creadas</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats?.quotationsCreated || 0}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Propuestas Generadas</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats?.proposalsGenerated || 0}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Mensajes Procesados</label>
-                      <p className="text-sm font-semibold">{modals.view.data.stats?.messagesProcessed || 0}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Última Actividad</label>
-                      <p className="text-sm">{modals.view.data.stats ? new Date(modals.view.data.stats.lastActivity).toLocaleString() : 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {modals.view.data.permissions && (
-                <div className="space-y-4">
-                  <h4 className="font-medium">Permisos</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(modals.view.data.permissions).map(([key, value]) => (
-                      <div key={key} className="flex items-center gap-2">
-                        {value ? (
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        )}
-                        <span className="text-sm">
-                          {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </ActionModal>
-
-        <ActionModal
-          isOpen={modals.edit.isOpen}
-          onClose={() => closeModal('edit')}
-          title="Editar Usuario"
-          description="Modifica la información del usuario"
-          type="edit"
-          onConfirm={() => handleSave(modals.edit.data)}
-        >
-          {modals.edit.data && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Nombre</Label>
-                  <Input 
-                    id="name" 
-                    defaultValue={modals.edit.data.name}
-                    placeholder="Nombre completo"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email"
-                    defaultValue={modals.edit.data.email}
-                    placeholder="email@ejemplo.com"
-                  />
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="phone">Teléfono</Label>
-                  <Input 
-                    id="phone" 
-                    defaultValue={modals.edit.data.phone || ''}
-                    placeholder="+52 55 1234 5678"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="role">Rol</Label>
-                  <Select defaultValue={modals.edit.data.role}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                      <SelectItem value="ejecutivo">Ejecutivo</SelectItem>
-                      <SelectItem value="cliente">Cliente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="department">Departamento</Label>
-                  <Input 
-                    id="department" 
-                    defaultValue={modals.edit.data.department || ''}
-                    placeholder="Departamento"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="position">Posición</Label>
-                  <Input 
-                    id="position" 
-                    defaultValue={modals.edit.data.position || ''}
-                    placeholder="Posición"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="status">Estado</Label>
-                <Select defaultValue={modals.edit.data.status}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Activo</SelectItem>
-                    <SelectItem value="inactive">Inactivo</SelectItem>
-                    <SelectItem value="pending">Pendiente</SelectItem>
-                    <SelectItem value="suspended">Suspendido</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {modals.edit.data.permissions && (
-                <div className="space-y-4">
-                  <h4 className="font-medium">Permisos</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    {Object.entries(modals.edit.data.permissions).map(([key, value]) => (
-                      <div key={key} className="flex items-center space-x-2">
-                        <Checkbox 
-                          id={key}
-                          defaultChecked={Boolean(value)}
-                        />
-                        <Label htmlFor={key} className="text-sm">
-                          {key.replace('can', '').replace(/([A-Z])/g, ' $1').trim()}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </ActionModal>
-
-        <ActionModal
-          isOpen={modals.delete.isOpen}
-          onClose={() => closeModal('delete')}
+          isOpen={isDeleteUserDialogOpen}
+          onClose={() => {
+            setIsDeleteUserDialogOpen(false)
+            setSelectedUser(null)
+          }}
           title="Eliminar Usuario"
-          description="¿Estás seguro de que quieres eliminar este usuario?"
           type="delete"
-          onConfirm={() => handleDeleteConfirm(modals.delete.data)}
+          onConfirm={handleDeleteUserConfirm}
+          destructive
         >
-          {modals.delete.data && (
+          {selectedUser && (
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <AlertCircle className="h-5 w-5 text-red-600" />
+                <Users className="h-8 w-8 text-red-600" />
                 <div>
-                  <p className="font-medium text-red-900 dark:text-red-100">
-                    Esta acción no se puede deshacer
-                  </p>
+                  <h4 className="font-medium text-red-900 dark:text-red-100">
+                    {selectedUser.firstName} {selectedUser.lastName}
+                  </h4>
                   <p className="text-sm text-red-700 dark:text-red-300">
-                    Se eliminará permanentemente el usuario <strong>{modals.delete.data.name}</strong> y todos sus datos asociados.
+                    {selectedUser.email} - {selectedUser.department}
                   </p>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Email:</strong> {modals.delete.data.email}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Rol:</strong> {getRoleText(modals.delete.data.role)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  <strong>Estado:</strong> {getStatusText(modals.delete.data.status)}
-                </p>
+              <div className="text-sm text-muted-foreground">
+                <p>Al eliminar este usuario:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Se perderá acceso al sistema</li>
+                  <li>Se eliminarán todas las asignaciones</li>
+                  <li>Esta acción no se puede deshacer</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </ActionModal>
+
+        <ActionModal
+          isOpen={isDeleteRoleDialogOpen}
+          onClose={() => {
+            setIsDeleteRoleDialogOpen(false)
+            setSelectedRole(null)
+          }}
+          title="Eliminar Rol"
+          type="delete"
+          onConfirm={handleDeleteRoleConfirm}
+          destructive
+        >
+          {selectedRole && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <Shield className="h-8 w-8 text-red-600" />
+                <div>
+                  <h4 className="font-medium text-red-900 dark:text-red-100">
+                    {selectedRole.name}
+                  </h4>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {selectedRole.description}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p>Al eliminar este rol:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Los usuarios con este rol perderán permisos</li>
+                  <li>Se eliminarán todas las asignaciones</li>
+                  <li>Esta acción no se puede deshacer</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </ActionModal>
+
+        <ActionModal
+          isOpen={isDeletePermissionDialogOpen}
+          onClose={() => {
+            setIsDeletePermissionDialogOpen(false)
+            setSelectedPermission(null)
+          }}
+          title="Eliminar Permiso"
+          type="delete"
+          onConfirm={handleDeletePermissionConfirm}
+          destructive
+        >
+          {selectedPermission && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <ShieldCheck className="h-8 w-8 text-red-600" />
+                <div>
+                  <h4 className="font-medium text-red-900 dark:text-red-100">
+                    {selectedPermission.name}
+                  </h4>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {selectedPermission.description} - {selectedPermission.resource}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p>Al eliminar este permiso:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Los roles que lo tengan perderán este acceso</li>
+                  <li>Se eliminarán todas las asignaciones</li>
+                  <li>Esta acción no se puede deshacer</li>
+                </ul>
               </div>
             </div>
           )}

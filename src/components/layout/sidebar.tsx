@@ -26,9 +26,8 @@ import {
   Zap,
   Cpu
 } from "lucide-react"
-import { useAuth } from "@/hooks/use-auth"
+import { useAuthContext } from "@/lib/auth/auth-context"
 import { useState } from "react"
-import { useRoles } from "@/hooks/use-roles"
 
 const navigation = [
   {
@@ -146,13 +145,12 @@ const navigation = [
 ]
 
 export function Sidebar() {
-  const { user, signOut } = useAuth()
+  const { user, logout, hasPermission } = useAuthContext()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
-  const { hasPermission } = useRoles()
 
   const handleSignOut = async () => {
-    await signOut()
+    logout()
   }
 
   return (
@@ -182,7 +180,28 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navigation.filter(item => hasPermission(item.permission as any)).map((item) => {
+        {navigation.filter(item => {
+          // Mapear permisos del sidebar a nuestro sistema
+          const permissionMap: { [key: string]: { resource: string; action: string } } = {
+            'canViewDashboard': { resource: 'dashboard', action: 'read' },
+            'canManageProviders': { resource: 'providers', action: 'read' },
+            'canManageProducts': { resource: 'products', action: 'read' },
+            'canManageWhatsApp': { resource: 'whatsapp', action: 'read' },
+            'canManageQuotations': { resource: 'quotations', action: 'read' },
+            'canManageProposals': { resource: 'proposals', action: 'read' },
+            'canViewAnalytics': { resource: 'analytics', action: 'read' },
+            'canViewReports': { resource: 'reports', action: 'read' },
+            'canManageUsers': { resource: 'users', action: 'read' },
+            'canManageIntegrations': { resource: 'integrations', action: 'read' },
+            'canManageSystem': { resource: 'system', action: 'read' },
+            'canManageSettings': { resource: 'settings', action: 'read' }
+          }
+          
+          const mappedPermission = permissionMap[item.permission]
+          if (!mappedPermission) return true // Si no hay mapeo, permitir acceso
+          
+          return hasPermission(mappedPermission.resource, mappedPermission.action)
+        }).map((item) => {
           const isActive = pathname === item.href
           const Icon = item.icon
           
@@ -224,19 +243,19 @@ export function Sidebar() {
           <Avatar className="h-8 w-8">
             <AvatarImage src="" />
             <AvatarFallback>
-              {user?.name?.charAt(0).toUpperCase() || "U"}
+              {(user?.firstName?.charAt(0) || user?.lastName?.charAt(0) || "U").toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
-                {user?.name || "Usuario"}
+                {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Usuario"}
               </p>
               <p className="text-xs text-muted-foreground truncate">
                 {user?.email || "usuario@onpoint.com"}
               </p>
               <Badge variant="outline" className="text-xs mt-1">
-                {user?.role || "usuario"}
+                {typeof user?.role === 'string' ? user.role : user?.role?.name || "usuario"}
               </Badge>
             </div>
           )}

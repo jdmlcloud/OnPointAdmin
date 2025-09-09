@@ -1,0 +1,69 @@
+{
+  "OnPointAdmin-Roles-local": [
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "role-super-admin"},
+          "name": {"S": "Super Administrador"},
+          "level": {"N": "1"},
+          "permissions": {
+            "L": [
+              {"M": {"resource": {"S": "users"}, "action": {"S": "manage"}}},
+              {"M": {"resource": {"S": "roles"}, "action": {"S": "manage"}}},
+              {"M": {"resource": {"S": "providers"}, "action": {"S": "manage"}}},
+              {"M": {"resource": {"S": "products"}, "action": {"S": "manage"}}},
+              {"M": {"resource": {"S": "permissions"}, "action": {"S": "manage"}}}
+            ]
+          },
+          "description": {"S": "Acceso total al sistema"},
+          "createdAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "updatedAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "createdBy": {"S": "system"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "role-admin"},
+          "name": {"S": "Administrador"},
+          "level": {"N": "2"},
+          "permissions": {
+            "L": [
+              {"M": {"resource": {"S": "users"}, "action": {"S": "manage"}}},
+              {"M": {"resource": {"S": "providers"}, "action": {"S": "manage"}}},
+              {"M": {"resource": {"S": "products"}, "action": {"S": "manage"}}}
+            ]
+          },
+          "description": {"S": "Administrador del sistema"},
+          "createdAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "updatedAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "createdBy": {"S": "system"}
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id": {"S": "role-executive"},
+          "name": {"S": "Ejecutivo"},
+          "level": {"N": "3"},
+          "permissions": {
+            "L": [
+              {"M": {"resource": {"S": "providers"}, "action": {"S": "read"}}},
+              {"M": {"resource": {"S": "providers"}, "action": {"S": "create"}}},
+              {"M": {"resource": {"S": "providers"}, "action": {"S": "update"}}},
+              {"M": {"resource": {"S": "products"}, "action": {"S": "read"}}},
+              {"M": {"resource": {"S": "products"}, "action": {"S": "create"}}},
+              {"M": {"resource": {"S": "products"}, "action": {"S": "update"}}}
+            ]
+          },
+          "description": {"S": "Ejecutivo con acceso limitado"},
+          "createdAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "updatedAt": {"S": "2024-12-19T00:00:00.000Z"},
+          "createdBy": {"S": "system"}
+        }
+      }
+    }
+  ]
+}

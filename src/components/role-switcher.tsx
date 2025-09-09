@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useRoles, UserRole } from "@/hooks/use-roles"
+import { useAuthRoles } from "@/hooks/use-auth-roles"
 import { 
   Shield, 
   User, 
@@ -40,7 +40,7 @@ export function RoleSwitcher() {
     getRoleDescription,
     availableRoles,
     permissions
-  } = useRoles()
+  } = useAuthRoles()
   
   const [isOpen, setIsOpen] = useState(false)
 
@@ -52,7 +52,7 @@ export function RoleSwitcher() {
     )
   }
 
-  const CurrentIcon = roleIcons[currentRole]
+  const CurrentIcon = roleIcons[currentRole] || User
 
   return (
     <div className="relative">
@@ -86,7 +86,7 @@ export function RoleSwitcher() {
             
             <CardContent className="space-y-3">
               {availableRoles.map((role) => {
-                const Icon = roleIcons[role]
+                const Icon = roleIcons[role] || User
                 const isActive = role === currentRole
                 
                 return (

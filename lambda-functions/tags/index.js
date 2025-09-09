@@ -33,7 +33,7 @@ exports.getTags = async (event) => {
     console.log('🔍 Lambda: Obteniendo tags...');
     
     const result = await docClient.send(new ScanCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: process.env.DYNAMODB_PROVIDERS_TABLE || 'OnPointAdmin-Providers-sandbox',
       ProjectionExpression: 'tags'
     }));
     

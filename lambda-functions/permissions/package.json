@@ -1,0 +1,13 @@
+{
+  "name": "onpoint-admin-permissions",
+  "version": "1.1.0",
+  "description": "Lambda function for permission management",
+  "main": "index.js",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/lib-dynamodb": "^3.450.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

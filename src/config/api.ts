@@ -1,7 +1,11 @@
 // Configuración de la API Gateway + Lambda
 export const API_CONFIG = {
-  // URL base de la API Gateway
-  BASE_URL: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
+  // URLs base de la API Gateway por entorno
+  BASE_URLS: {
+    local: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox', // Local usa sandbox
+    sandbox: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
+    prod: 'https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod'
+  },
   
   // Endpoints
   ENDPOINTS: {
@@ -28,9 +32,62 @@ export const API_CONFIG = {
   }
 }
 
+// Función para detectar el entorno automáticamente
+export const detectEnvironment = (): 'sandbox' | 'prod' | 'local' => {
+  // Si estamos en el navegador, detectar por la URL
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    console.log('🔍 Detectando entorno - hostname:', hostname)
+    
+    // Detectar local específicamente
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')) {
+      console.log('✅ Entorno detectado: local')
+      return 'local'
+    }
+    
+    // Detectar sandbox específicamente
+    if (hostname.includes('sandbox')) {
+      console.log('✅ Entorno detectado: sandbox')
+      return 'sandbox'
+    }
+    
+    // Detectar producción específicamente
+    if (hostname.includes('main') || hostname === 'd3ts6pwgn7uyyh.amplifyapp.com') {
+      console.log('✅ Entorno detectado: prod')
+      return 'prod'
+    }
+  }
+  
+  // Fallback a variable de entorno o local (NUNCA producción)
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'local'
+  console.log('⚠️ Usando fallback - entorno:', environment)
+  
+  // Si no es local, sandbox o prod, usar local por defecto
+  if (environment !== 'local' && environment !== 'sandbox' && environment !== 'prod') {
+    console.log('🚨 Entorno no válido, usando local por seguridad')
+    return 'local'
+  }
+  
+  return environment as 'sandbox' | 'prod' | 'local'
+}
+
+// Función para obtener la URL base según el entorno
+export const getBaseUrl = (): string => {
+  const environment = detectEnvironment()
+  console.log(`🌍 Entorno detectado: ${environment}`)
+  
+  // Por seguridad, si no se puede determinar el entorno, usar local
+  if (!API_CONFIG.BASE_URLS[environment]) {
+    console.log('🚨 Entorno no válido, usando local por seguridad')
+    return API_CONFIG.BASE_URLS.local
+  }
+  
+  return API_CONFIG.BASE_URLS[environment]
+}
+
 // Función helper para construir URLs completas
 export const buildApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}${endpoint}`
+  return `${getBaseUrl()}${endpoint}`
 }
 
 // Función helper para hacer requests a la API
@@ -39,6 +96,11 @@ export const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<T> => {
   const url = buildApiUrl(endpoint)
+  
+  // Debug: mostrar la URL que se está usando
+  console.log(`🌐 API Request: ${url}`)
+  console.log(`🔍 Endpoint: ${endpoint}`)
+  console.log(`🌍 Entorno detectado: ${detectEnvironment()}`)
   
   const config: RequestInit = {
     ...options,

@@ -15,14 +15,14 @@ import {
   ArrowRight
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRoles } from "@/hooks/use-roles"
+import { useAuthRoles } from "@/hooks/use-auth-roles"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useCognitoAuth } from "@/hooks/use-cognito-auth"
 
 export default function CognitoDashboardPage() {
   const router = useRouter()
-  const { currentRole, hasPermission } = useRoles()
+  const { currentRole, hasPermission } = useAuthRoles()
   const { users, loading: usersLoading } = useUsers()
   const { providers, loading: providersLoading } = useProviders()
   const { user: cognitoUser } = useCognitoAuth()

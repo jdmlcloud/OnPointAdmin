@@ -1,6 +1,6 @@
 // Sistema de versionamiento para OnPoint Admin
 export const VERSION = {
-  major: 2,      // Cambios importantes/breaking changes
+  major: 1,      // Cambios importantes/breaking changes
   minor: 1,      // Nuevas features
   patch: 0,      // Bug fixes
   build: '2024.12.19' // Fecha de build

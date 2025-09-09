@@ -9,6 +9,29 @@ const client = new DynamoDBClient({
 
 const docClient = DynamoDBDocumentClient.from(client);
 
+// Función para detectar el entorno basándose en el contexto de la invocación
+const detectEnvironment = (event) => {
+  // Detectar por el source ARN si está disponible
+  if (event.requestContext && event.requestContext.identity && event.requestContext.identity.sourceIp) {
+    // Si viene del API Gateway, detectar por el stage
+    if (event.requestContext.stage === 'sandbox') {
+      return 'sandbox';
+    } else if (event.requestContext.stage === 'prod') {
+      return 'prod';
+    }
+  }
+  
+  // Fallback a variable de entorno
+  return process.env.ENVIRONMENT || 'sandbox';
+};
+
+// Función para obtener el nombre de tabla según el entorno
+const getTableName = (baseTableName, environment) => {
+  const env = environment || detectEnvironment({});
+  const suffix = env === 'prod' ? 'prod' : 'sandbox';
+  return `OnPointAdmin-${baseTableName}-${suffix}`;
+};
+
 // Función para generar respuesta CORS
 const createResponse = (statusCode, body) => ({
   statusCode,
@@ -25,12 +48,13 @@ const createResponse = (statusCode, body) => ({
 // GET /providers
 exports.getProviders = async (event) => {
   try {
-    console.log('🔍 Lambda: Obteniendo providers...');
+    const environment = detectEnvironment(event);
+    console.log('🔍 Lambda: Obteniendo providers...', { environment, stage: event.requestContext?.stage });
     
     const { page = 1, limit = 10, status } = event.queryStringParameters || {};
     
     const params = {
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: getTableName('Providers', environment),
       Limit: parseInt(limit),
       ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
     };
@@ -68,7 +92,8 @@ exports.getProviders = async (event) => {
 // POST /providers
 exports.createProvider = async (event) => {
   try {
-    console.log('🔍 Lambda: Creando provider...');
+    const environment = detectEnvironment(event);
+    console.log('🔍 Lambda: Creando provider...', { environment, stage: event.requestContext?.stage });
     
     const body = JSON.parse(event.body);
     const { name, email, company, phone, description, website, address, contacts, status, logo, notes, tags } = body;
@@ -100,7 +125,7 @@ exports.createProvider = async (event) => {
     };
     
     await docClient.send(new PutCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: getTableName('Providers', environment),
       Item: provider
     }));
     
@@ -123,7 +148,8 @@ exports.createProvider = async (event) => {
 // PUT /providers/{id}
 exports.updateProvider = async (event) => {
   try {
-    console.log('🔍 Lambda: Actualizando provider...');
+    const environment = detectEnvironment(event);
+    console.log('🔍 Lambda: Actualizando provider...', { environment, stage: event.requestContext?.stage });
     
     const providerId = event.pathParameters?.id;
     if (!providerId) {
@@ -154,7 +180,7 @@ exports.updateProvider = async (event) => {
     };
     
     await docClient.send(new UpdateCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: getTableName('Providers', environment),
       Key: { id: providerId },
       UpdateExpression: 'SET ' + Object.keys(updateData).map(key => `#${key} = :${key}`).join(', '),
       ExpressionAttributeNames: Object.keys(updateData).reduce((acc, key) => {
@@ -170,7 +196,7 @@ exports.updateProvider = async (event) => {
     
     // Obtener el proveedor actualizado
     const result = await docClient.send(new GetCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: getTableName('Providers', environment),
       Key: { id: providerId }
     }));
     
@@ -193,7 +219,8 @@ exports.updateProvider = async (event) => {
 // DELETE /providers/{id}
 exports.deleteProvider = async (event) => {
   try {
-    console.log('🔍 Lambda: Eliminando provider...');
+    const environment = detectEnvironment(event);
+    console.log('🔍 Lambda: Eliminando provider...', { environment, stage: event.requestContext?.stage });
     
     const providerId = event.pathParameters?.id;
     if (!providerId) {
@@ -205,7 +232,7 @@ exports.deleteProvider = async (event) => {
     }
     
     await docClient.send(new DeleteCommand({
-      TableName: 'onpoint-admin-providers-dev',
+      TableName: getTableName('Providers', environment),
       Key: { id: providerId }
     }));
     
