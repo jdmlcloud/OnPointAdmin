@@ -822,8 +822,116 @@ export default function LogosPage() {
         {/* Contenido Principal */}
         <div className="flex-1 overflow-auto scrollbar-hide">
           {viewMode === 'clients' ? (
-            // Vista de Cards de Clientes
-            Object.keys(logosByClient).length === 0 ? (
+            // Vista de Clientes o Logos de Cliente Seleccionado
+            selectedClient ? (
+              // Vista de logos de un cliente específico
+              <div className="space-y-6">
+                {/* Header del Cliente Seleccionado */}
+                <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleBackToClients}
+                    className="mr-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="text-xl font-semibold">{selectedClient.name}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedClient.logos.length} logos disponibles
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => router.push(`/logos/new?client=${selectedClient.id}&clientName=${encodeURIComponent(selectedClient.name)}`)}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Agregar Logo
+                  </Button>
+                </div>
+                
+                {/* Grid de Logos del Cliente */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {selectedClient.logos.map((logo) => (
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
+                      {/* Imagen centrada en la parte superior */}
+                      <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
+                        {logo.thumbnailUrl ? (
+                          <img
+                            src={logo.thumbnailUrl}
+                            alt={logo.name}
+                            className="max-w-full max-h-full object-contain"
+                          />
+                        ) : (
+                          <div className="text-muted-foreground text-center">
+                            <Image className="h-12 w-12 mx-auto mb-2" />
+                            <p className="text-sm">Sin vista previa</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Información del logo */}
+                      <CardContent className="p-4 flex-1 flex flex-col">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-2">{logo.name}</h3>
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {logo.description || 'Sin descripción'}
+                          </p>
+                          
+                          {/* Tags */}
+                          {logo.tags && logo.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mb-3">
+                              {logo.tags.slice(0, 3).map((tag, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {logo.tags.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{logo.tags.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Botones de acción */}
+                        <div className="flex gap-2 mt-4">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleView(logo)}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEdit(logo)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDelete(logo)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ) : Object.keys(logosByClient).length === 0 ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
                   <Building2 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -949,8 +1057,7 @@ export default function LogosPage() {
               </div>
             )
           ) : (
-            // Vista de Logos (modo original)
-            selectedClient ? (
+            // Vista de Todos los Logos
               // Vista de logos de un cliente específico
               <div className="space-y-6">
                 {/* Header del Cliente Seleccionado */}
