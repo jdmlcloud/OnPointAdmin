@@ -12,121 +12,100 @@ import {
   TrendingUp,
   Settings,
   Plus,
-  ArrowRight
+  ArrowRight,
+  Building2,
+  Image,
+  BarChart3,
+  FileBarChart,
+  Palette,
+  Zap,
+  Cpu,
+  Bot,
+  MessageCircle
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useAuthRoles } from "@/hooks/use-auth-roles"
+import { useAuthContext } from "@/lib/auth/auth-context"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useStats } from "@/hooks/use-stats"
-import { useRoles as useRolesData } from "@/hooks/use-roles"
-import { usePermissions } from "@/hooks/use-permissions"
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { currentRole, hasPermission } = useAuthRoles()
+  const { user } = useAuthContext()
   const { users, loading: usersLoading } = useUsers()
   const { providers, loading: providersLoading } = useProviders()
   const { stats, loading: statsLoading } = useStats()
-  const { roles, systemRoles, customRoles, loading: rolesLoading } = useRolesData()
-  const { permissions, systemPermissions, customPermissions, loading: permissionsLoading } = usePermissions()
 
-  const modules = [
+  const services = [
     {
-      title: "Gestión de Proveedores",
-      description: "Administra proveedores, logos y información comercial",
-      icon: Users,
+      title: "Proveedores",
+      description: "Gestión de proveedores",
+      icon: Building2,
       href: "/providers",
-      status: "Disponible",
       color: "bg-blue-500"
     },
     {
-      title: "Gestión de Productos",
-      description: "CRUD de productos, variantes y precios escalonados",
+      title: "Productos",
+      description: "Catálogo de productos",
       icon: Package,
       href: "/products",
-      status: "Disponible",
       color: "bg-green-500"
     },
     {
-      title: "Gestión de Usuarios",
-      description: "Administra usuarios y permisos del sistema",
-      icon: Users,
-      href: "/users",
-      status: "Disponible",
-      color: "bg-indigo-500"
+      title: "Logos",
+      description: "Gestión de logos",
+      icon: Image,
+      href: "/logos",
+      color: "bg-purple-500"
     },
     {
       title: "WhatsApp + IA",
-      description: "Procesamiento automático de mensajes con IA",
+      description: "Mensajes con IA",
       icon: MessageSquare,
       href: "/whatsapp",
-      status: "Disponible",
       color: "bg-yellow-500"
     },
     {
       title: "Cotizaciones",
-      description: "Sistema de cotizaciones y presupuestos",
+      description: "Sistema de cotizaciones",
       icon: TrendingUp,
       href: "/quotations",
-      status: "Disponible",
-      color: "bg-purple-500"
-    },
-    {
-      title: "Propuestas",
-      description: "Generación y gestión de propuestas",
-      icon: FileText,
-      href: "/proposals",
-      status: "Disponible",
       color: "bg-pink-500"
     },
     {
-      title: "Analytics",
-      description: "Análisis y métricas del sistema",
-      icon: TrendingUp,
-      href: "/analytics",
-      status: "Disponible",
+      title: "Propuestas",
+      description: "Gestión de propuestas",
+      icon: FileText,
+      href: "/proposals",
       color: "bg-orange-500"
     },
     {
-      title: "Reportes",
-      description: "Generación de reportes y estadísticas",
-      icon: FileText,
-      href: "/reports",
-      status: "Disponible",
+      title: "Generador PDFs",
+      description: "Creación de PDFs",
+      icon: FileBarChart,
+      href: "/pdf-generator",
       color: "bg-red-500"
     },
     {
-      title: "Integraciones",
-      description: "Configuración de integraciones externas",
-      icon: Settings,
-      href: "/integrations",
-      status: "Disponible",
+      title: "Envío y Tracking",
+      description: "Seguimiento de envíos",
+      icon: BarChart3,
+      href: "/tracking",
       color: "bg-cyan-500"
     },
     {
-      title: "Editor",
-      description: "Editor de documentos y contenido",
-      icon: FileText,
+      title: "Editor Visual",
+      description: "Editor de contenido",
+      icon: Palette,
       href: "/editor",
-      status: "Disponible",
       color: "bg-teal-500"
     },
     {
-      title: "Tracking",
-      description: "Seguimiento y monitoreo de actividades",
-      icon: TrendingUp,
-      href: "/tracking",
-      status: "Disponible",
-      color: "bg-violet-500"
-    },
-    {
-      title: "AI Test",
-      description: "Pruebas y configuración de IA",
-      icon: MessageSquare,
-      href: "/ai-test",
-      status: "Disponible",
-      color: "bg-emerald-500"
+      title: "Configuración",
+      description: "Configuración del sistema",
+      icon: Settings,
+      href: "/settings",
+      color: "bg-gray-500"
     }
   ]
 
@@ -136,215 +115,115 @@ export default function DashboardPage() {
         {/* Welcome Section */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard Principal</h1>
+            <h1 className="text-3xl font-bold">
+              Hola {user?.firstName ? user.firstName : 'Usuario'}
+            </h1>
             <p className="text-muted-foreground">
-              Bienvenido a OnPoint Admin - Plataforma de Ventas B2B con IA
+              Bienvenido a JDML Cloud - Servicios de Infraestructura
             </p>
           </div>
-          <Button onClick={() => router.push('/providers/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Proveedor
-          </Button>
         </div>
 
-        {/* Stats Cards - Dinámicas */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Usuarios Activos */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-green-600">
-                    {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Usuarios Activos</p>
-                  <p className="text-xs text-gray-500">
-                    de {usersLoading ? "..." : users.length} usuarios totales
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Usuarios Inactivos */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-red-600">
-                    {usersLoading ? "..." : users.filter(u => u.status === 'inactive').length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Usuarios Inactivos</p>
-                  <p className="text-xs text-gray-500">
-                    {usersLoading ? "..." : users.filter(u => u.status === 'inactive').length === 0 ? "Todos activos" : `${users.filter(u => u.status === 'inactive').length} inactivos`}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Roles Personalizados */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
-                  <Settings className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {rolesLoading ? "..." : customRoles.length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Roles Personalizados</p>
-                  <p className="text-xs text-gray-500">
-                    + {rolesLoading ? "..." : systemRoles.length} roles del sistema
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Permisos Personalizados */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
-                  <Settings className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {permissionsLoading ? "..." : customPermissions.length}
-                  </p>
-                  <p className="text-sm text-muted-foreground">Permisos Personalizados</p>
-                  <p className="text-xs text-gray-500">
-                    + {permissionsLoading ? "..." : systemPermissions.length} permisos del sistema
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Modules Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {modules.map((module) => {
-            const Icon = module.icon
-            return (
-              <Card key={module.title} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${module.color} text-white`}>
-                      <Icon className="h-6 w-6" />
+        {/* Accesos Rápidos */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Accesos Rápidos</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {services.map((service) => {
+              const Icon = service.icon
+              return (
+                <Card 
+                  key={service.title}
+                  className="hover:shadow-lg transition-shadow cursor-pointer h-24"
+                  onClick={() => router.push(service.href)}
+                >
+                  <CardContent className="p-4 h-full flex flex-col items-center justify-center text-center">
+                    <div className={`w-8 h-8 rounded-lg ${service.color} flex items-center justify-center mb-2`}>
+                      <Icon className="h-4 w-4 text-white" />
                     </div>
-                    <div>
-                      <CardTitle className="text-lg">{module.title}</CardTitle>
-                      <Badge variant="secondary" className="mt-1">
-                        {module.status}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="mb-4">
-                    {module.description}
-                  </CardDescription>
-                  <Button 
-                    className="w-full" 
-                    variant="outline"
-                    onClick={() => router.push(module.href)}
-                  >
-                    Acceder
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </CardContent>
-              </Card>
-            )
-          })}
+                    <h3 className="text-sm font-medium truncate w-full">{service.title}</h3>
+                    <p className="text-xs text-muted-foreground truncate w-full">{service.description}</p>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="mt-12">
-          <h3 className="text-2xl font-bold mb-6">Resumen del Sistema</h3>
+        {/* Métricas del Sistema */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Métricas del Sistema</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Proveedores */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <Users className="h-8 w-8 text-blue-500" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.overview.totalUsers || 0}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Usuarios</p>
-                    {stats && (
-                      <p className="text-xs text-green-600">
-                        {stats.overview.totalActiveUsers} activos
-                      </p>
-                    )}
+                  <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-white" />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <Package className="h-8 w-8 text-green-500" />
                   <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.overview.totalProducts || 0}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Productos</p>
-                    {stats && (
-                      <p className="text-xs text-green-600">
-                        {stats.overview.totalActiveProducts} activos
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <Users className="h-8 w-8 text-purple-500" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : stats?.overview.totalProviders || 0}
+                    <p className="text-2xl font-bold text-blue-600">
+                      {providersLoading ? "..." : providers.length}
                     </p>
                     <p className="text-sm text-muted-foreground">Proveedores</p>
-                    {stats && (
-                      <p className="text-xs text-green-600">
-                        {stats.overview.totalActiveProviders} activos
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-500">Registrados en el sistema</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Usuarios Activos */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <TrendingUp className="h-8 w-8 text-yellow-500" />
+                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-white" />
+                  </div>
                   <div>
-                    <p className="text-2xl font-bold">
-                      {statsLoading ? '...' : (stats?.products.total || 0)}
+                    <p className="text-2xl font-bold text-green-600">
+                      {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
                     </p>
-                    <p className="text-sm text-muted-foreground">Total Productos</p>
-                    {stats && (
-                      <p className="text-xs text-orange-600">
-                        {stats.products.active} activos
-                      </p>
-                    )}
+                    <p className="text-sm text-muted-foreground">Usuarios Activos</p>
+                    <p className="text-xs text-gray-500">de {usersLoading ? "..." : users.length} totales</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Servicios Disponibles */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+                    <Zap className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-purple-600">{services.length}</p>
+                    <p className="text-sm text-muted-foreground">Servicios</p>
+                    <p className="text-xs text-gray-500">Disponibles en la plataforma</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Estado del Sistema */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                    <Cpu className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-600">Online</p>
+                    <p className="text-sm text-muted-foreground">Estado del Sistema</p>
+                    <p className="text-xs text-gray-500">Todos los servicios operativos</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
+
+
 
         {/* Gestión de Usuarios - Solo para Administradores */}
         {hasPermission('canManageUsers') && (
@@ -603,6 +482,20 @@ export default function DashboardPage() {
             </Card>
           </div>
         )}
+
+        {/* Chat Flotante con IA */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            size="lg"
+            className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
+            onClick={() => {
+              // Aquí se puede implementar la funcionalidad del chat
+              console.log('Abrir chat con IA')
+            }}
+          >
+            <Bot className="h-6 w-6 text-white" />
+          </Button>
+        </div>
       </div>
     </MainLayout>
   )
