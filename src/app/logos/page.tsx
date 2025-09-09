@@ -866,9 +866,9 @@ export default function LogosPage() {
               // Vista de logos de un cliente específico
               <div className="space-y-6">
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 justify-items-center">
                   {selectedClient.logos.map((logo) => (
-                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden">
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                       {/* Imagen centrada en la parte superior */}
                       <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                         {logo.thumbnailUrl ? (
@@ -1104,9 +1104,9 @@ export default function LogosPage() {
                 </div>
                 
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 justify-items-center">
                   {selectedClient.logos.map((logo) => (
-                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden">
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                       {/* Imagen centrada en la parte superior */}
                       <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                         {logo.thumbnailUrl ? (
@@ -1302,9 +1302,9 @@ export default function LogosPage() {
                       </div>
 
                       {/* Grid de Logos del Cliente */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-2 justify-items-center">
                         {client.logos.map((logo) => (
-                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden">
+                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                             {/* Imagen centrada en la parte superior */}
                             <div className="relative h-40 bg-muted flex items-center justify-center overflow-hidden">
                               {logo.thumbnailUrl ? (
