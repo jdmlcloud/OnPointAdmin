@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiRequest } from '@/config/api'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 export interface SystemMetrics {
   // Métricas de rendimiento
@@ -66,7 +66,21 @@ export const useSystemMetrics = () => {
       setLoading(true)
       setError(null)
       
-      // Por ahora usar datos mock, después conectar con AWS CloudWatch
+      // Intentar obtener datos reales de AWS
+      try {
+        const [metricsData, healthData] = await Promise.all([
+          apiRequest<{metrics: SystemMetrics}>(API_CONFIG.ENDPOINTS.SYSTEM_METRICS),
+          apiRequest<{health: {services: ServiceStatus[]}}>(API_CONFIG.ENDPOINTS.SYSTEM_HEALTH)
+        ])
+        
+        setMetrics(metricsData.metrics)
+        setServices(healthData.health.services)
+        return
+      } catch (apiError) {
+        console.warn('⚠️ Error al conectar con AWS, usando datos mock:', apiError)
+      }
+      
+      // Fallback a datos mock si falla la API
       const mockMetrics: SystemMetrics = {
         cpuUsage: 45,
         memoryUsage: 52,

@@ -23,7 +23,14 @@ export const API_CONFIG = {
     EDITOR: '/editor',
     TRACKING: '/tracking',
     AI_TEST: '/ai-test',
-    CLIENTS: '/clients'
+    CLIENTS: '/clients',
+    // Nuevos endpoints para dashboard
+    NOTIFICATIONS: '/notifications',
+    PRODUCTIVITY: '/productivity',
+    SYSTEM_METRICS: '/system/metrics',
+    SYSTEM_HEALTH: '/system/health',
+    CLOUDWATCH_CPU: '/cloudwatch/cpu-utilization',
+    CLOUDWATCH_MEMORY: '/cloudwatch/memory-utilization'
   },
   
   // Headers por defecto

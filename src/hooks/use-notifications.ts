@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiRequest } from '@/config/api'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 export interface Notification {
   id: string
@@ -40,7 +40,27 @@ export const useNotifications = () => {
       setLoading(true)
       setError(null)
       
-      // Por ahora usar datos mock, después conectar con AWS
+      // Intentar obtener datos reales de AWS
+      try {
+        const data = await apiRequest<{notifications: Notification[]}>(API_CONFIG.ENDPOINTS.NOTIFICATIONS)
+        setNotifications(data.notifications)
+        
+        // Calcular estadísticas
+        const newStats: NotificationStats = {
+          urgent: data.notifications.filter(n => n.priority === 'urgent').length,
+          messages: data.notifications.filter(n => n.type === 'message').length,
+          tasks: data.notifications.filter(n => n.type === 'task').length,
+          proposals: data.notifications.filter(n => n.type === 'proposal').length,
+          clients: data.notifications.filter(n => n.type === 'client').length
+        }
+        
+        setStats(newStats)
+        return
+      } catch (apiError) {
+        console.warn('⚠️ Error al conectar con AWS, usando datos mock:', apiError)
+      }
+      
+      // Fallback a datos mock si falla la API
       const mockNotifications: Notification[] = [
         {
           id: '1',

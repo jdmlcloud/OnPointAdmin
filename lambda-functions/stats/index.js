@@ -42,9 +42,21 @@ exports.getStats = async (event) => {
       TableName: process.env.DYNAMODB_PRODUCTS_TABLE || 'OnPointAdmin-Products-sandbox'
     }));
     
+    // Obtener estadísticas de logos
+    const logosResult = await docClient.send(new ScanCommand({
+      TableName: process.env.DYNAMODB_LOGOS_TABLE || 'OnPointAdmin-Logos-sandbox'
+    }));
+    
+    // Obtener estadísticas de clients
+    const clientsResult = await docClient.send(new ScanCommand({
+      TableName: process.env.DYNAMODB_CLIENTS_TABLE || 'OnPointAdmin-Clients-sandbox'
+    }));
+    
     const users = usersResult.Items || [];
     const providers = providersResult.Items || [];
     const products = productsResult.Items || [];
+    const logos = logosResult.Items || [];
+    const clients = clientsResult.Items || [];
     
     const stats = {
       users: {
@@ -64,10 +76,42 @@ exports.getStats = async (event) => {
         active: products.filter(p => p.status === 'active').length,
         inactive: products.filter(p => p.status === 'inactive').length
       },
+      logos: {
+        total: logos.length,
+        byFormat: logos.reduce((acc, logo) => {
+          const format = logo.format || 'unknown';
+          acc[format] = (acc[format] || 0) + 1;
+          return acc;
+        }, {}),
+        byClient: logos.reduce((acc, logo) => {
+          const client = logo.brand || 'unknown';
+          acc[client] = (acc[client] || 0) + 1;
+          return acc;
+        }, {}),
+        recent: logos.filter(logo => {
+          const createdAt = new Date(logo.createdAt || logo.created_at);
+          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+          return createdAt > weekAgo;
+        }).length
+      },
+      clients: {
+        total: clients.length,
+        withLogos: clients.filter(client => {
+          const clientLogos = logos.filter(logo => logo.brand === client.brand);
+          return clientLogos.length > 0;
+        }).length,
+        recent: clients.filter(client => {
+          const createdAt = new Date(client.createdAt || client.created_at);
+          const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+          return createdAt > weekAgo;
+        }).length
+      },
       overview: {
         totalUsers: users.length,
         totalProviders: providers.length,
         totalProducts: products.length,
+        totalLogos: logos.length,
+        totalClients: clients.length,
         totalActiveUsers: users.filter(u => u.status === 'active').length,
         totalActiveProviders: providers.filter(p => p.status === 'active').length,
         totalActiveProducts: products.filter(p => p.status === 'active').length

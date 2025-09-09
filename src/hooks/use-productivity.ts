@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiRequest } from '@/config/api'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 export interface ProductivityMetrics {
   tasksCompletedToday: number
@@ -56,7 +56,23 @@ export const useProductivity = () => {
       setLoading(true)
       setError(null)
       
-      // Por ahora usar datos mock, después conectar con AWS
+      // Intentar obtener datos reales de AWS
+      try {
+        const [metricsData, tasksData, contactsData] = await Promise.all([
+          apiRequest<{metrics: ProductivityMetrics}>(API_CONFIG.ENDPOINTS.PRODUCTIVITY + '/metrics'),
+          apiRequest<{tasks: Task[]}>(API_CONFIG.ENDPOINTS.PRODUCTIVITY + '/tasks'),
+          apiRequest<{contacts: ClientContact[]}>(API_CONFIG.ENDPOINTS.PRODUCTIVITY + '/contacts')
+        ])
+        
+        setMetrics(metricsData.metrics)
+        setRecentTasks(tasksData.tasks)
+        setRecentContacts(contactsData.contacts)
+        return
+      } catch (apiError) {
+        console.warn('⚠️ Error al conectar con AWS, usando datos mock:', apiError)
+      }
+      
+      // Fallback a datos mock si falla la API
       const mockMetrics: ProductivityMetrics = {
         tasksCompletedToday: 5,
         clientsContactedThisWeek: 8,
