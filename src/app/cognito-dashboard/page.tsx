@@ -209,7 +209,7 @@ export default function CognitoDashboardPage() {
         </div>
 
         {/* Gestión de Usuarios - Solo para Administradores */}
-        {hasPermission('canManageUsers') && (
+        {hasPermission('users', 'manage') && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>

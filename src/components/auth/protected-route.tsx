@@ -61,7 +61,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Verificar rol requerido
-  if (requiredRole && user.role !== requiredRole) {
+  if (requiredRole && user.role.name !== requiredRole) {
     // Verificar si el usuario tiene un rol superior
     const roleLevels = {
       SUPER_ADMIN: 1,
@@ -69,7 +69,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       EXECUTIVE: 3
     }
 
-    const userLevel = roleLevels[user.role as keyof typeof roleLevels] || 999
+    const userLevel = roleLevels[user.role.name as keyof typeof roleLevels] || 999
     const requiredLevel = roleLevels[requiredRole] || 999
 
     if (userLevel > requiredLevel) {
@@ -89,7 +89,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               No tienes permisos para acceder a esta sección.
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              Rol requerido: {requiredRole} | Tu rol: {user.role}
+              Rol requerido: {requiredRole} | Tu rol: {user.role.name}
             </p>
             <button
               onClick={() => router.push('/dashboard')}

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Role, UserRoleType } from '@/types/users'
+import { UserUserRole, UserUserRoleType } from '@/types/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,12 +12,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Users, Shield, Settings, FileText, BarChart3 } from 'lucide-react'
 
-interface RoleFormProps {
+interface UserRoleFormProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (roleData: any) => Promise<boolean>
-  role?: Role | null
-  currentUserRole?: UserRoleType
+  role?: UserRole | null
+  currentUserUserRole?: UserUserRoleType
   isLoading?: boolean
 }
 
@@ -28,7 +28,7 @@ const availablePermissions = {
     { id: 'users:write', name: 'Editar usuarios', description: 'Puede modificar información de usuarios' },
     { id: 'users:manage', name: 'Gestionar usuarios', description: 'Puede crear, editar y eliminar usuarios' }
   ],
-  'Roles': [
+  'UserRoles': [
     { id: 'roles:read', name: 'Ver roles', description: 'Puede ver la lista de roles' },
     { id: 'roles:manage', name: 'Gestionar roles', description: 'Puede crear, editar y eliminar roles' }
   ],
@@ -54,12 +54,12 @@ const availablePermissions = {
   ]
 }
 
-export const RoleForm: React.FC<RoleFormProps> = ({
+export const RoleForm: React.FC<UserRoleFormProps> = ({
   isOpen,
   onClose,
   onSubmit,
   role,
-  currentUserRole,
+  currentUserUserRole,
   isLoading = false
 }) => {
   const [formData, setFormData] = useState({
@@ -155,7 +155,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
     switch (category) {
       case 'Usuarios':
         return <Users className="h-4 w-4" />
-      case 'Roles':
+      case 'UserRoles':
       case 'Permisos':
         return <Shield className="h-4 w-4" />
       case 'Configuración':

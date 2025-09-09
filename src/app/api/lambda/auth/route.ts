@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb'
+import { DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb'
 
 // Configurar cliente DynamoDB
 const client = new DynamoDBClient({
@@ -119,16 +119,16 @@ async function handleLogin(requestBody: string, environment: string) {
       }
     }
 
-    const result = await dynamodb.send(new GetCommand(params))
+    const result = await dynamodb.send(new ScanCommand(params))
     
-    if (!result.Item) {
+    if (!result.Items || result.Items.length === 0) {
       return createResponse(401, { 
         success: false, 
         message: 'Credenciales inválidas' 
       })
     }
 
-    const user = result.Item
+    const user = result.Items[0]
 
     // Verificar contraseña
     const isValidPassword = simpleVerify(password, user.password)
@@ -167,7 +167,7 @@ async function handleLogin(requestBody: string, environment: string) {
       }
     }
 
-    await dynamodb.send(new PutCommand(updateParams))
+    await dynamodb.send(new UpdateCommand(updateParams))
 
     // Retornar usuario sin contraseña
     const { password: _, ...userWithoutPassword } = user

@@ -34,12 +34,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Ver usuarios',
       resource: 'users',
       action: 'read',
-      category: 'Usuarios',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-users-write',
@@ -47,12 +41,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Editar usuarios',
       resource: 'users',
       action: 'write',
-      category: 'Usuarios',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-users-manage',
@@ -60,12 +48,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Gestionar usuarios',
       resource: 'users',
       action: 'manage',
-      category: 'Usuarios',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     // Roles
     {
@@ -74,12 +56,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Ver roles',
       resource: 'roles',
       action: 'read',
-      category: 'Roles',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-roles-manage',
@@ -87,12 +63,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Gestionar roles',
       resource: 'roles',
       action: 'manage',
-      category: 'Roles',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     // Permisos
     {
@@ -101,12 +71,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Ver permisos',
       resource: 'permissions',
       action: 'read',
-      category: 'Permisos',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-permissions-manage',
@@ -114,12 +78,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Gestionar permisos',
       resource: 'permissions',
       action: 'manage',
-      category: 'Permisos',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     // Proveedores
     {
@@ -128,12 +86,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Ver proveedores',
       resource: 'providers',
       action: 'read',
-      category: 'Proveedores',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-providers-write',
@@ -141,12 +93,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Editar proveedores',
       resource: 'providers',
       action: 'write',
-      category: 'Proveedores',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-providers-manage',
@@ -154,12 +100,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Gestionar proveedores',
       resource: 'providers',
       action: 'manage',
-      category: 'Proveedores',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     // Productos
     {
@@ -168,12 +108,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Ver productos',
       resource: 'products',
       action: 'read',
-      category: 'Productos',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-products-write',
@@ -181,12 +115,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Editar productos',
       resource: 'products',
       action: 'write',
-      category: 'Productos',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-products-manage',
@@ -194,12 +122,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Gestionar productos',
       resource: 'products',
       action: 'manage',
-      category: 'Productos',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     // Reportes
     {
@@ -208,12 +130,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Ver reportes',
       resource: 'reports',
       action: 'view',
-      category: 'Reportes',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     // Configuración
     {
@@ -222,12 +138,6 @@ const PermissionsPage: React.FC = () => {
       description: 'Gestionar configuración',
       resource: 'settings',
       action: 'manage',
-      category: 'Configuración',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     }
   ]
 
@@ -271,7 +181,7 @@ const PermissionsPage: React.FC = () => {
     )
 
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(permission => permission.category === selectedCategory)
+      filtered = filtered.filter(permission => permission.resource === selectedCategory)
     }
 
     setFilteredPermissions(filtered)
@@ -287,7 +197,8 @@ const PermissionsPage: React.FC = () => {
   }
 
   const handleDeletePermission = (permission: Permission) => {
-    if (permission.isSystem) {
+    // Los permisos del sistema se identifican por tener resource que empieza con 'system'
+    if (permission.resource.startsWith('system')) {
       alert('No se pueden eliminar permisos del sistema')
       return
     }

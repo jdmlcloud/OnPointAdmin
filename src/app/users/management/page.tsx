@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuthContext } from '@/lib/auth/auth-context'
 import ProtectedRoute from '@/components/auth/protected-route'
-import { User, Role, Permission, UserRoleType } from '@/types/users'
+import { User, UserRole, Permission, UserRoleType } from '@/types/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -32,12 +32,12 @@ const UserManagementPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   
   // Estados para roles
-  const [roles, setRoles] = useState<Role[]>([])
-  const [filteredRoles, setFilteredRoles] = useState<Role[]>([])
-  const [roleSearchTerm, setRoleSearchTerm] = useState('')
-  const [isCreateRoleDialogOpen, setIsCreateRoleDialogOpen] = useState(false)
-  const [isEditRoleDialogOpen, setIsEditRoleDialogOpen] = useState(false)
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null)
+  const [roles, setUserRoles] = useState<UserRole[]>([])
+  const [filteredUserRoles, setFilteredUserRoles] = useState<UserRole[]>([])
+  const [roleSearchTerm, setUserRoleSearchTerm] = useState('')
+  const [isCreateUserRoleDialogOpen, setIsCreateUserRoleDialogOpen] = useState(false)
+  const [isEditUserRoleDialogOpen, setIsEditUserRoleDialogOpen] = useState(false)
+  const [selectedUserRole, setSelectedUserRole] = useState<UserRole | null>(null)
   
   // Estados para permisos
   const [permissions, setPermissions] = useState<Permission[]>([])
@@ -56,10 +56,20 @@ const UserManagementPage: React.FC = () => {
     {
       id: 'user-super-admin',
       email: 'superadmin@onpoint.com',
+      password: 'password123',
       firstName: 'Super',
       lastName: 'Administrador',
       phone: '+525512345678',
-      role: 'SUPER_ADMIN',
+      role: {
+        id: 'role-super-admin',
+        name: 'SUPER_ADMIN',
+        level: 1,
+        permissions: [],
+        description: 'Super Administrador',
+        createdAt: '2024-12-19T00:00:00.000Z',
+        updatedAt: '2024-12-19T00:00:00.000Z',
+        createdBy: 'system'
+      },
       department: 'Tecnología',
       position: 'Super Administrador',
       status: 'active',
@@ -70,10 +80,20 @@ const UserManagementPage: React.FC = () => {
     {
       id: 'user-admin',
       email: 'admin@onpoint.com',
+      password: 'password123',
       firstName: 'Admin',
       lastName: 'Usuario',
       phone: '+525512345679',
-      role: 'ADMIN',
+      role: {
+        id: 'role-admin',
+        name: 'ADMIN',
+        level: 2,
+        permissions: [],
+        description: 'Administrador',
+        createdAt: '2024-12-19T00:00:00.000Z',
+        updatedAt: '2024-12-19T00:00:00.000Z',
+        createdBy: 'system'
+      },
       department: 'Administración',
       position: 'Administrador',
       status: 'active',
@@ -84,10 +104,20 @@ const UserManagementPage: React.FC = () => {
     {
       id: 'user-executive',
       email: 'ejecutivo@onpoint.com',
+      password: 'password123',
       firstName: 'Ejecutivo',
       lastName: 'Usuario',
       phone: '+525512345680',
-      role: 'EXECUTIVE',
+      role: {
+        id: 'role-executive',
+        name: 'EXECUTIVE',
+        level: 3,
+        permissions: [],
+        description: 'Ejecutivo',
+        createdAt: '2024-12-19T00:00:00.000Z',
+        updatedAt: '2024-12-19T00:00:00.000Z',
+        createdBy: 'system'
+      },
       department: 'Ventas',
       position: 'Ejecutivo',
       status: 'active',
@@ -97,15 +127,13 @@ const UserManagementPage: React.FC = () => {
     }
   ]
 
-  const testRoles: Role[] = [
+  const testUserRoles: UserRole[] = [
     {
       id: 'role-super-admin',
       name: 'Super Administrador',
       description: 'Acceso total al sistema, puede gestionar todo incluyendo otros administradores',
-      permissions: ['users:manage', 'roles:manage', 'permissions:manage', 'providers:manage', 'products:manage', 'reports:view', 'settings:manage'],
+      permissions: [],
       level: 1,
-      isSystem: true,
-      status: 'active',
       createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
@@ -114,10 +142,8 @@ const UserManagementPage: React.FC = () => {
       id: 'role-admin',
       name: 'Administrador',
       description: 'Puede gestionar usuarios, proveedores y productos del sistema',
-      permissions: ['users:manage', 'providers:manage', 'products:manage', 'reports:view'],
+      permissions: [],
       level: 2,
-      isSystem: false,
-      status: 'active',
       createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
@@ -126,10 +152,8 @@ const UserManagementPage: React.FC = () => {
       id: 'role-executive',
       name: 'Ejecutivo',
       description: 'Puede ver y gestionar proveedores y productos asignados',
-      permissions: ['providers:read', 'products:read', 'reports:view'],
+      permissions: [],
       level: 3,
-      isSystem: false,
-      status: 'active',
       createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
@@ -143,12 +167,6 @@ const UserManagementPage: React.FC = () => {
       description: 'Ver usuarios',
       resource: 'users',
       action: 'read',
-      category: 'Usuarios',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-users-manage',
@@ -156,12 +174,6 @@ const UserManagementPage: React.FC = () => {
       description: 'Gestionar usuarios',
       resource: 'users',
       action: 'manage',
-      category: 'Usuarios',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     },
     {
       id: 'permission-roles-manage',
@@ -169,19 +181,13 @@ const UserManagementPage: React.FC = () => {
       description: 'Gestionar roles',
       resource: 'roles',
       action: 'manage',
-      category: 'Roles',
-      isSystem: true,
-      status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
     }
   ]
 
   const categories = [
     { id: 'all', name: 'Todas', icon: Shield },
     { id: 'Usuarios', name: 'Usuarios', icon: Users },
-    { id: 'Roles', name: 'Roles', icon: Shield },
+    { id: 'UserRoles', name: 'UserRoles', icon: Shield },
     { id: 'Permisos', name: 'Permisos', icon: Settings },
     { id: 'Proveedores', name: 'Proveedores', icon: Users },
     { id: 'Productos', name: 'Productos', icon: Users },
@@ -197,8 +203,8 @@ const UserManagementPage: React.FC = () => {
         await new Promise(resolve => setTimeout(resolve, 1000))
         setUsers(testUsers)
         setFilteredUsers(testUsers)
-        setRoles(testRoles)
-        setFilteredRoles(testRoles)
+        setUserRoles(testUserRoles)
+        setFilteredUserRoles(testUserRoles)
         setPermissions(testPermissions)
         setFilteredPermissions(testPermissions)
       } catch (error) {
@@ -229,7 +235,7 @@ const UserManagementPage: React.FC = () => {
       role.name.toLowerCase().includes(roleSearchTerm.toLowerCase()) ||
       role.description.toLowerCase().includes(roleSearchTerm.toLowerCase())
     )
-    setFilteredRoles(filtered)
+    setFilteredUserRoles(filtered)
   }, [roleSearchTerm, roles])
 
   // Filtrar permisos
@@ -241,7 +247,7 @@ const UserManagementPage: React.FC = () => {
     )
 
     if (selectedPermissionCategory !== 'all') {
-      filtered = filtered.filter(permission => permission.category === selectedPermissionCategory)
+      filtered = filtered.filter(permission => permission.resource === selectedPermissionCategory)
     }
 
     setFilteredPermissions(filtered)
@@ -295,24 +301,25 @@ const UserManagementPage: React.FC = () => {
   }
 
   // Handlers para roles
-  const handleCreateRole = () => setIsCreateRoleDialogOpen(true)
-  const handleEditRole = (role: Role) => {
-    setSelectedRole(role)
-    setIsEditRoleDialogOpen(true)
+  const handleCreateUserRole = () => setIsCreateUserRoleDialogOpen(true)
+  const handleEditUserRole = (role: UserRole) => {
+    setSelectedUserRole(role)
+    setIsEditUserRoleDialogOpen(true)
   }
-  const handleDeleteRole = (role: Role) => {
-    if (role.isSystem) {
+  const handleDeleteUserRole = (role: UserRole) => {
+    // Los roles del sistema se identifican por tener level 1
+    if (role.level === 1) {
       alert('No se pueden eliminar roles del sistema')
       return
     }
     if (confirm(`¿Estás seguro de que quieres eliminar el rol "${role.name}"?`)) {
-      setRoles(prev => prev.filter(r => r.id !== role.id))
-      setFilteredRoles(prev => prev.filter(r => r.id !== role.id))
+      setUserRoles(prev => prev.filter(r => r.id !== role.id))
+      setFilteredUserRoles(prev => prev.filter(r => r.id !== role.id))
     }
   }
 
-  const handleCreateRoleSubmit = async (roleData: any) => {
-    const newRole: Role = {
+  const handleCreateUserRoleSubmit = async (roleData: any) => {
+    const newUserRole: UserRole = {
       id: `role-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       ...roleData,
       level: 4,
@@ -322,26 +329,26 @@ const UserManagementPage: React.FC = () => {
       updatedAt: new Date().toISOString(),
       createdBy: 'current-user'
     }
-    setRoles(prev => [...prev, newRole])
-    setFilteredRoles(prev => [...prev, newRole])
-    setIsCreateRoleDialogOpen(false)
+    setUserRoles(prev => [...prev, newUserRole])
+    setFilteredUserRoles(prev => [...prev, newUserRole])
+    setIsCreateUserRoleDialogOpen(false)
     return true
   }
 
-  const handleEditRoleSubmit = async (roleData: any) => {
-    if (selectedRole) {
-      setRoles(prev => prev.map(role => 
-        role.id === selectedRole.id 
+  const handleEditUserRoleSubmit = async (roleData: any) => {
+    if (selectedUserRole) {
+      setUserRoles(prev => prev.map(role => 
+        role.id === selectedUserRole.id 
           ? { ...role, ...roleData, updatedAt: new Date().toISOString() }
           : role
       ))
-      setFilteredRoles(prev => prev.map(role => 
-        role.id === selectedRole.id 
+      setFilteredUserRoles(prev => prev.map(role => 
+        role.id === selectedUserRole.id 
           ? { ...role, ...roleData, updatedAt: new Date().toISOString() }
           : role
       ))
-      setIsEditRoleDialogOpen(false)
-      setSelectedRole(null)
+      setIsEditUserRoleDialogOpen(false)
+      setSelectedUserRole(null)
       return true
     }
     return false
@@ -354,7 +361,8 @@ const UserManagementPage: React.FC = () => {
     setIsEditPermissionDialogOpen(true)
   }
   const handleDeletePermission = (permission: Permission) => {
-    if (permission.isSystem) {
+    // Los permisos del sistema se identifican por tener resource que empieza con 'system'
+    if (permission.resource.startsWith('system')) {
       alert('No se pueden eliminar permisos del sistema')
       return
     }
@@ -400,7 +408,7 @@ const UserManagementPage: React.FC = () => {
   }
 
   const canManageUsers = hasPermission('users', 'manage')
-  const canManageRoles = hasPermission('roles', 'manage')
+  const canManageUserRoles = hasPermission('roles', 'manage')
   const canManagePermissions = hasPermission('permissions', 'manage')
 
   return (
@@ -447,7 +455,7 @@ const UserManagementPage: React.FC = () => {
                 </TabsTrigger>
                 <TabsTrigger value="roles" className="flex items-center space-x-2">
                   <Shield className="h-4 w-4" />
-                  <span>Roles ({roles.length})</span>
+                  <span>UserRoles ({roles.length})</span>
                 </TabsTrigger>
                 <TabsTrigger value="permissions" className="flex items-center space-x-2">
                   <ShieldCheck className="h-4 w-4" />
@@ -499,7 +507,7 @@ const UserManagementPage: React.FC = () => {
                 )}
               </TabsContent>
 
-              {/* Tab de Roles */}
+              {/* Tab de UserRoles */}
               <TabsContent value="roles" className="space-y-6">
                 <div className="flex justify-between items-center">
                   <div className="flex-1 max-w-md">
@@ -508,13 +516,13 @@ const UserManagementPage: React.FC = () => {
                       <Input
                         placeholder="Buscar roles..."
                         value={roleSearchTerm}
-                        onChange={(e) => setRoleSearchTerm(e.target.value)}
+                        onChange={(e) => setUserRoleSearchTerm(e.target.value)}
                         className="pl-10"
                       />
                     </div>
                   </div>
-                  {canManageRoles && (
-                    <Button onClick={handleCreateRole} className="flex items-center">
+                  {canManageUserRoles && (
+                    <Button onClick={handleCreateUserRole} className="flex items-center">
                       <Plus className="h-4 w-4 mr-2" />
                       Nuevo Rol
                     </Button>
@@ -522,13 +530,13 @@ const UserManagementPage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredRoles.map((role) => (
+                  {filteredUserRoles.map((role) => (
                     <RoleCard
                       key={role.id}
                       role={role}
-                      onEdit={handleEditRole}
-                      onDelete={handleDeleteRole}
-                      canManage={canManageRoles}
+                      onEdit={handleEditUserRole}
+                      onDelete={handleDeleteUserRole}
+                      canManage={canManageUserRoles}
                     />
                   ))}
                 </div>
@@ -594,7 +602,7 @@ const UserManagementPage: React.FC = () => {
           isOpen={isCreateUserDialogOpen}
           onClose={() => setIsCreateUserDialogOpen(false)}
           onSubmit={handleCreateUserSubmit}
-          currentUserRole={currentUser?.role}
+          currentUserRole={currentUser?.role?.name as any}
         />
 
         <UserForm
@@ -605,25 +613,25 @@ const UserManagementPage: React.FC = () => {
           }}
           onSubmit={handleEditUserSubmit}
           user={selectedUser}
-          currentUserRole={currentUser?.role}
+          currentUserRole={currentUser?.role?.name as any}
         />
 
         <RoleForm
-          isOpen={isCreateRoleDialogOpen}
-          onClose={() => setIsCreateRoleDialogOpen(false)}
-          onSubmit={handleCreateRoleSubmit}
-          currentUserRole={currentUser?.role}
+          isOpen={isCreateUserRoleDialogOpen}
+          onClose={() => setIsCreateUserRoleDialogOpen(false)}
+          onSubmit={handleCreateUserRoleSubmit}
+          currentUserUserRole={currentUser?.role?.name as any}
         />
 
         <RoleForm
-          isOpen={isEditRoleDialogOpen}
+          isOpen={isEditUserRoleDialogOpen}
           onClose={() => {
-            setIsEditRoleDialogOpen(false)
-            setSelectedRole(null)
+            setIsEditUserRoleDialogOpen(false)
+            setSelectedUserRole(null)
           }}
-          onSubmit={handleEditRoleSubmit}
-          role={selectedRole}
-          currentUserRole={currentUser?.role}
+          onSubmit={handleEditUserRoleSubmit}
+          role={selectedUserRole}
+          currentUserUserRole={currentUser?.role?.name as any}
         />
 
         <PermissionForm

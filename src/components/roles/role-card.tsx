@@ -1,20 +1,20 @@
 'use client'
 
 import React from 'react'
-import { Role } from '@/types/users'
+import { UserRole } from '@/types/users'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Edit, Trash2, Shield, Users, Settings } from 'lucide-react'
 
-interface RoleCardProps {
-  role: Role
-  onEdit: (role: Role) => void
-  onDelete: (role: Role) => void
+interface UserRoleCardProps {
+  role: UserRole
+  onEdit: (role: UserRole) => void
+  onDelete: (role: UserRole) => void
   canManage: boolean
 }
 
-export const RoleCard: React.FC<RoleCardProps> = ({
+export const RoleCard: React.FC<UserRoleCardProps> = ({
   role,
   onEdit,
   onDelete,
@@ -72,7 +72,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({
       const [resource, action] = permission.split(':')
       const resourceNames: Record<string, string> = {
         'users': 'Usuarios',
-        'roles': 'Roles',
+        'roles': 'UserRoles',
         'permissions': 'Permisos',
         'providers': 'Proveedores',
         'products': 'Productos',
@@ -90,7 +90,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({
       // Es un objeto Permission
       const resourceNames: Record<string, string> = {
         'users': 'Usuarios',
-        'roles': 'Roles',
+        'roles': 'UserRoles',
         'permissions': 'Permisos',
         'providers': 'Proveedores',
         'products': 'Productos',
@@ -137,7 +137,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
-                {!role.isSystem && (
+                {role.level > 1 && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -163,8 +163,8 @@ export const RoleCard: React.FC<RoleCardProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Estado:</span>
-            <Badge className={getStatusColor(role.status)}>
-              {role.status}
+            <Badge className="bg-green-100 text-green-800">
+              Activo
             </Badge>
           </div>
           <div className="flex items-center justify-between">

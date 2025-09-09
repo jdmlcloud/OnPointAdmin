@@ -109,7 +109,7 @@ export const PermissionCard: React.FC<PermissionCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              {getCategoryIcon(permission.category)}
+              {getCategoryIcon(permission.resource)}
             </div>
             <div className="flex-1 min-w-0">
               <CardTitle className="text-sm font-mono truncate">
@@ -128,7 +128,7 @@ export const PermissionCard: React.FC<PermissionCardProps> = ({
                 >
                   <Edit className="h-3 w-3" />
                 </Button>
-                {!permission.isSystem && (
+                {!permission.resource.startsWith('system') && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -152,8 +152,8 @@ export const PermissionCard: React.FC<PermissionCardProps> = ({
           
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">Categoría:</span>
-            <Badge className={`${getCategoryColor(permission.category)} text-xs`}>
-              {permission.category}
+            <Badge className={`${getCategoryColor(permission.resource)} text-xs`}>
+              {permission.resource}
             </Badge>
           </div>
           
@@ -166,15 +166,15 @@ export const PermissionCard: React.FC<PermissionCardProps> = ({
           
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">Estado:</span>
-            <Badge className={`${getStatusColor(permission.status)} text-xs`}>
-              {permission.status}
+            <Badge className="bg-green-100 text-green-800 text-xs">
+              Activo
             </Badge>
           </div>
           
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">Tipo:</span>
-            <Badge className={permission.isSystem ? 'bg-purple-100 text-purple-800 text-xs' : 'bg-gray-100 text-gray-800 text-xs'}>
-              {permission.isSystem ? 'Sistema' : 'Personalizado'}
+            <Badge className={permission.resource.startsWith('system') ? 'bg-purple-100 text-purple-800 text-xs' : 'bg-gray-100 text-gray-800 text-xs'}>
+              {permission.resource.startsWith('system') ? 'Sistema' : 'Personalizado'}
             </Badge>
           </div>
         </div>

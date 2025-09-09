@@ -26,7 +26,7 @@ import {
   Cpu
 } from "lucide-react"
 import { useState } from "react"
-import { useRoles } from "@/hooks/use-roles"
+import { useAuthRoles } from "@/hooks/use-auth-roles"
 import { useCognitoAuth } from "@/hooks/use-cognito-auth"
 
 const navigation = [
@@ -132,7 +132,7 @@ const navigation = [
 export function SidebarCognito() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
-  const { hasPermission } = useRoles()
+  const { hasPermission } = useAuthRoles()
   const { user, signOut } = useCognitoAuth()
 
   const handleSignOut = async () => {
@@ -144,7 +144,7 @@ export function SidebarCognito() {
   }
 
   const filteredNavigation = navigation.filter(item => 
-    hasPermission(item.permission as any)
+    hasPermission(item.permission.split(':')[0], item.permission.split(':')[1])
   )
 
   return (
