@@ -99,6 +99,9 @@ export default function LogosPage() {
     closeModal
   } = useCardActions()
 
+  // Estado para el item seleccionado
+  const [selectedItem, setSelectedItem] = useState<Logo | null>(null)
+
   // Usar hook de logos para datos reales de DynamoDB
   const { logos, isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
 
@@ -134,6 +137,22 @@ export default function LogosPage() {
   const handleBackToClients = () => {
     setSelectedClient(null)
     setViewMode('clients')
+  }
+
+  // Funciones para manejar acciones de logos
+  const handleViewLogo = (logo: Logo) => {
+    setSelectedItem(logo)
+    handleView(logo)
+  }
+
+  const handleEditLogo = (logo: Logo) => {
+    setSelectedItem(logo)
+    handleEdit(logo)
+  }
+
+  const handleDeleteLogo = (logo: Logo) => {
+    setSelectedItem(logo)
+    handleDelete(logo)
   }
 
   const filteredLogos = logos.filter(logo => {
@@ -987,7 +1006,7 @@ export default function LogosPage() {
                                   variant="outline"
                                   size="sm"
                                   className="flex-1"
-                                  onClick={() => handleView(logo)}
+                                  onClick={() => handleViewLogo(logo)}
                                   animation="pulse"
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
@@ -997,7 +1016,7 @@ export default function LogosPage() {
                                   variant="outline"
                                   size="sm"
                                   className="flex-1"
-                                  onClick={() => handleEdit(logo)}
+                                  onClick={() => handleEditLogo(logo)}
                                   animation="pulse"
                                 >
                                   <Edit className="h-4 w-4 mr-2" />
@@ -1006,7 +1025,7 @@ export default function LogosPage() {
                                 <AnimatedButton
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleDelete(logo)}
+                                  onClick={() => handleDeleteLogo(logo)}
                                   animation="pulse"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -1026,19 +1045,19 @@ export default function LogosPage() {
 
         {/* Modales */}
         <ActionModal
-          isOpen={modals.view}
+          isOpen={modals.view.isOpen}
           onClose={() => closeModal('view')}
           title="Detalles del Logo"
           size="lg"
         >
-          {modals.selectedItem && (
+          {selectedItem && (
             <div className="space-y-6">
               {/* Imagen del logo */}
               <div className="flex justify-center">
-                {modals.selectedItem.thumbnailUrl ? (
+                {selectedItem.thumbnailUrl ? (
                   <img 
-                    src={modals.selectedItem.thumbnailUrl} 
-                    alt={modals.selectedItem.name}
+                    src={selectedItem.thumbnailUrl} 
+                    alt={selectedItem.name}
                     className="max-w-md max-h-64 object-contain"
                   />
                 ) : (
@@ -1052,55 +1071,55 @@ export default function LogosPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Nombre</label>
-                  <p className="text-lg font-semibold">{modals.selectedItem.name}</p>
+                  <p className="text-lg font-semibold">{selectedItem.name}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Categoría</label>
-                  <p className="text-lg">{modals.selectedItem.category}</p>
+                  <p className="text-lg">{selectedItem.category}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Tipo de Archivo</label>
-                  <p className="text-lg font-mono">{modals.selectedItem.fileType.toUpperCase()}</p>
+                  <p className="text-lg font-mono">{selectedItem.fileType.toUpperCase()}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Tamaño</label>
-                  <p className="text-lg">{formatFileSize(modals.selectedItem.fileSize)}</p>
+                  <p className="text-lg">{formatFileSize(selectedItem.fileSize)}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Estado</label>
-                  <Badge variant={getStatusBadgeVariant(modals.selectedItem.status)}>
-                    {getStatusText(modals.selectedItem.status)}
+                  <Badge variant={getStatusBadgeVariant(selectedItem.status)}>
+                    {getStatusText(selectedItem.status)}
                   </Badge>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Cliente</label>
-                  <p className="text-lg">{modals.selectedItem.clientName}</p>
+                  <p className="text-lg">{selectedItem.clientName}</p>
                 </div>
               </div>
 
               {/* Especificaciones técnicas */}
-              {(modals.selectedItem.dimensions || modals.selectedItem.dpi || modals.selectedItem.isVector) && (
+              {(selectedItem.dimensions || selectedItem.dpi || selectedItem.isVector) && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Especificaciones Técnicas</label>
                   <div className="grid grid-cols-3 gap-4 mt-2">
-                    {modals.selectedItem.dimensions && (
+                    {selectedItem.dimensions && (
                       <div>
                         <p className="text-sm font-medium">Dimensiones</p>
                         <p className="text-sm text-muted-foreground">
-                          {modals.selectedItem.dimensions.width} x {modals.selectedItem.dimensions.height}px
+                          {selectedItem.dimensions.width} x {selectedItem.dimensions.height}px
                         </p>
                       </div>
                     )}
-                    {modals.selectedItem.dpi && (
+                    {selectedItem.dpi && (
                       <div>
                         <p className="text-sm font-medium">DPI</p>
-                        <p className="text-sm text-muted-foreground">{modals.selectedItem.dpi}</p>
+                        <p className="text-sm text-muted-foreground">{selectedItem.dpi}</p>
                       </div>
                     )}
                     <div>
                       <p className="text-sm font-medium">Tipo</p>
                       <p className="text-sm text-muted-foreground">
-                        {modals.selectedItem.isVector ? 'Vectorial' : 'Raster'}
+                        {selectedItem.isVector ? 'Vectorial' : 'Raster'}
                       </p>
                     </div>
                   </div>
@@ -1108,11 +1127,11 @@ export default function LogosPage() {
               )}
 
               {/* Etiquetas */}
-              {modals.selectedItem.tags && modals.selectedItem.tags.length > 0 && (
+              {selectedItem.tags && selectedItem.tags.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Etiquetas</label>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {modals.selectedItem.tags.map((tag: string, index: number) => (
+                    {selectedItem.tags.map((tag: string, index: number) => (
                       <Badge key={index} variant="outline">{tag}</Badge>
                     ))}
                   </div>
@@ -1122,18 +1141,18 @@ export default function LogosPage() {
               {/* Descripción */}
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Descripción</label>
-                <p className="text-lg">{modals.selectedItem.description || 'Sin descripción'}</p>
+                <p className="text-lg">{selectedItem.description || 'Sin descripción'}</p>
               </div>
 
               {/* Fechas */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Creado</label>
-                  <p className="text-sm">{new Date(modals.selectedItem.createdAt).toLocaleDateString()}</p>
+                  <p className="text-sm">{new Date(selectedItem.createdAt).toLocaleDateString()}</p>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Última actualización</label>
-                  <p className="text-sm">{new Date(modals.selectedItem.updatedAt || modals.selectedItem.createdAt).toLocaleDateString()}</p>
+                  <p className="text-sm">{new Date(selectedItem.updatedAt || selectedItem.createdAt).toLocaleDateString()}</p>
                 </div>
               </div>
             </div>
@@ -1141,20 +1160,20 @@ export default function LogosPage() {
         </ActionModal>
 
         <ActionModal
-          isOpen={modals.edit}
+          isOpen={modals.edit.isOpen}
           onClose={() => closeModal('edit')}
           title="Editar Logo"
           size="lg"
-          onSave={() => handleSave(modals.selectedItem)}
+          onSave={() => handleSave(selectedItem)}
         >
-          {modals.selectedItem && (
+          {selectedItem && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="edit-name" className="block text-sm font-medium mb-2">Nombre *</label>
                   <Input
                     id="edit-name"
-                    defaultValue={modals.selectedItem.name}
+                    defaultValue={selectedItem.name}
                     placeholder="Nombre del logo"
                   />
                 </div>
@@ -1162,7 +1181,7 @@ export default function LogosPage() {
                   <label htmlFor="edit-category" className="block text-sm font-medium mb-2">Categoría *</label>
                   <Input
                     id="edit-category"
-                    defaultValue={modals.selectedItem.category}
+                    defaultValue={selectedItem.category}
                     placeholder="Categoría del logo"
                   />
                 </div>
@@ -1170,7 +1189,7 @@ export default function LogosPage() {
                   <label htmlFor="edit-brand" className="block text-sm font-medium mb-2">Marca</label>
                   <Input
                     id="edit-brand"
-                    defaultValue={modals.selectedItem.brand || ''}
+                    defaultValue={selectedItem.brand || ''}
                     placeholder="Nombre de la marca"
                   />
                 </div>
@@ -1178,7 +1197,7 @@ export default function LogosPage() {
                   <label htmlFor="edit-version" className="block text-sm font-medium mb-2">Versión</label>
                   <Input
                     id="edit-version"
-                    defaultValue={modals.selectedItem.version || ''}
+                    defaultValue={selectedItem.version || ''}
                     placeholder="v1.0"
                   />
                 </div>
@@ -1186,7 +1205,7 @@ export default function LogosPage() {
                   <label htmlFor="edit-status" className="block text-sm font-medium mb-2">Estado</label>
                   <select
                     id="edit-status"
-                    defaultValue={modals.selectedItem.status}
+                    defaultValue={selectedItem.status}
                     className="w-full px-3 py-2 border border-input bg-background rounded-md"
                   >
                     <option value="active">Activo</option>
@@ -1200,7 +1219,7 @@ export default function LogosPage() {
                 <label htmlFor="edit-description" className="block text-sm font-medium mb-2">Descripción</label>
                 <textarea
                   id="edit-description"
-                  defaultValue={modals.selectedItem.description || ''}
+                  defaultValue={selectedItem.description || ''}
                   placeholder="Descripción del logo"
                   className="w-full px-3 py-2 border border-input bg-background rounded-md min-h-[100px]"
                 />
@@ -1210,7 +1229,7 @@ export default function LogosPage() {
                 <label htmlFor="edit-tags" className="block text-sm font-medium mb-2">Etiquetas</label>
                 <Input
                   id="edit-tags"
-                  defaultValue={modals.selectedItem.tags ? modals.selectedItem.tags.join(', ') : ''}
+                  defaultValue={selectedItem.tags ? selectedItem.tags.join(', ') : ''}
                   placeholder="Etiquetas separadas por comas"
                 />
               </div>
@@ -1219,16 +1238,16 @@ export default function LogosPage() {
         </ActionModal>
 
         <ActionModal
-          isOpen={modals.delete}
+          isOpen={modals.delete.isOpen}
           onClose={() => closeModal('delete')}
           title="Eliminar Logo"
-          onSave={() => handleDeleteConfirm(modals.selectedItem)}
+          onSave={() => handleDeleteConfirm(selectedItem)}
           saveText="Eliminar"
           saveVariant="destructive"
         >
-          {modals.selectedItem && (
+          {selectedItem && (
             <div className="space-y-4">
-              <p>¿Estás seguro de que quieres eliminar el logo <strong>{modals.selectedItem.name}</strong>?</p>
+              <p>¿Estás seguro de que quieres eliminar el logo <strong>{selectedItem.name}</strong>?</p>
               <p className="text-sm text-muted-foreground">Esta acción no se puede deshacer y eliminará el archivo del almacenamiento.</p>
             </div>
           )}
