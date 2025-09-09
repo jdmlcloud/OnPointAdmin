@@ -6,8 +6,9 @@ export interface User {
   password: string // Hasheada
   firstName: string
   lastName: string
+  name: string // Nombre completo
   phone: string // Formato: +52XXXXXXXXXX
-  role: UserRole
+  role: UserRole | UserRoleType // Compatibilidad con ambos tipos
   department: string
   position: string
   status: UserStatus
@@ -15,6 +16,7 @@ export interface User {
   updatedAt: string
   lastLogin?: string
   createdBy: string // ID del usuario que lo creó
+  avatar?: string // URL del avatar
 }
 
 export interface UserRole {
@@ -26,6 +28,8 @@ export interface UserRole {
   createdAt: string
   updatedAt: string
   createdBy: string
+  isSystem?: boolean
+  status?: 'active' | 'inactive' | 'pending'
 }
 
 export interface Permission {
@@ -34,11 +38,17 @@ export interface Permission {
   resource: string // 'users', 'providers', 'products', 'roles', etc.
   action: string // 'create', 'read', 'update', 'delete', 'manage'
   description: string
+  category: string
+  isSystem?: boolean
+  status?: 'active' | 'inactive' | 'pending'
 }
 
 export type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending'
 
 export type UserRoleType = 'SUPER_ADMIN' | 'ADMIN' | 'EXECUTIVE'
+
+// Alias para compatibilidad
+export type Role = UserRole
 
 export interface LoginRequest {
   email: string
