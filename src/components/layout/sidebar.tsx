@@ -43,63 +43,63 @@ const navigation = [
     name: "Proveedores",
     href: "/providers",
     icon: Building2,
-    badge: "V1",
+    badge: null,
     permission: "canManageProviders"
   },
   {
     name: "Productos",
     href: "/products",
     icon: Package,
-    badge: "V1",
+    badge: null,
     permission: "canManageProducts"
   },
   {
     name: "Logos",
     href: "/logos",
     icon: Image,
-    badge: "V1",
+    badge: null,
     permission: "canManageLogos"
   },
   {
     name: "WhatsApp + IA",
     href: "/whatsapp",
     icon: MessageSquare,
-    badge: "V2",
+    badge: null,
     permission: "canManageWhatsApp"
   },
   {
     name: "Cotizaciones",
     href: "/quotations",
     icon: TrendingUp,
-    badge: "V3",
+    badge: null,
     permission: "canManageQuotations"
   },
   {
     name: "Propuestas",
     href: "/proposals",
     icon: FileText,
-    badge: "V4",
+    badge: null,
     permission: "canManageProposals"
   },
   {
     name: "Generador PDFs",
     href: "/pdf-generator",
     icon: FileBarChart,
-    badge: "V5",
+    badge: null,
     permission: "canGeneratePDFs"
   },
   {
     name: "Envío y Tracking",
     href: "/tracking",
     icon: BarChart3,
-    badge: "V6",
+    badge: null,
     permission: "canViewAnalytics"
   },
   {
     name: "Editor Visual",
     href: "/editor",
     icon: Palette,
-    badge: "V7",
+    badge: null,
     permission: "canManageTemplates"
   },
   {
@@ -141,7 +141,7 @@ const navigation = [
     name: "Configuración",
     href: "/settings",
     icon: Settings,
-    badge: "V1",
+    badge: null,
     permission: "canManageSettings"
   },
   {
@@ -258,7 +258,7 @@ export function Sidebar() {
                     <span className="flex-1 text-left">{item.name}</span>
                     {item.badge && (
                       <Badge 
-                        variant={item.badge === "V1" ? "default" : "secondary"}
+                        variant="secondary"
                         className="text-xs"
                       >
                         {item.badge}
