@@ -184,7 +184,16 @@ export function Sidebar() {
   }, [isHovered])
 
   // Determinar si el sidebar debe estar colapsado
-  const shouldCollapse = collapsed && !isHovered && isAutoHidden
+  const shouldCollapse = collapsed && (!isHovered || isAutoHidden)
+  
+  // Función para manejar el toggle manual del menú
+  const handleToggleMenu = () => {
+    setCollapsed(!collapsed)
+    // Si se está expandiendo manualmente, desactivar auto-hidden temporalmente
+    if (collapsed) {
+      setIsAutoHidden(false)
+    }
+  }
 
   return (
     <div 
@@ -207,7 +216,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={handleToggleMenu}
             className="h-8 w-8 p-0"
           >
             {shouldCollapse ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
