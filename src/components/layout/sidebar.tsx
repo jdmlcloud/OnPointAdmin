@@ -28,7 +28,7 @@ import {
   Image
 } from "lucide-react"
 import { useAuthContext } from "@/lib/auth/auth-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const navigation = [
   {
@@ -155,21 +155,49 @@ const navigation = [
 export function Sidebar() {
   const { user, logout, hasPermission } = useAuthContext()
   const pathname = usePathname()
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true) // Iniciar colapsado
+  const [isHovered, setIsHovered] = useState(false)
+  const [isAutoHidden, setIsAutoHidden] = useState(true)
 
   const handleSignOut = async () => {
     logout()
   }
 
+  // Auto-ocultar el menú después de 3 segundos sin hover
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout
+
+    if (isHovered) {
+      setIsAutoHidden(false)
+    } else {
+      timeoutId = setTimeout(() => {
+        setIsAutoHidden(true)
+      }, 3000) // 3 segundos
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [isHovered])
+
+  // Determinar si el sidebar debe estar colapsado
+  const shouldCollapse = collapsed && !isHovered && isAutoHidden
+
   return (
-    <div className={cn(
-      "flex flex-col h-full bg-card border-r transition-all duration-300",
-      collapsed ? "w-16" : "w-64"
-    )}>
+    <div 
+      className={cn(
+        "flex flex-col h-full bg-card border-r transition-all duration-300",
+        shouldCollapse ? "w-16" : "w-64"
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center justify-between">
-          {!collapsed && (
+          {!shouldCollapse && (
             <div>
               <h1 className="text-xl font-bold text-primary">OnPoint</h1>
               <p className="text-xs text-muted-foreground">Admin Platform</p>
@@ -181,7 +209,7 @@ export function Sidebar() {
             onClick={() => setCollapsed(!collapsed)}
             className="h-8 w-8 p-0"
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {shouldCollapse ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
       </div>
@@ -224,7 +252,7 @@ export function Sidebar() {
                 )}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
-                {!collapsed && (
+                {!shouldCollapse && (
                   <>
                     <span className="flex-1 text-left">{item.name}</span>
                     {item.badge && (
@@ -246,8 +274,8 @@ export function Sidebar() {
       {/* User Profile */}
       <div className="p-4 border-t">
         <div className={cn(
-          "flex items-center gap-3",
-          collapsed && "justify-center"
+        "flex items-center gap-3",
+        shouldCollapse && "justify-center"
         )}>
           <Avatar className="h-8 w-8">
             <AvatarImage src="" />
@@ -255,7 +283,7 @@ export function Sidebar() {
               {(user?.firstName?.charAt(0) || user?.lastName?.charAt(0) || "U").toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          {!collapsed && (
+          {!shouldCollapse && (
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">
                 {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : "Usuario"}
