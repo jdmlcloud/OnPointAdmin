@@ -358,7 +358,7 @@ export default function LogosPage() {
   })
 
   // Agrupar logos filtrados por cliente usando el campo brand
-  const filteredLogosByClient = filteredLogos.reduce((acc, logo) => {
+  const logosByClient = filteredLogos.reduce((acc, logo) => {
     const clientKey = logo.brand || 'Sin Marca'
     if (!acc[clientKey]) {
       acc[clientKey] = {
@@ -715,7 +715,7 @@ export default function LogosPage() {
         <div className="flex-1 overflow-auto scrollbar-hide">
           {viewMode === 'clients' ? (
             // Vista de Cards de Clientes
-            Object.keys(filteredLogosByClient).length === 0 ? (
+            Object.keys(logosByClient).length === 0 ? (
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
                   <Building2 className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -734,7 +734,7 @@ export default function LogosPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Object.values(filteredLogosByClient).map((client) => (
+                {Object.values(logosByClient).map((client) => (
                   <Card 
                     key={client.clientId} 
                     className="hover:shadow-lg transition-shadow cursor-pointer"
@@ -1017,7 +1017,7 @@ export default function LogosPage() {
               </div>
             ) : (
               // Vista original de logos agrupados por cliente
-              Object.keys(filteredLogosByClient).length === 0 ? (
+              Object.keys(logosByClient).length === 0 ? (
                 <div className="flex items-center justify-center h-64">
                   <div className="text-center">
                     <Image className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -1036,7 +1036,7 @@ export default function LogosPage() {
                 </div>
               ) : (
                 <div className="space-y-8">
-                  {Object.values(filteredLogosByClient).map((client) => (
+                  {Object.values(logosByClient).map((client) => (
                     <div key={client.clientId} className="space-y-4">
                       {/* Header del Cliente */}
                       <div className="flex items-center justify-between">
