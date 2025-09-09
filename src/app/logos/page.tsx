@@ -122,11 +122,11 @@ export default function LogosPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [logoDeleted, setLogoDeleted] = useState(false)
 
-  // Crear un mapa de clientes combinando los del hook con los generados desde logos
+  // Crear un mapa de clientes solo desde el hook useClients
   const allClientsMap = useMemo(() => {
     const clientMap = new Map<string, { clientId: string; clientName: string; logos: Logo[] }>()
     
-    // Agregar clientes del hook (incluye clientes manuales)
+    // Agregar clientes del hook (clientes reales de la API)
     clients.forEach(client => {
       clientMap.set(client.name, {
         clientId: client.id,
@@ -135,21 +135,8 @@ export default function LogosPage() {
       })
     })
     
-    // Agregar clientes generados desde logos
-    logos.forEach(logo => {
-      const clientKey = logo.brand || 'Sin Marca'
-      if (!clientMap.has(clientKey)) {
-        clientMap.set(clientKey, {
-          clientId: clientKey.toLowerCase().replace(/\s+/g, '-'),
-          clientName: clientKey,
-          logos: []
-        })
-      }
-      clientMap.get(clientKey)!.logos.push(logo)
-    })
-    
     return clientMap
-  }, [clients, logos])
+  }, [clients])
 
   // Convertir el mapa a objeto para compatibilidad
   const logosByClient = Object.fromEntries(allClientsMap)
