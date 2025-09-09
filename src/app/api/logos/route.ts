@@ -75,6 +75,15 @@ export async function POST(request: NextRequest) {
     const base64File = buffer.toString('base64')
 
     const logoData = JSON.parse(data)
+    
+    // Validar campos requeridos
+    if (!logoData.name || !logoData.category) {
+      return createResponse(400, {
+        success: false,
+        error: 'name, category y fileUrl son obligatorios'
+      })
+    }
+    
     const lambdaPayload = {
       data: JSON.stringify({
         ...logoData,

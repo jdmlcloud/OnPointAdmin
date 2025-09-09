@@ -41,22 +41,23 @@ export function useClients(): UseClientsReturn {
         throw new Error(data.message || 'Error al obtener logos')
       }
       
-      // Agrupar logos por cliente
+      // Agrupar logos por cliente usando el campo brand
       const logosByClient = data.logos.reduce((acc: any, logo: any) => {
-        if (!acc[logo.clientId]) {
-          acc[logo.clientId] = {
-            id: logo.clientId,
-            name: logo.clientName,
-            description: `Cliente con logos de ${logo.brand || logo.clientName}`,
+        const clientKey = logo.brand || 'Sin Marca'
+        if (!acc[clientKey]) {
+          acc[clientKey] = {
+            id: clientKey.toLowerCase().replace(/\s+/g, '-'),
+            name: clientKey,
+            description: `Cliente con logos de ${clientKey}`,
             industry: 'Entertainment',
-            contactEmail: `${logo.clientName.toLowerCase().replace(/\s+/g, '')}@example.com`,
+            contactEmail: `${clientKey.toLowerCase().replace(/\s+/g, '')}@example.com`,
             logos: [],
             primaryLogoId: null,
             createdAt: logo.createdAt,
             updatedAt: logo.updatedAt
           }
         }
-        acc[logo.clientId].logos.push(logo)
+        acc[clientKey].logos.push(logo)
         return acc
       }, {})
 

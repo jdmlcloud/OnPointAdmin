@@ -32,12 +32,46 @@ export default function NewLogoPage() {
     isPrimary: false
   })
 
+  // Obtener parámetros de URL para pre-llenar el cliente
+  const [searchParams] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      return {
+        client: params.get('client'),
+        clientName: params.get('clientName')
+      }
+    }
+    return { client: null, clientName: null }
+  })
+
+  // Pre-llenar datos del cliente si vienen de URL
+  useState(() => {
+    if (searchParams.clientName) {
+      setFormData(prev => ({
+        ...prev,
+        clientName: searchParams.clientName || '',
+        brand: searchParams.clientName || '',
+        clientId: searchParams.client || `client-${searchParams.clientName?.toLowerCase().replace(/\s+/g, '-')}`
+      }))
+    }
+  })
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    }))
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      }
+      
+      // Sincronizar brand con clientName
+      if (name === 'clientName') {
+        newData.brand = value
+        newData.clientId = `client-${value.toLowerCase().replace(/\s+/g, '-')}`
+      }
+      
+      return newData
+    })
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,7 +92,7 @@ export default function NewLogoPage() {
     e.preventDefault()
     
     // Validar campos requeridos
-    if (!formData.name || !formData.category || !formData.clientName || !selectedFile) {
+    if (!formData.name || !formData.category || !formData.brand || !selectedFile) {
       alert('Por favor completa todos los campos requeridos y selecciona un archivo')
       return
     }
@@ -70,8 +104,8 @@ export default function NewLogoPage() {
         name: formData.name,
         description: formData.description,
         category: formData.category,
-        clientId: formData.clientId || `client-${Date.now()}`,
-        clientName: formData.clientName,
+        clientId: formData.clientId || `client-${formData.brand.toLowerCase().replace(/\s+/g, '-')}`,
+        clientName: formData.brand, // Usar brand como clientName
         variant: formData.variant,
         brand: formData.brand,
         version: formData.version,

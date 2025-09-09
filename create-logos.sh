@@ -1,0 +1,260 @@
+#!/bin/bash
+
+# HBO Logos
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "HBO Logo Oficial",
+  "description": "Logo principal de HBO en formato vectorial",
+  "category": "Principal",
+  "brand": "HBO",
+  "clientName": "HBO",
+  "clientId": "client-hbo-001",
+  "variant": "Oficial",
+  "isPrimary": true,
+  "fileType": "SVG",
+  "format": "SVG",
+  "fileSize": 15420,
+  "dimensions": {"width": 800, "height": 400},
+  "isVector": true,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["oficial", "principal", "vectorial"],
+  "version": "v1.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/hbo-oficial.svg",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/hbo-oficial-thumb.png"
+}'
+
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "HBO Logo Horizontal",
+  "description": "Logo de HBO en formato horizontal para banners",
+  "category": "Variantes",
+  "brand": "HBO",
+  "clientName": "HBO",
+  "clientId": "client-hbo-001",
+  "variant": "Horizontal",
+  "isPrimary": false,
+  "fileType": "PNG",
+  "format": "PNG",
+  "fileSize": 25600,
+  "dimensions": {"width": 1200, "height": 300},
+  "isVector": false,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["horizontal", "banner", "variante"],
+  "version": "v1.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/hbo-horizontal.png",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/hbo-horizontal-thumb.png"
+}'
+
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "HBO Logo Monocromo",
+  "description": "Logo de HBO en versión monocroma para impresión",
+  "category": "Variantes",
+  "brand": "HBO",
+  "clientName": "HBO",
+  "clientId": "client-hbo-001",
+  "variant": "Monocromo",
+  "isPrimary": false,
+  "fileType": "PDF",
+  "format": "PDF",
+  "fileSize": 45200,
+  "dimensions": {"width": 800, "height": 400},
+  "isVector": true,
+  "isTransparent": false,
+  "dpi": 300,
+  "tags": ["monocromo", "impresion", "bw"],
+  "version": "v1.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/hbo-monocromo.pdf",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/hbo-monocromo-thumb.png"
+}'
+
+# Netflix Logos
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Netflix Logo Principal",
+  "description": "Logo principal de Netflix con el ícono característico",
+  "category": "Principal",
+  "brand": "Netflix",
+  "clientName": "Netflix",
+  "clientId": "client-netflix-001",
+  "variant": "Principal",
+  "isPrimary": true,
+  "fileType": "SVG",
+  "format": "SVG",
+  "fileSize": 12800,
+  "dimensions": {"width": 600, "height": 200},
+  "isVector": true,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["oficial", "principal", "streaming"],
+  "version": "v2.1",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/netflix-principal.svg",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/netflix-principal-thumb.png"
+}'
+
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Netflix Lettermark",
+  "description": "Solo el texto de Netflix sin el ícono",
+  "category": "Variantes",
+  "brand": "Netflix",
+  "clientName": "Netflix",
+  "clientId": "client-netflix-001",
+  "variant": "Lettermark",
+  "isPrimary": false,
+  "fileType": "PNG",
+  "format": "PNG",
+  "fileSize": 15200,
+  "dimensions": {"width": 400, "height": 100},
+  "isVector": false,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["lettermark", "texto", "minimalista"],
+  "version": "v2.1",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/netflix-lettermark.png",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/netflix-lettermark-thumb.png"
+}'
+
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Netflix App Icon",
+  "description": "Ícono de Netflix para aplicaciones móviles",
+  "category": "Iconos",
+  "brand": "Netflix",
+  "clientName": "Netflix",
+  "clientId": "client-netflix-001",
+  "variant": "App Icon",
+  "isPrimary": false,
+  "fileType": "PNG",
+  "format": "PNG",
+  "fileSize": 8500,
+  "dimensions": {"width": 200, "height": 200},
+  "isVector": false,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["icono", "app", "mobile"],
+  "version": "v1.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/netflix-app-icon.png",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/netflix-app-icon-thumb.png"
+}'
+
+# Disney Logos
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Disney Logo Clásico",
+  "description": "Logo clásico de Disney con el castillo",
+  "category": "Principal",
+  "brand": "Disney",
+  "clientName": "Disney",
+  "clientId": "client-disney-001",
+  "variant": "Clásico",
+  "isPrimary": true,
+  "fileType": "SVG",
+  "format": "SVG",
+  "fileSize": 25600,
+  "dimensions": {"width": 800, "height": 300},
+  "isVector": true,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["oficial", "clasico", "castillo"],
+  "version": "v3.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/disney-clasico.svg",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/disney-clasico-thumb.png"
+}'
+
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Disney+ Logo",
+  "description": "Logo de Disney+ para streaming",
+  "category": "Variantes",
+  "brand": "Disney+",
+  "clientName": "Disney",
+  "clientId": "client-disney-001",
+  "variant": "Disney+",
+  "isPrimary": false,
+  "fileType": "PNG",
+  "format": "PNG",
+  "fileSize": 18900,
+  "dimensions": {"width": 500, "height": 200},
+  "isVector": false,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["streaming", "plus", "moderno"],
+  "version": "v3.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/disney-plus.png",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/disney-plus-thumb.png"
+}'
+
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Disney Castle Icon",
+  "description": "Solo el castillo de Disney como ícono",
+  "category": "Iconos",
+  "brand": "Disney",
+  "clientName": "Disney",
+  "clientId": "client-disney-001",
+  "variant": "Castle Icon",
+  "isPrimary": false,
+  "fileType": "SVG",
+  "format": "SVG",
+  "fileSize": 12000,
+  "dimensions": {"width": 200, "height": 200},
+  "isVector": true,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["icono", "castillo", "minimalista"],
+  "version": "v1.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/disney-castle-icon.svg",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/disney-castle-icon-thumb.png"
+}'
+
+# Apple Music Logos
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Apple Music Logo",
+  "description": "Logo principal de Apple Music",
+  "category": "Principal",
+  "brand": "Apple Music",
+  "clientName": "Apple Music",
+  "clientId": "client-apple-music-001",
+  "variant": "Principal",
+  "isPrimary": true,
+  "fileType": "SVG",
+  "format": "SVG",
+  "fileSize": 14000,
+  "dimensions": {"width": 500, "height": 200},
+  "isVector": true,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["oficial", "principal", "musica"],
+  "version": "v1.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/apple-music.svg",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/apple-music-thumb.png"
+}'
+
+curl -X POST "https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox/logos" -H "Content-Type: application/json" -d '{
+  "name": "Apple Music Icon",
+  "description": "Ícono de Apple Music para aplicaciones",
+  "category": "Iconos",
+  "brand": "Apple Music",
+  "clientName": "Apple Music",
+  "clientId": "client-apple-music-001",
+  "variant": "Icon",
+  "isPrimary": false,
+  "fileType": "PNG",
+  "format": "PNG",
+  "fileSize": 9000,
+  "dimensions": {"width": 200, "height": 200},
+  "isVector": false,
+  "isTransparent": true,
+  "dpi": 300,
+  "tags": ["icono", "app", "mobile"],
+  "version": "v1.0",
+  "status": "active",
+  "fileUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/apple-music-icon.png",
+  "thumbnailUrl": "https://onpoint-logos-sandbox.s3.amazonaws.com/logos/apple-music-icon-thumb.png"
+}'
+
+echo "Todos los logos creados exitosamente!"
