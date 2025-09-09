@@ -125,10 +125,17 @@ export default function LogosPage() {
 
   // Crear un mapa de clientes solo desde el hook useClients
   const allClientsMap = useMemo(() => {
+    console.log('🔍 CALCULANDO allClientsMap con clients:', clients)
     const clientMap = new Map<string, { clientId: string; clientName: string; logos: Logo[] }>()
     
     // Agregar clientes del hook (clientes reales de la API)
     clients.forEach(client => {
+      console.log('📝 Agregando cliente al mapa:', {
+        name: client.name,
+        id: client.id,
+        logosCount: client.logos?.length || 0,
+        logos: client.logos
+      })
       clientMap.set(client.name, {
         clientId: client.id,
         clientName: client.name,
@@ -136,11 +143,13 @@ export default function LogosPage() {
       })
     })
     
+    console.log('✅ allClientsMap final:', Array.from(clientMap.entries()))
     return clientMap
   }, [clients])
 
   // Convertir el mapa a objeto para compatibilidad
   const logosByClient = Object.fromEntries(allClientsMap)
+  console.log('🎯 logosByClient final:', logosByClient)
 
   // Funciones para manejar la navegación entre vistas
   const handleClientClick = (client: { clientId: string; clientName: string; logos: Logo[] }) => {
@@ -500,6 +509,14 @@ export default function LogosPage() {
                 : `Centraliza y administra todos los logos oficiales (${filteredLogos.length} logos)`
               }
             </p>
+            {/* Debug: Mostrar información de logos */}
+            <div className="text-xs text-gray-500 mt-2">
+              <div>🔍 DEBUG LOGOS:</div>
+              <div>• Total logos: {logos.length}</div>
+              <div>• Logos filtrados: {filteredLogos.length}</div>
+              <div>• Clientes con logos: {Object.keys(logosByClient).length}</div>
+              <div>• View mode: {viewMode}</div>
+            </div>
           </div>
           {viewMode === 'clients' && (
             <div className="flex gap-2">

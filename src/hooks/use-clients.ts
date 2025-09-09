@@ -33,6 +33,7 @@ export function useClients(): UseClientsReturn {
       setIsLoading(true)
       setError(null)
       
+      console.log('🔍 FETCHING CLIENTS: Iniciando consulta a', API_CONFIG.ENDPOINTS.CLIENTS)
       const data = await apiRequest<{
         success: boolean
         clients: Client[]
@@ -40,7 +41,15 @@ export function useClients(): UseClientsReturn {
         message: string
       }>(API_CONFIG.ENDPOINTS.CLIENTS)
       
+      console.log('📡 CLIENTS API RESPONSE:', {
+        success: data.success,
+        clientsCount: data.clients?.length || 0,
+        clients: data.clients,
+        message: data.message
+      })
+      
       if (data.success) {
+        console.log('✅ CLIENTS SET:', data.clients || [])
         setClients(data.clients || [])
         setError(null)
       } else {
