@@ -22,7 +22,8 @@ export const API_CONFIG = {
     INTEGRATIONS: '/integrations',
     EDITOR: '/editor',
     TRACKING: '/tracking',
-    AI_TEST: '/ai-test'
+    AI_TEST: '/ai-test',
+    CLIENTS: '/clients'
   },
   
   // Headers por defecto

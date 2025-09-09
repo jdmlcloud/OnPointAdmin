@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface Client {
   id: string
@@ -32,19 +33,23 @@ export function useClients(): UseClientsReturn {
       setIsLoading(true)
       setError(null)
       
-      // Obtener clientes de la API
-      const response = await fetch('/api/clients')
-      const data = await response.json()
+      const data = await apiRequest<{
+        success: boolean
+        clients: Client[]
+        pagination: any
+        message: string
+      }>(API_CONFIG.ENDPOINTS.CLIENTS)
       
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al obtener clientes')
+      if (data.success) {
+        setClients(data.clients || [])
+        setError(null)
+      } else {
+        throw new Error('Error al obtener clientes desde la API')
       }
-      
-      // Los clientes vienen directamente de la API
-      setClients(data.clients || [])
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
+      setError(errorMessage)
       console.error('Error fetching clients:', err)
-      setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {
       setIsLoading(false)
     }
@@ -52,83 +57,76 @@ export function useClients(): UseClientsReturn {
 
   const createClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>): Promise<boolean> => {
     try {
-      // Enviar a la API
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(clientData)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al crear cliente')
-      }
-
-      // Refrescar la lista para que aparezca en la UI
-      await fetchClients()
+      setError(null)
       
-      return true
+      const data = await apiRequest<{
+        success: boolean
+        client: Client
+        message: string
+      }>(API_CONFIG.ENDPOINTS.CLIENTS, {
+        method: 'POST',
+        body: JSON.stringify(clientData),
+      })
+      
+      if (data.success) {
+        setClients(prev => [...prev, data.client])
+        return true
+      } else {
+        throw new Error('Error al crear cliente')
+      }
     } catch (err) {
-      console.error('Error creating client:', err)
       setError(err instanceof Error ? err.message : 'Error al crear cliente')
+      console.error('Error creating client:', err)
       return false
     }
   }
 
   const updateClient = async (id: string, clientData: Partial<Omit<Client, 'id' | 'createdAt' | 'logos'>>): Promise<boolean> => {
     try {
-      // Enviar a la API
-      const response = await fetch(`/api/clients/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(clientData)
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al actualizar cliente')
-      }
-
-      // Refrescar la lista
-      await fetchClients()
+      setError(null)
       
-      return true
+      const data = await apiRequest<{
+        success: boolean
+        client: Client
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.CLIENTS}/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(clientData),
+      })
+      
+      if (data.success) {
+        setClients(prev => prev.map(client => client.id === id ? data.client : client))
+        return true
+      } else {
+        throw new Error('Error al actualizar cliente')
+      }
     } catch (err) {
-      console.error('Error updating client:', err)
       setError(err instanceof Error ? err.message : 'Error al actualizar cliente')
+      console.error('Error updating client:', err)
       return false
     }
   }
 
   const deleteClient = async (id: string): Promise<boolean> => {
     try {
-      // Enviar a la API
-      const response = await fetch(`/api/clients/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al eliminar cliente')
-      }
-
-      // Refrescar la lista
-      await fetchClients()
+      setError(null)
       
-      return true
+      const data = await apiRequest<{
+        success: boolean
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.CLIENTS}/${id}`, {
+        method: 'DELETE',
+      })
+      
+      if (data.success) {
+        setClients(prev => prev.filter(client => client.id !== id))
+        return true
+      } else {
+        throw new Error('Error al eliminar cliente')
+      }
     } catch (err) {
-      console.error('Error deleting client:', err)
       setError(err instanceof Error ? err.message : 'Error al eliminar cliente')
+      console.error('Error deleting client:', err)
       return false
     }
   }
