@@ -82,6 +82,13 @@ const navigation = [
     permission: "canManageProposals"
   },
   {
+    name: "Tareas",
+    href: "/tasks",
+    icon: Cpu,
+    badge: null,
+    permission: "canManageTasks"
+  },
+  {
     name: "Generador PDFs",
     href: "/pdf-generator",
     icon: FileBarChart,
