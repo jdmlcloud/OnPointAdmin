@@ -15,14 +15,14 @@ import {
   ArrowRight
 } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useRoles } from "@/hooks/use-roles"
+import { useAuthRoles } from "@/hooks/use-auth-roles"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useCognitoAuth } from "@/hooks/use-cognito-auth"
 
 export default function CognitoDashboardPage() {
   const router = useRouter()
-  const { currentRole, hasPermission } = useRoles()
+  const { currentRole, hasPermission } = useAuthRoles()
   const { users, loading: usersLoading } = useUsers()
   const { providers, loading: providersLoading } = useProviders()
   const { user: cognitoUser } = useCognitoAuth()
@@ -209,7 +209,7 @@ export default function CognitoDashboardPage() {
         </div>
 
         {/* Gestión de Usuarios - Solo para Administradores */}
-        {hasPermission('canManageUsers') && (
+        {hasPermission('users', 'manage') && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -354,7 +354,7 @@ export default function CognitoDashboardPage() {
               <div>
                 <p className="text-sm font-medium text-blue-900">Rol:</p>
                 <p className="text-sm text-blue-700">
-                  {cognitoUser?.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                  {cognitoUser?.role?.name === 'admin' ? 'Administrador' : 'Ejecutivo'}
                 </p>
               </div>
               <div>

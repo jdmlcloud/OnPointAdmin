@@ -113,7 +113,7 @@ export function HeaderCognitoIntegrated() {
               </p>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {user?.role || "ejecutivo"}
+                  {user?.role?.name || "ejecutivo"}
                 </Badge>
                 <Badge variant="secondary" className="text-xs bg-green-50 text-green-700">
                   Real

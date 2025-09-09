@@ -1,4 +1,4 @@
-import { UserRole } from '@/hooks/use-roles'
+import { UserRole } from '@/types/users'
 
 export interface CognitoUser {
   id: string
@@ -26,8 +26,34 @@ export class CognitoDirectService {
     try {
       // Simular autenticación exitosa para usuarios válidos
       const validUsers = [
-        { email: 'admin@onpoint.com', password: 'Admin123!', role: 'admin' as UserRole },
-        { email: 'ejecutivo@onpoint.com', password: 'Ejecutivo123!', role: 'ejecutivo' as UserRole }
+        { 
+          email: 'admin@onpoint.com', 
+          password: 'Admin123!', 
+          role: {
+            id: 'role-admin',
+            name: 'admin',
+            level: 1,
+            permissions: [],
+            description: 'Administrador',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system'
+          }
+        },
+        { 
+          email: 'ejecutivo@onpoint.com', 
+          password: 'Ejecutivo123!', 
+          role: {
+            id: 'role-ejecutivo',
+            name: 'ejecutivo',
+            level: 3,
+            permissions: [],
+            description: 'Ejecutivo',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: 'system'
+          }
+        }
       ]
 
       const validUser = validUsers.find(

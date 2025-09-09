@@ -1,9 +1,11 @@
-const AWS = require('aws-sdk');
+const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBDocumentClient, ScanCommand, PutCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
 
 // Configurar DynamoDB
-const dynamodb = new AWS.DynamoDB.DocumentClient({
+const client = new DynamoDBClient({
   region: process.env.AWS_REGION || 'us-east-1'
 });
+const dynamodb = DynamoDBDocumentClient.from(client);
 
 const TABLE_NAME = process.env.DYNAMODB_PRODUCTS_TABLE || 'OnPointAdmin-Products-sandbox';
 
@@ -35,7 +37,7 @@ exports.handler = async (event) => {
         TableName: TABLE_NAME
       };
 
-      const result = await dynamodb.scan(params).promise();
+      const result = await dynamodb.send(new ScanCommand(params));
       
       return createResponse(200, {
         success: true,
@@ -68,7 +70,7 @@ exports.handler = async (event) => {
         Item: product
       };
 
-      await dynamodb.put(params).promise();
+      await dynamodb.send(new PutCommand(params));
       
       return createResponse(201, {
         success: true,
@@ -116,7 +118,7 @@ exports.handler = async (event) => {
         ReturnValues: 'ALL_NEW'
       };
 
-      const result = await dynamodb.update(params).promise();
+      const result = await dynamodb.send(new UpdateCommand(params));
       
       return createResponse(200, {
         success: true,
@@ -140,7 +142,7 @@ exports.handler = async (event) => {
         Key: { id: productId }
       };
 
-      await dynamodb.delete(params).promise();
+      await dynamodb.send(new DeleteCommand(params));
       
       return createResponse(200, {
         success: true,

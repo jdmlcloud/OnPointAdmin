@@ -1,135 +1,355 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocumentClient, ScanCommand, PutCommand, GetCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
+const { DynamoDBDocumentClient, ScanCommand, GetCommand, PutCommand, UpdateCommand, DeleteCommand } = require('@aws-sdk/lib-dynamodb');
+const bcrypt = require('bcryptjs');
 
-// Configuración de DynamoDB
 const client = new DynamoDBClient({
   region: process.env.AWS_REGION || 'us-east-1'
-  // No especificar credenciales - usar el rol IAM de Lambda
 });
+const dynamodb = DynamoDBDocumentClient.from(client);
 
-const docClient = DynamoDBDocumentClient.from(client);
-
-// Función para generar respuesta CORS
-const createResponse = (statusCode, body) => ({
-  statusCode,
-  headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-    'Access-Control-Max-Age': '86400'
-  },
-  body: JSON.stringify(body)
-});
-
-// GET /users
-exports.getUsers = async (event) => {
-  try {
-    console.log('🔍 Lambda: Obteniendo users...');
-    
-    const { page = 1, limit = 10, status } = event.queryStringParameters || {};
-    
-    const params = {
-      TableName: process.env.DYNAMODB_USERS_TABLE || 'OnPointAdmin-Users-sandbox',
-      Limit: parseInt(limit),
-      ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
-    };
-    
-    if (status) {
-      params.FilterExpression = '#status = :status';
-      params.ExpressionAttributeNames = { '#status': 'status' };
-      params.ExpressionAttributeValues = { ':status': status };
-    }
-    
-    const result = await docClient.send(new ScanCommand(params));
-    
-    return createResponse(200, {
-      success: true,
-      users: result.Items || [],
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        total: result.Count || 0,
-        totalPages: Math.ceil((result.Count || 0) / parseInt(limit))
-      },
-      message: 'Usuarios obtenidos exitosamente desde DynamoDB'
-    });
-    
-  } catch (error) {
-    console.error('❌ Error en getUsers:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error al obtener usuarios',
-      message: error.message
-    });
-  }
+// Detectar entorno dinámicamente
+const detectEnvironment = () => {
+  const environment = process.env.ENVIRONMENT || 'sandbox';
+  return environment;
 };
 
-// GET /users/stats
-exports.getUserStats = async (event) => {
-  try {
-    console.log('🔍 Lambda: Obteniendo estadísticas de usuarios...');
-    
-    const result = await docClient.send(new ScanCommand({
-      TableName: 'onpoint-admin-users-dev'
-    }));
-    
-    const users = result.Items || [];
-    const stats = {
-      total: users.length,
-      active: users.filter(u => u.status === 'active').length,
-      inactive: users.filter(u => u.status === 'inactive').length,
-      pending: users.filter(u => u.status === 'pending').length,
-      admins: users.filter(u => u.role === 'admin').length,
-      managers: users.filter(u => u.role === 'manager').length,
-      users: users.filter(u => u.role === 'user').length
-    };
-    
-    return createResponse(200, {
-      success: true,
-      stats,
-      message: 'Estadísticas de usuarios obtenidas exitosamente'
-    });
-    
-  } catch (error) {
-    console.error('❌ Error en getUserStats:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error al obtener estadísticas de usuarios',
-      message: error.message
-    });
-  }
+const getTableName = (tableType, environment) => {
+  return `OnPointAdmin-${tableType}-${environment}`;
 };
 
-// Handler principal
+const createResponse = (statusCode, body) => {
+  return {
+    statusCode,
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS'
+    },
+    body: JSON.stringify(body)
+  };
+};
+
 exports.handler = async (event) => {
-  console.log('🔍 Event:', JSON.stringify(event, null, 2));
+  console.log('👥 Users Lambda - Event:', JSON.stringify(event, null, 2));
   
-  // Manejar CORS preflight
-  if (event.httpMethod === 'OPTIONS') {
-    return createResponse(200, { message: 'CORS preflight' });
-  }
+  const environment = detectEnvironment();
+  console.log('🌍 Environment detected:', environment);
   
   try {
-    const path = event.path;
+    // Manejar OPTIONS
+    if (event.httpMethod === 'OPTIONS') {
+      return createResponse(200, { message: 'CORS preflight' });
+    }
+
+    const { httpMethod, path } = event;
+    const pathSegments = path.split('/').filter(Boolean);
     
-    if (path === '/users/stats') {
-      return await exports.getUserStats(event);
-    } else if (path === '/users') {
-      return await exports.getUsers(event);
-    } else {
-      return createResponse(404, {
-        success: false,
-        error: 'Endpoint no encontrado',
-        message: `Ruta ${path} no existe`
+    // Rutas de usuarios
+    if (pathSegments[0] === 'users') {
+      if (httpMethod === 'GET' && pathSegments.length === 1) {
+        return await handleGetUsers(event, environment);
+      } else if (httpMethod === 'GET' && pathSegments.length === 2) {
+        return await handleGetUser(event, environment, pathSegments[1]);
+      } else if (httpMethod === 'POST' && pathSegments.length === 1) {
+        return await handleCreateUser(event, environment);
+      } else if (httpMethod === 'PUT' && pathSegments.length === 2) {
+        return await handleUpdateUser(event, environment, pathSegments[1]);
+      } else if (httpMethod === 'DELETE' && pathSegments.length === 2) {
+        return await handleDeleteUser(event, environment, pathSegments[1]);
+      }
+    }
+
+    return createResponse(404, { error: 'Endpoint not found' });
+
+  } catch (error) {
+    console.error('❌ Users Lambda Error:', error);
+    return createResponse(500, { 
+      error: 'Internal server error',
+      message: error.message 
+    });
+  }
+};
+
+async function handleGetUsers(event, environment) {
+  try {
+    const usersTable = getTableName('Users', environment);
+    const params = {
+      TableName: usersTable
+    };
+
+    const result = await dynamodb.send(new ScanCommand(params));
+    
+    // Remover contraseñas de la respuesta
+    const users = result.Items?.map(user => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    }) || [];
+
+    return createResponse(200, {
+      success: true,
+      users,
+      count: users.length
+    });
+
+  } catch (error) {
+    console.error('❌ Get Users Error:', error);
+    return createResponse(500, { 
+      success: false, 
+      message: 'Error al obtener usuarios' 
+    });
+  }
+}
+
+async function handleGetUser(event, environment, userId) {
+  try {
+    const usersTable = getTableName('Users', environment);
+    const params = {
+      TableName: usersTable,
+      Key: { id: userId }
+    };
+
+    const result = await dynamodb.send(new GetCommand(params));
+    
+    if (!result.Item) {
+      return createResponse(404, { 
+        success: false, 
+        message: 'Usuario no encontrado' 
       });
     }
+
+    // Remover contraseña de la respuesta
+    const { password, ...userWithoutPassword } = result.Item;
+
+    return createResponse(200, {
+      success: true,
+      user: userWithoutPassword
+    });
+
   } catch (error) {
-    console.error('❌ Error en handler:', error);
-    return createResponse(500, {
-      success: false,
-      error: 'Error interno del servidor',
-      message: error.message
+    console.error('❌ Get User Error:', error);
+    return createResponse(500, { 
+      success: false, 
+      message: 'Error al obtener usuario' 
     });
   }
-};
+}
+
+async function handleCreateUser(event, environment) {
+  try {
+    const body = JSON.parse(event.body || '{}');
+    const { email, password, firstName, lastName, phone, role, department, position } = body;
+
+    // Validaciones básicas
+    if (!email || !firstName || !lastName || !phone) {
+      return createResponse(400, { 
+        success: false, 
+        message: 'Todos los campos son requeridos' 
+      });
+    }
+
+    // Usar password por defecto si no se proporciona
+    const userPassword = password || 'password123';
+
+    // Verificar si el usuario ya existe
+    const usersTable = getTableName('Users', environment);
+    const checkParams = {
+      TableName: usersTable,
+      FilterExpression: 'email = :email',
+      ExpressionAttributeValues: {
+        ':email': email
+      }
+    };
+
+    const existingUser = await dynamodb.send(new ScanCommand(checkParams));
+    
+    if (existingUser.Items && existingUser.Items.length > 0) {
+      return createResponse(400, { 
+        success: false, 
+        message: 'El usuario ya existe' 
+      });
+    }
+
+    // Hash de la contraseña
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+    // Formatear teléfono con +52
+    const formattedPhone = phone.startsWith('+52') ? phone : `+52${phone}`;
+
+    // Crear usuario
+    const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    console.log('🆔 Generated User ID:', userId);
+    const newUser = {
+      id: userId,
+      email,
+      password: hashedPassword,
+      firstName,
+      lastName,
+      phone: formattedPhone,
+      role: role || 'EXECUTIVE',
+      department: department || 'General',
+      position: position || 'Ejecutivo',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'system' // En producción sería el ID del usuario que lo crea
+    };
+
+    console.log('📝 New User Object:', JSON.stringify(newUser, null, 2));
+    const putParams = {
+      TableName: usersTable,
+      Item: newUser
+    };
+
+    await dynamodb.send(new PutCommand(putParams));
+
+    // Retornar usuario sin contraseña
+    const { password: _, ...userWithoutPassword } = newUser;
+
+    return createResponse(201, {
+      success: true,
+      user: userWithoutPassword,
+      message: 'Usuario creado exitosamente'
+    });
+
+  } catch (error) {
+    console.error('❌ Create User Error:', error);
+    return createResponse(500, { 
+      success: false, 
+      message: 'Error al crear usuario' 
+    });
+  }
+}
+
+async function handleUpdateUser(event, environment, userId) {
+  try {
+    const body = JSON.parse(event.body || '{}');
+    const { firstName, lastName, phone, role, department, position, status } = body;
+
+    // Verificar que el usuario existe
+    const usersTable = getTableName('Users', environment);
+    const getParams = {
+      TableName: usersTable,
+      Key: { id: userId }
+    };
+
+    const existingUser = await dynamodb.send(new GetCommand(getParams));
+    
+    if (!existingUser.Item) {
+      return createResponse(404, { 
+        success: false, 
+        message: 'Usuario no encontrado' 
+      });
+    }
+
+    // Construir expresión de actualización
+    const updateExpressions = [];
+    const expressionAttributeValues = {};
+    const expressionAttributeNames = {};
+
+    if (firstName) {
+      updateExpressions.push('#firstName = :firstName');
+      expressionAttributeNames['#firstName'] = 'firstName';
+      expressionAttributeValues[':firstName'] = firstName;
+    }
+
+    if (lastName) {
+      updateExpressions.push('#lastName = :lastName');
+      expressionAttributeNames['#lastName'] = 'lastName';
+      expressionAttributeValues[':lastName'] = lastName;
+    }
+
+    if (phone) {
+      updateExpressions.push('#phone = :phone');
+      expressionAttributeNames['#phone'] = 'phone';
+      expressionAttributeValues[':phone'] = phone.startsWith('+52') ? phone : `+52${phone}`;
+    }
+
+    if (role) {
+      updateExpressions.push('#role = :role');
+      expressionAttributeNames['#role'] = 'role';
+      expressionAttributeValues[':role'] = role;
+    }
+
+    if (department) {
+      updateExpressions.push('#department = :department');
+      expressionAttributeNames['#department'] = 'department';
+      expressionAttributeValues[':department'] = department;
+    }
+
+    if (position) {
+      updateExpressions.push('#position = :position');
+      expressionAttributeNames['#position'] = 'position';
+      expressionAttributeValues[':position'] = position;
+    }
+
+    if (status) {
+      updateExpressions.push('#status = :status');
+      expressionAttributeNames['#status'] = 'status';
+      expressionAttributeValues[':status'] = status;
+    }
+
+    if (updateExpressions.length === 0) {
+      return createResponse(400, { 
+        success: false, 
+        message: 'No hay campos para actualizar' 
+      });
+    }
+
+    // Agregar updatedAt
+    updateExpressions.push('#updatedAt = :updatedAt');
+    expressionAttributeNames['#updatedAt'] = 'updatedAt';
+    expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+
+    const updateParams = {
+      TableName: usersTable,
+      Key: { id: userId },
+      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+      ExpressionAttributeNames: expressionAttributeNames,
+      ExpressionAttributeValues: expressionAttributeValues,
+      ReturnValues: 'ALL_NEW'
+    };
+
+    const result = await dynamodb.send(new UpdateCommand(updateParams));
+
+    // Retornar usuario actualizado sin contraseña
+    const { password: _, ...userWithoutPassword } = result.Attributes;
+
+    return createResponse(200, {
+      success: true,
+      user: userWithoutPassword,
+      message: 'Usuario actualizado exitosamente'
+    });
+
+  } catch (error) {
+    console.error('❌ Update User Error:', error);
+    return createResponse(500, { 
+      success: false, 
+      message: 'Error al actualizar usuario' 
+    });
+  }
+}
+
+async function handleDeleteUser(event, environment, userId) {
+  try {
+    const usersTable = getTableName('Users', environment);
+    const params = {
+      TableName: usersTable,
+      Key: { id: userId }
+    };
+
+    await dynamodb.send(new DeleteCommand(params));
+
+    return createResponse(200, {
+      success: true,
+      message: 'Usuario eliminado exitosamente'
+    });
+
+  } catch (error) {
+    console.error('❌ Delete User Error:', error);
+    return createResponse(500, { 
+      success: false, 
+      message: 'Error al eliminar usuario' 
+    });
+  }
+}
