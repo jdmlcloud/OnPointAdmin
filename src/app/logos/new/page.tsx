@@ -58,20 +58,10 @@ export default function NewLogoPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-      }
-      
-      // Sincronizar brand con clientName
-      if (name === 'clientName') {
-        newData.brand = value
-        newData.clientId = `client-${value.toLowerCase().replace(/\s+/g, '-')}`
-      }
-      
-      return newData
-    })
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+    }))
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +83,7 @@ export default function NewLogoPage() {
     
     // Validar campos requeridos
     if (!formData.name || !formData.category || !formData.brand || !selectedFile) {
-      alert('Por favor completa todos los campos requeridos y selecciona un archivo')
+      alert('Por favor completa todos los campos requeridos: Nombre del Logo, Categoría, Marca y selecciona un archivo')
       return
     }
 

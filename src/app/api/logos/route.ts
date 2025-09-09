@@ -57,45 +57,43 @@ export async function POST(request: NextRequest) {
     const environment = detectEnvironment()
     const lambdaUrl = LAMBDA_URLS[environment]
     
-    // Parse FormData
-    const formData = await request.formData()
-    const file = formData.get('file') as File | null
-    const data = formData.get('data') as string | null
-
-    if (!file || !data) {
-      return createResponse(400, {
-        success: false,
-        error: 'Datos y archivo de logo requeridos'
-      })
-    }
-
-    // Convert file to base64 for Lambda
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    const base64File = buffer.toString('base64')
-
-    const logoData = JSON.parse(data)
+    // Parse JSON body directly like providers
+    const logoData = await request.json()
     
     // Validar campos requeridos
-    if (!logoData.name || !logoData.category) {
+    if (!logoData.name || !logoData.category || !logoData.brand) {
       return createResponse(400, {
         success: false,
-        error: 'name, category y fileUrl son obligatorios'
+        error: 'name, category y brand son obligatorios'
       })
     }
     
+    // Prepare logo data for Lambda
     const lambdaPayload = {
-      data: JSON.stringify({
-        ...logoData,
-        fileType: file.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        fileSize: file.size,
-        fileUrl: `https://onpoint-logos-${environment}.s3.amazonaws.com/logos/${Date.now()}-${file.name}`
-      }),
-      file: {
-        content: base64File,
-        filename: file.name,
-        contentType: file.type,
-      },
+      name: logoData.name,
+      description: logoData.description || '',
+      category: logoData.category,
+      brand: logoData.brand,
+      clientName: logoData.brand, // Use brand as clientName
+      clientId: logoData.clientId || `client-${logoData.brand.toLowerCase().replace(/\s+/g, '-')}`,
+      variant: logoData.variant || '',
+      version: logoData.version || 'v1.0',
+      tags: logoData.tags || [],
+      status: logoData.status || 'active',
+      isPrimary: logoData.isPrimary || false,
+      fileType: logoData.fileType || 'UNKNOWN',
+      fileSize: logoData.fileSize || 0,
+      fileUrl: logoData.fileUrl || `https://onpoint-logos-${environment}.s3.amazonaws.com/logos/${Date.now()}-${logoData.name.replace(/\s+/g, '-')}.${logoData.fileType?.toLowerCase() || 'png'}`,
+      thumbnailUrl: logoData.thumbnailUrl || '',
+      dimensions: logoData.dimensions || { width: 0, height: 0 },
+      dpi: logoData.dpi || 300,
+      format: logoData.format || logoData.fileType || 'PNG',
+      isVector: logoData.isVector || false,
+      isTransparent: logoData.isTransparent || false,
+      colorVariants: logoData.colorVariants || [],
+      usageRights: logoData.usageRights || [],
+      lastUsed: logoData.lastUsed || null,
+      downloadCount: logoData.downloadCount || 0
     }
     
     const response = await fetch(`${lambdaUrl}/logos`, {

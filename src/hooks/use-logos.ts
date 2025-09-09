@@ -88,13 +88,38 @@ export function useLogos(): UseLogosReturn {
 
   const createLogo = async (logoData: Omit<Logo, 'id' | 'createdAt' | 'downloadCount' | 'fileUrl'>, file: File): Promise<boolean> => {
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('data', JSON.stringify(logoData))
+      // Convert file to base64 for transmission
+      const arrayBuffer = await file.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      const base64File = buffer.toString('base64')
+      
+      // Prepare logo data with file information
+      const logoPayload = {
+        ...logoData,
+        fileType: file.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        fileSize: file.size,
+        fileUrl: `https://onpoint-logos-sandbox.s3.amazonaws.com/logos/${Date.now()}-${file.name}`,
+        thumbnailUrl: `https://onpoint-logos-sandbox.s3.amazonaws.com/logos/${Date.now()}-${file.name.replace(/\.[^/.]+$/, '')}-thumb.png`,
+        dimensions: { width: 0, height: 0 }, // Will be set by Lambda
+        dpi: 300,
+        format: file.name.split('.').pop()?.toUpperCase() || 'PNG',
+        isVector: file.name.toLowerCase().endsWith('.svg') || file.name.toLowerCase().endsWith('.ai'),
+        isTransparent: file.name.toLowerCase().endsWith('.png') || file.name.toLowerCase().endsWith('.svg'),
+        colorVariants: [],
+        usageRights: [],
+        lastUsed: null,
+        downloadCount: 0,
+        fileContent: base64File, // Include base64 content for Lambda
+        fileName: file.name,
+        fileContentType: file.type
+      }
 
       const response = await fetch('/api/logos', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(logoPayload),
       })
       
       const data = await response.json()
