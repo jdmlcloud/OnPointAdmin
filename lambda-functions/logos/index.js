@@ -80,11 +80,11 @@ exports.handler = async (event) => {
       }
       
       // Validar datos requeridos
-      if (!logoData.name || !logoData.category || !logoData.fileUrl) {
+      if (!logoData.name || !logoData.category || !logoData.fileUrl || !logoData.clientName) {
         return createResponse(400, {
           success: false,
           error: 'Faltan campos requeridos',
-          message: 'name, category y fileUrl son obligatorios'
+          message: 'name, category, fileUrl y clientName son obligatorios'
         })
       }
 
@@ -99,6 +99,11 @@ exports.handler = async (event) => {
         thumbnailUrl: logoData.thumbnailUrl || null,
         tags: logoData.tags || [],
         status: logoData.status || 'active',
+        // Campos específicos para logos de clientes
+        clientId: logoData.clientId || `client-${Date.now()}`,
+        clientName: logoData.clientName || '',
+        variant: logoData.variant || '',
+        isPrimary: logoData.isPrimary === 'true' || logoData.isPrimary === true,
         brand: logoData.brand || '',
         version: logoData.version || '',
         colorVariants: logoData.colorVariants || [],

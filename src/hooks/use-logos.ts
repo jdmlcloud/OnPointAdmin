@@ -13,6 +13,11 @@ interface Logo {
   status: string
   createdAt: string
   updatedAt?: string
+  // Campos específicos para logos de clientes
+  clientId: string
+  clientName: string
+  variant?: string // e.g., "Oficial", "Horizontal", "Vertical", "Monocromo"
+  isPrimary: boolean // Si es el logo principal del cliente
   brand?: string
   version?: string
   colorVariants?: Array<{
@@ -33,13 +38,25 @@ interface Logo {
   downloadCount?: number
 }
 
+interface Client {
+  id: string
+  name: string
+  description?: string
+  industry?: string
+  contactEmail?: string
+  logos: Logo[]
+  primaryLogoId?: string
+  createdAt: string
+  updatedAt?: string
+}
+
 interface UseLogosReturn {
   logos: Logo[]
   isLoading: boolean
   error: string | null
   refreshLogos: () => Promise<void>
-  createLogo: (logoData: Omit<Logo, 'id' | 'createdAt'>) => Promise<boolean>
-  updateLogo: (id: string, logoData: Partial<Logo>) => Promise<boolean>
+  createLogo: (logoData: Omit<Logo, 'id' | 'createdAt' | 'downloadCount' | 'fileUrl'>, file: File) => Promise<boolean>
+  updateLogo: (id: string, logoData: Partial<Omit<Logo, 'id' | 'createdAt' | 'downloadCount' | 'fileUrl'>>, file?: File) => Promise<boolean>
   deleteLogo: (id: string) => Promise<boolean>
 }
 
@@ -69,14 +86,15 @@ export function useLogos(): UseLogosReturn {
     }
   }
 
-  const createLogo = async (logoData: Omit<Logo, 'id' | 'createdAt'>): Promise<boolean> => {
+  const createLogo = async (logoData: Omit<Logo, 'id' | 'createdAt' | 'downloadCount' | 'fileUrl'>, file: File): Promise<boolean> => {
     try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('data', JSON.stringify(logoData))
+
       const response = await fetch('/api/logos', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(logoData),
+        body: formData,
       })
       
       const data = await response.json()
@@ -94,14 +112,17 @@ export function useLogos(): UseLogosReturn {
     }
   }
 
-  const updateLogo = async (id: string, logoData: Partial<Logo>): Promise<boolean> => {
+  const updateLogo = async (id: string, logoData: Partial<Omit<Logo, 'id' | 'createdAt' | 'downloadCount' | 'fileUrl'>>, file?: File): Promise<boolean> => {
     try {
+      const formData = new FormData()
+      if (file) {
+        formData.append('file', file)
+      }
+      formData.append('data', JSON.stringify(logoData))
+
       const response = await fetch(`/api/logos/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(logoData),
+        body: formData,
       })
       
       const data = await response.json()

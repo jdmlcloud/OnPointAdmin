@@ -43,7 +43,11 @@ interface Logo {
   status: string
   createdAt: string
   updatedAt?: string
-  // Campos específicos para logos
+  // Campos específicos para logos de clientes
+  clientId: string
+  clientName: string
+  variant?: string // e.g., "Oficial", "Horizontal", "Vertical", "Monocromo"
+  isPrimary: boolean // Si es el logo principal del cliente
   brand?: string
   version?: string
   colorVariants?: Array<{
@@ -62,6 +66,18 @@ interface Logo {
   isTransparent?: boolean
   lastUsed?: string
   downloadCount?: number
+}
+
+interface Client {
+  id: string
+  name: string
+  description?: string
+  industry?: string
+  contactEmail?: string
+  logos: Logo[]
+  primaryLogoId?: string
+  createdAt: string
+  updatedAt?: string
 }
 
 export default function LogosPage() {
@@ -84,6 +100,19 @@ export default function LogosPage() {
 
   // Usar hook de logos para datos reales de DynamoDB
   const { logos, isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
+
+  // Agrupar logos por cliente
+  const logosByClient = logos.reduce((acc, logo) => {
+    if (!acc[logo.clientId]) {
+      acc[logo.clientId] = {
+        clientId: logo.clientId,
+        clientName: logo.clientName,
+        logos: []
+      }
+    }
+    acc[logo.clientId].logos.push(logo)
+    return acc
+  }, {} as Record<string, { clientId: string; clientName: string; logos: Logo[] }>)
 
   const filteredLogos = logos.filter(logo => {
     const searchLower = searchTerm.toLowerCase()
@@ -115,6 +144,12 @@ export default function LogosPage() {
         case 'recent:unused':
           if (logo.lastUsed) return false
           break
+        case 'primary:yes':
+          if (!logo.isPrimary) return false
+          break
+        case 'primary:no':
+          if (logo.isPrimary) return false
+          break
         default:
           // Filtro por categoría específica
           if (filter.startsWith('category:')) {
@@ -128,12 +163,18 @@ export default function LogosPage() {
               tag.toLowerCase().includes(tagFilter.toLowerCase())
             )) return false
           }
+          // Filtro por cliente específico
+          if (filter.startsWith('client:')) {
+            const clientFilter = filter.replace('client:', '')
+            if (!logo.clientName.toLowerCase().includes(clientFilter.toLowerCase())) return false
+          }
       }
     }
     
     // Filtro de búsqueda
     return (
       logo.name.toLowerCase().includes(searchLower) ||
+      logo.clientName.toLowerCase().includes(searchLower) ||
       logo.category.toLowerCase().includes(searchLower) ||
       (logo.description && logo.description.toLowerCase().includes(searchLower)) ||
       (logo.brand && logo.brand.toLowerCase().includes(searchLower)) ||
@@ -142,6 +183,19 @@ export default function LogosPage() {
       ))
     )
   })
+
+  // Agrupar logos filtrados por cliente
+  const filteredLogosByClient = filteredLogos.reduce((acc, logo) => {
+    if (!acc[logo.clientId]) {
+      acc[logo.clientId] = {
+        clientId: logo.clientId,
+        clientName: logo.clientName,
+        logos: []
+      }
+    }
+    acc[logo.clientId].logos.push(logo)
+    return acc
+  }, {} as Record<string, { clientId: string; clientName: string; logos: Logo[] }>)
 
   // Función para formatear tamaño de archivo
   const formatFileSize = (bytes: number) => {
@@ -276,6 +330,8 @@ export default function LogosPage() {
                 { key: 'type:raster', label: 'Raster', icon: '🖼️' },
                 { key: 'transparent:yes', label: 'Con transparencia', icon: '🔍' },
                 { key: 'transparent:no', label: 'Sin transparencia', icon: '⬜' },
+                { key: 'primary:yes', label: 'Logos principales', icon: '⭐' },
+                { key: 'primary:no', label: 'Logos secundarios', icon: '🔹' },
                 { key: 'recent:used', label: 'Recientemente usados', icon: '🕒' },
                 { key: 'recent:unused', label: 'No usados', icon: '📅' }
               ].map((filter) => (
@@ -298,6 +354,35 @@ export default function LogosPage() {
                 </button>
               ))}
             </div>
+
+            {/* Filtros por Cliente */}
+            {Object.keys(logosByClient).length > 0 && (
+              <div className="mb-3">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Clientes</h4>
+                <div className="flex flex-wrap gap-2">
+                  {Object.values(logosByClient).map((client) => (
+                    <button
+                      key={client.clientId}
+                      onClick={() => {
+                        const filterKey = `client:${client.clientName}`
+                        if (activeFilters.includes(filterKey)) {
+                          setActiveFilters(activeFilters.filter(f => f !== filterKey))
+                        } else {
+                          setActiveFilters([...activeFilters, filterKey])
+                        }
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                        activeFilters.includes(`client:${client.clientName}`)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-background border border-border hover:bg-muted'
+                      }`}
+                    >
+                      🏢 {client.clientName} ({client.logos.length})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Filtros por Categoría */}
             {categories.length > 0 && (
@@ -376,8 +461,11 @@ export default function LogosPage() {
                     {filter === 'type:raster' && '🖼️ Raster'}
                     {filter === 'transparent:yes' && '🔍 Con transparencia'}
                     {filter === 'transparent:no' && '⬜ Sin transparencia'}
+                    {filter === 'primary:yes' && '⭐ Logos principales'}
+                    {filter === 'primary:no' && '🔹 Logos secundarios'}
                     {filter === 'recent:used' && '🕒 Recientemente usados'}
                     {filter === 'recent:unused' && '📅 No usados'}
+                    {filter.startsWith('client:') && `🏢 ${filter.replace('client:', '')}`}
                     {filter.startsWith('category:') && `🏷️ ${filter.replace('category:', '')}`}
                     {filter.startsWith('tag:') && `🏷️ ${filter.replace('tag:', '')}`}
                   </span>
@@ -393,10 +481,55 @@ export default function LogosPage() {
           </div>
         )}
 
-        {/* Logos Grid */}
+        {/* Logos Grid - Agrupados por Cliente */}
         <div className="flex-1 overflow-auto scrollbar-hide">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredLogos.map((logo) => (
+          {Object.keys(filteredLogosByClient).length === 0 ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="text-center">
+                <Image className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                <h2 className="text-xl font-semibold mb-2">No se encontraron logos</h2>
+                <p className="text-muted-foreground mb-4">
+                  {searchTerm || activeFilters.length > 0 
+                    ? 'No hay logos que coincidan con los filtros aplicados'
+                    : 'Aún no hay logos registrados'
+                  }
+                </p>
+                <Button onClick={() => router.push('/logos/new')}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar primer logo
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {Object.values(filteredLogosByClient).map((client) => (
+                <div key={client.clientId} className="space-y-4">
+                  {/* Header del Cliente */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-xl font-semibold">{client.clientName}</h3>
+                      <Badge variant="outline" className="text-sm">
+                        {client.logos.length} logo{client.logos.length !== 1 ? 's' : ''}
+                      </Badge>
+                      {client.logos.some(logo => logo.isPrimary) && (
+                        <Badge variant="default" className="text-sm">
+                          ⭐ Tiene logo principal
+                        </Badge>
+                      )}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => router.push(`/logos/new?client=${client.clientId}`)}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Agregar logo
+                    </Button>
+                  </div>
+
+                  {/* Grid de Logos del Cliente */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {client.logos.map((logo) => (
             <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
               {/* Imagen centrada en la parte superior */}
               <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
@@ -440,12 +573,24 @@ export default function LogosPage() {
 
               {/* Contenido de la card */}
               <CardContent className="flex-1 flex flex-col p-4">
-                {/* Nombre y categoría */}
+                {/* Nombre y variante */}
                 <div className="mb-3">
                   <CardTitle className="text-lg mb-1 line-clamp-1">{logo.name}</CardTitle>
-                  <Badge variant="outline" className="text-xs">
-                    {logo.category}
-                  </Badge>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-xs">
+                      {logo.category}
+                    </Badge>
+                    {logo.variant && (
+                      <Badge variant="secondary" className="text-xs">
+                        {logo.variant}
+                      </Badge>
+                    )}
+                    {logo.isPrimary && (
+                      <Badge variant="default" className="text-xs">
+                        ⭐ Principal
+                      </Badge>
+                    )}
+                  </div>
                 </div>
 
                 {/* Descripción */}
@@ -531,8 +676,12 @@ export default function LogosPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-          </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

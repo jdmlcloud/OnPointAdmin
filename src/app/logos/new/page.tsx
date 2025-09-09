@@ -22,17 +22,21 @@ export default function NewLogoPage() {
     name: '',
     description: '',
     category: '',
+    clientId: '',
+    clientName: '',
+    variant: '',
     brand: '',
     version: '',
     tags: '',
-    status: 'active'
+    status: 'active',
+    isPrimary: false
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+    const { name, value, type } = e.target
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }))
   }
 
@@ -54,7 +58,7 @@ export default function NewLogoPage() {
     e.preventDefault()
     
     // Validar campos requeridos
-    if (!formData.name || !formData.category || !selectedFile) {
+    if (!formData.name || !formData.category || !formData.clientName || !selectedFile) {
       alert('Por favor completa todos los campos requeridos y selecciona un archivo')
       return
     }
@@ -62,29 +66,25 @@ export default function NewLogoPage() {
     setIsLoading(true)
     
     try {
-      // Crear FormData para subir archivo
-      const uploadData = new FormData()
-      uploadData.append('file', selectedFile)
-      uploadData.append('name', formData.name)
-      uploadData.append('description', formData.description)
-      uploadData.append('category', formData.category)
-      uploadData.append('brand', formData.brand)
-      uploadData.append('version', formData.version)
-      uploadData.append('tags', formData.tags)
-      uploadData.append('status', formData.status)
-
-      const response = await fetch('/api/logos', {
-        method: 'POST',
-        body: uploadData,
-      })
+      const success = await createLogo({
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        clientId: formData.clientId || `client-${Date.now()}`,
+        clientName: formData.clientName,
+        variant: formData.variant,
+        brand: formData.brand,
+        version: formData.version,
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+        status: formData.status,
+        isPrimary: formData.isPrimary
+      }, selectedFile)
       
-      const data = await response.json()
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al crear logo')
+      if (success) {
+        router.push('/logos')
+      } else {
+        alert('Error al crear el logo')
       }
-      
-      router.push('/logos')
     } catch (error) {
       console.error('Error creating logo:', error)
       alert('Error al crear el logo')
@@ -193,52 +193,84 @@ export default function NewLogoPage() {
                 </div>
               </div>
 
+              {/* Información del Cliente */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Información del Cliente</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="clientName">Nombre del Cliente *</Label>
+                    <Input
+                      id="clientName"
+                      name="clientName"
+                      value={formData.clientName}
+                      onChange={handleInputChange}
+                      placeholder="Ej: HBO, Netflix, Disney"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="variant">Variante del Logo</Label>
+                    <Input
+                      id="variant"
+                      name="variant"
+                      value={formData.variant}
+                      onChange={handleInputChange}
+                      placeholder="Ej: Oficial, Horizontal, Vertical, Monocromo"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Información básica */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nombre del Logo *</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Ej: Logo Principal OnPoint"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="category">Categoría *</Label>
-                  <Input
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    placeholder="Ej: Principal, Variantes, Iconos"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="brand">Marca</Label>
-                  <Input
-                    id="brand"
-                    name="brand"
-                    value={formData.brand}
-                    onChange={handleInputChange}
-                    placeholder="Nombre de la marca"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="version">Versión</Label>
-                  <Input
-                    id="version"
-                    name="version"
-                    value={formData.version}
-                    onChange={handleInputChange}
-                    placeholder="v1.0"
-                  />
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Información del Logo</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nombre del Logo *</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Ej: Logo Principal HBO"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Categoría *</Label>
+                    <Input
+                      id="category"
+                      name="category"
+                      value={formData.category}
+                      onChange={handleInputChange}
+                      placeholder="Ej: Principal, Variantes, Iconos"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="brand">Marca</Label>
+                    <Input
+                      id="brand"
+                      name="brand"
+                      value={formData.brand}
+                      onChange={handleInputChange}
+                      placeholder="Nombre de la marca"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="version">Versión</Label>
+                    <Input
+                      id="version"
+                      name="version"
+                      value={formData.version}
+                      onChange={handleInputChange}
+                      placeholder="v1.0"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -267,20 +299,44 @@ export default function NewLogoPage() {
                 />
               </div>
 
-              {/* Estado */}
-              <div className="space-y-2">
-                <Label htmlFor="status">Estado</Label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-input bg-background rounded-md"
-                >
-                  <option value="active">Activo</option>
-                  <option value="inactive">Inactivo</option>
-                  <option value="archived">Archivado</option>
-                </select>
+              {/* Configuración adicional */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Configuración</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Estado</Label>
+                    <select
+                      id="status"
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-input bg-background rounded-md"
+                    >
+                      <option value="active">Activo</option>
+                      <option value="inactive">Inactivo</option>
+                      <option value="archived">Archivado</option>
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="isPrimary"
+                        name="isPrimary"
+                        checked={formData.isPrimary}
+                        onChange={handleInputChange}
+                        className="rounded border-gray-300"
+                      />
+                      <Label htmlFor="isPrimary" className="text-sm font-medium">
+                        Logo principal del cliente
+                      </Label>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Marca este logo como el principal para este cliente
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Botones */}

@@ -57,23 +57,53 @@ export async function POST(request: NextRequest) {
     const environment = detectEnvironment()
     const lambdaUrl = LAMBDA_URLS[environment]
     
-    const logoData = await request.json()
+    // Parse FormData
+    const formData = await request.formData()
+    const file = formData.get('file') as File | null
+    const data = formData.get('data') as string | null
+
+    if (!file || !data) {
+      return createResponse(400, {
+        success: false,
+        error: 'Datos y archivo de logo requeridos'
+      })
+    }
+
+    // Convert file to base64 for Lambda
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
+    const base64File = buffer.toString('base64')
+
+    const logoData = JSON.parse(data)
+    const lambdaPayload = {
+      data: JSON.stringify({
+        ...logoData,
+        fileType: file.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        fileSize: file.size,
+        fileUrl: `https://onpoint-logos-${environment}.s3.amazonaws.com/logos/${Date.now()}-${file.name}`
+      }),
+      file: {
+        content: base64File,
+        filename: file.name,
+        contentType: file.type,
+      },
+    }
     
     const response = await fetch(`${lambdaUrl}/logos`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(logoData)
+      body: JSON.stringify(lambdaPayload)
     })
     
-    const data = await response.json()
+    const responseData = await response.json()
     
     if (!response.ok) {
-      throw new Error(data.message || 'Error al crear logo')
+      throw new Error(responseData.message || 'Error al crear logo')
     }
     
-    return createResponse(201, data)
+    return createResponse(201, responseData)
   } catch (error) {
     console.error('Error in POST /api/logos:', error)
     return createResponse(500, {
