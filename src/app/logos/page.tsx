@@ -107,8 +107,7 @@ export default function LogosPage() {
     closeModal
   } = useCardActions(refreshLogos)
   
-  // Usar hook de clientes
-  const { clients, createClient, updateClient, deleteClient } = useClients()
+  // Arquitectura limpia: solo useLogos
   
   // Estado para modal de cliente
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
