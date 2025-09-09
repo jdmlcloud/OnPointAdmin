@@ -634,6 +634,14 @@ export default function LogosPage() {
             />
           </div>
           
+          <Button 
+            variant="outline"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filtros {activeFilters.length > 0 && `(${activeFilters.length})`}
+          </Button>
+          
           {/* Botón de cambio de vista */}
           {/* Pestañas de Vista - Solo se muestran cuando no hay cliente seleccionado */}
           {!selectedClient && (
@@ -668,14 +676,6 @@ export default function LogosPage() {
             </button>
           </div>
           )}
-          
-          <Button 
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros {activeFilters.length > 0 && `(${activeFilters.length})`}
-          </Button>
         </div>
 
         {/* Filtros Activos */}
@@ -866,9 +866,9 @@ export default function LogosPage() {
               // Vista de logos de un cliente específico
               <div className="space-y-6">
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {selectedClient.logos.map((logo) => (
-                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden">
                       {/* Imagen centrada en la parte superior */}
                       <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
                         {logo.thumbnailUrl ? (
@@ -1104,9 +1104,9 @@ export default function LogosPage() {
                 </div>
                 
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {selectedClient.logos.map((logo) => (
-                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
+                    <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden">
                       {/* Imagen centrada en la parte superior */}
                       <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
                         {logo.thumbnailUrl ? (
@@ -1302,9 +1302,9 @@ export default function LogosPage() {
                       </div>
 
                       {/* Grid de Logos del Cliente */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         {client.logos.map((logo) => (
-                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-full overflow-hidden">
+                          <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-80 overflow-hidden">
                             {/* Imagen centrada en la parte superior */}
                             <div className="relative h-48 bg-muted flex items-center justify-center overflow-hidden">
                               {logo.thumbnailUrl ? (
