@@ -21,50 +21,23 @@ const createResponse = (statusCode: number, body: any) => {
   })
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    console.log('🔍 Logos API - GET by ID (proxy to Lambda):', params.id)
+    console.log(`🔍 Logos API - PUT request for ID: ${params.id}`)
     const environment = detectEnvironment()
     const lambdaUrl = LAMBDA_URLS[environment]
     
-    const response = await fetch(`${lambdaUrl}/logos/${params.id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    
-    const data = await response.json()
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Error al obtener logo')
-    }
-    
-    return createResponse(200, data)
-  } catch (error) {
-    console.error('Error in GET /api/logos/[id]:', error)
-    return createResponse(500, {
-      success: false,
-      error: 'Error interno del servidor',
-      message: error instanceof Error ? error.message : 'Error desconocido'
-    })
-  }
-}
-
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    console.log('🔍 Logos API - PUT by ID (proxy to Lambda):', params.id)
-    const environment = detectEnvironment()
-    const lambdaUrl = LAMBDA_URLS[environment]
-    
-    const updateData = await request.json()
+    const body = await request.json()
     
     const response = await fetch(`${lambdaUrl}/logos/${params.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(updateData)
+      body: JSON.stringify(body)
     })
     
     const data = await response.json()
@@ -75,7 +48,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     
     return createResponse(200, data)
   } catch (error) {
-    console.error('Error in PUT /api/logos/[id]:', error)
+    console.error(`Error in PUT /api/logos/${params.id}:`, error)
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor',
@@ -84,9 +57,12 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    console.log('🔍 Logos API - DELETE by ID (proxy to Lambda):', params.id)
+    console.log(`🔍 Logos API - DELETE request for ID: ${params.id}`)
     const environment = detectEnvironment()
     const lambdaUrl = LAMBDA_URLS[environment]
     
@@ -105,7 +81,40 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     
     return createResponse(200, data)
   } catch (error) {
-    console.error('Error in DELETE /api/logos/[id]:', error)
+    console.error(`Error in DELETE /api/logos/${params.id}:`, error)
+    return createResponse(500, {
+      success: false,
+      error: 'Error interno del servidor',
+      message: error instanceof Error ? error.message : 'Error desconocido'
+    })
+  }
+}
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    console.log(`🔍 Logos API - GET request for ID: ${params.id}`)
+    const environment = detectEnvironment()
+    const lambdaUrl = LAMBDA_URLS[environment]
+    
+    const response = await fetch(`${lambdaUrl}/logos/${params.id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    
+    const data = await response.json()
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Error al obtener logo')
+    }
+    
+    return createResponse(200, data)
+  } catch (error) {
+    console.error(`Error in GET /api/logos/${params.id}:`, error)
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor',

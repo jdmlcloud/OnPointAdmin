@@ -9,7 +9,7 @@ export interface CardActionOptions {
   showNotification?: boolean
 }
 
-export function useCardActions() {
+export function useCardActions(refreshData?: () => void) {
   const [modals, setModals] = useState<{
     view: { isOpen: boolean; data: any }
     edit: { isOpen: boolean; data: any }
@@ -55,27 +55,36 @@ export function useCardActions() {
     await simulateAction(
       'save-item',
       async () => {
-        // Aquí se integrará con la API del backend
-        // Por ahora simulamos la operación
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Integrar con la API real del backend
+        const response = await fetch(`/api/logos/${data.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
         
-        // Simular respuesta del backend
-        const savedData = { ...data, id: data.id || Date.now().toString() }
-        // No retornar nada para evitar error de tipo
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Error al actualizar logo')
+        }
+        
+        return await response.json()
       },
       {
-        successMessage: "Elemento guardado exitosamente",
+        successMessage: "Logo actualizado exitosamente",
         notification: {
           type: 'success',
-          title: 'Guardado Exitoso',
+          title: 'Actualización Exitosa',
           message: 'Los cambios han sido guardados correctamente'
         }
       }
     )
     
     closeModal('edit')
+    refreshData?.() // Refrescar datos después de actualizar
     options.onSuccess?.()
-  }, [simulateAction, closeModal])
+  }, [simulateAction, closeModal, refreshData])
 
   const handleDeleteConfirm = useCallback(async (
     data: any,
@@ -84,26 +93,32 @@ export function useCardActions() {
     await simulateAction(
       'delete-item',
       async () => {
-        // Aquí se integrará con la API del backend
-        // Por ahora simulamos la operación
-        await new Promise(resolve => setTimeout(resolve, 800))
+        // Integrar con la API real del backend
+        const response = await fetch(`/api/logos/${data.id}`, {
+          method: 'DELETE'
+        })
         
-        // Simular eliminación
-        // No retornar nada para evitar error de tipo
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Error al eliminar logo')
+        }
+        
+        return await response.json()
       },
       {
-        successMessage: "Elemento eliminado exitosamente",
+        successMessage: "Logo eliminado exitosamente",
         notification: {
           type: 'success',
-          title: 'Eliminado Exitoso',
-          message: 'El elemento ha sido eliminado correctamente'
+          title: 'Eliminación Exitosa',
+          message: 'El logo ha sido eliminado correctamente'
         }
       }
     )
     
     closeModal('delete')
+    refreshData?.() // Refrescar datos después de eliminar
     options.onSuccess?.()
-  }, [simulateAction, closeModal])
+  }, [simulateAction, closeModal, refreshData])
 
   const handleDownload = useCallback(async (data: any) => {
     await simulateAction(

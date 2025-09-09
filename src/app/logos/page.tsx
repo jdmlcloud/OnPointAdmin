@@ -11,7 +11,9 @@ import { AnimatedButton } from "@/components/ui/animated-button"
 import { ActionModal } from "@/components/ui/action-modal"
 import { useCardActions } from "@/hooks/use-card-actions"
 import { useLogos } from "@/hooks/use-logos"
+import { useClients } from "@/hooks/use-clients"
 import { LogoListSkeleton } from "@/components/ui/logo-skeleton"
+import { ClientModal } from "@/components/ui/client-modal"
 import { 
   Plus, 
   Search, 
@@ -97,13 +99,20 @@ export default function LogosPage() {
     handleDownload,
     handleShare,
     closeModal
-  } = useCardActions()
+  } = useCardActions(refreshLogos)
 
   // Estado para el item seleccionado
   const [selectedItem, setSelectedItem] = useState<Logo | null>(null)
 
   // Usar hook de logos para datos reales de DynamoDB
   const { logos, isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
+  
+  // Usar hook de clientes
+  const { clients, createClient, updateClient, deleteClient } = useClients()
+  
+  // Estado para modal de cliente
+  const [isClientModalOpen, setIsClientModalOpen] = useState(false)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
 
   // Agrupar logos por cliente
   const logosByClient = logos.reduce((acc, logo) => {
@@ -153,6 +162,32 @@ export default function LogosPage() {
   const handleDeleteLogo = (logo: Logo) => {
     setSelectedItem(logo)
     handleDelete(logo)
+  }
+
+  // Funciones para gestión de clientes
+  const handleCreateClient = () => {
+    setEditingClient(null)
+    setIsClientModalOpen(true)
+  }
+
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client)
+    setIsClientModalOpen(true)
+  }
+
+  const handleSaveClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>) => {
+    if (editingClient) {
+      await updateClient(editingClient.id, clientData)
+    } else {
+      await createClient(clientData)
+    }
+    setIsClientModalOpen(false)
+    setEditingClient(null)
+  }
+
+  const handleCloseClientModal = () => {
+    setIsClientModalOpen(false)
+    setEditingClient(null)
   }
 
   const filteredLogos = logos.filter(logo => {
@@ -332,10 +367,18 @@ export default function LogosPage() {
               }
             </p>
           </div>
-          <Button onClick={() => router.push('/logos/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Logo
-          </Button>
+          <div className="flex gap-3">
+            {viewMode === 'clients' && (
+              <Button onClick={handleCreateClient} variant="outline">
+                <Building2 className="h-4 w-4 mr-2" />
+                Nuevo Cliente
+              </Button>
+            )}
+            <Button onClick={() => router.push('/logos/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Logo
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filters */}
@@ -808,7 +851,7 @@ export default function LogosPage() {
                             variant="outline"
                             size="sm"
                             className="flex-1"
-                            onClick={() => handleView(logo)}
+                            onClick={() => handleViewLogo(logo)}
                             animation="pulse"
                           >
                             <Eye className="h-4 w-4 mr-2" />
@@ -818,7 +861,7 @@ export default function LogosPage() {
                             variant="outline"
                             size="sm"
                             className="flex-1"
-                            onClick={() => handleEdit(logo)}
+                            onClick={() => handleEditLogo(logo)}
                             animation="pulse"
                           >
                             <Edit className="h-4 w-4 mr-2" />
@@ -827,7 +870,7 @@ export default function LogosPage() {
                           <AnimatedButton
                             variant="outline"
                             size="sm"
-                            onClick={() => handleDelete(logo)}
+                            onClick={() => handleDeleteLogo(logo)}
                             animation="pulse"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -1252,6 +1295,15 @@ export default function LogosPage() {
             </div>
           )}
         </ActionModal>
+
+        {/* Modal de Cliente */}
+        <ClientModal
+          isOpen={isClientModalOpen}
+          onClose={handleCloseClientModal}
+          onSave={handleSaveClient}
+          client={editingClient}
+          title={editingClient ? 'Editar Cliente' : 'Nuevo Cliente'}
+        />
       </div>
     </MainLayout>
   )
