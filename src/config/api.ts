@@ -2,8 +2,8 @@
 export const API_CONFIG = {
   // URLs base de la API Gateway por entorno
   BASE_URLS: {
-    local: 'https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox', // Local usa sandbox
-    sandbox: 'https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox',
+    local: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox', // Local usa sandbox
+    sandbox: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
     prod: 'https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod'
   },
   
@@ -88,6 +88,11 @@ export const getBaseUrl = (): string => {
 
 // Función helper para construir URLs completas
 export const buildApiUrl = (endpoint: string): string => {
+  // Si es el endpoint de clientes, usar el API Gateway específico de clientes
+  if (endpoint === '/clients') {
+    return `https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox${endpoint}`
+  }
+  
   return `${getBaseUrl()}${endpoint}`
 }
 

@@ -117,9 +117,6 @@ export default function LogosPage() {
   const [deletingClient, setDeletingClient] = useState<{ clientId: string; clientName: string; logos: Logo[] } | null>(null)
   const [includeLogoForm, setIncludeLogoForm] = useState(false)
   
-  // Estado para modal de nuevo logo
-  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false)
-  const [selectedClientForLogo, setSelectedClientForLogo] = useState<{ clientId: string; clientName: string } | null>(null)
   
   // Estado para archivo de logo en edición
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -215,47 +212,22 @@ export default function LogosPage() {
     setEditingClient(null)
   }
 
-  const handleCloseLogoModal = () => {
-    setIsLogoModalOpen(false)
-    setSelectedClientForLogo(null)
-    handleLogoReset()
-  }
-
   const handleDeleteClient = (client: { clientId: string; clientName: string; logos: Logo[] }) => {
     setDeletingClient(client)
   }
 
   const handleAddLogoToClient = (client: { clientId: string; clientName: string; logos: Logo[] }) => {
-    setSelectedClientForLogo({
-      clientId: client.clientId,
-      clientName: client.clientName
-    })
-    setIsLogoModalOpen(true)
-  }
-
-  const handleCreateLogoFromModal = async (logoData: any) => {
-    if (!selectedClientForLogo) return
-    
-    try {
-      // Agregar información del cliente al logo
-      const logoWithClient = {
-        ...logoData,
-        clientId: selectedClientForLogo.clientId,
-        clientName: selectedClientForLogo.clientName,
-        brand: selectedClientForLogo.clientName
-      }
-      
-      const success = await createLogo(logoWithClient)
-      
-      if (success) {
-        handleCloseLogoModal()
-      } else {
-        alert('Error al crear el logo')
-      }
-    } catch (error) {
-      console.error('Error creating logo:', error)
-      alert('Error al crear el logo')
+    // Crear un cliente temporal para el modal
+    const tempClient: Client = {
+      id: client.clientId,
+      name: client.clientName,
+      industry: '',
+      logos: client.logos,
+      createdAt: new Date().toISOString()
     }
+    setEditingClient(tempClient)
+    setIncludeLogoForm(true)
+    setIsClientModalOpen(true)
   }
 
   const handleConfirmDeleteClient = async () => {
@@ -1594,134 +1566,6 @@ export default function LogosPage() {
           )}
         </ActionModal>
 
-        {/* Modal de Nuevo Logo */}
-        <ActionModal
-          isOpen={isLogoModalOpen}
-          onClose={handleCloseLogoModal}
-          title="Nuevo Logo"
-          description={`Agregar un nuevo logo para ${selectedClientForLogo?.clientName}`}
-          type="create"
-          onConfirm={handleCreateLogoFromModal}
-          confirmText="Crear Logo"
-          showFooter={false}
-        >
-          {selectedClientForLogo && (
-            <div className="space-y-6">
-              {/* Información del Cliente */}
-              <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <Building2 className="h-6 w-6 text-blue-600" />
-                <div>
-                  <h4 className="font-medium text-blue-900 dark:text-blue-100">
-                    {selectedClientForLogo.clientName}
-                  </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    Cliente seleccionado
-                  </p>
-                </div>
-              </div>
-
-              {/* Formulario de Logo */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Nombre del Logo</label>
-                  <Input
-                    id="logo-name"
-                    placeholder="Ej: Logo Principal, Logo Horizontal, etc."
-                    className="w-full"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Categoría</label>
-                  <select className="w-full p-2 border border-gray-300 rounded-md">
-                    <option value="Principal">Principal</option>
-                    <option value="Variante">Variante</option>
-                    <option value="Iconos">Iconos</option>
-                    <option value="Monocromo">Monocromo</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Variante</label>
-                  <select className="w-full p-2 border border-gray-300 rounded-md">
-                    <option value="Oficial">Oficial</option>
-                    <option value="Horizontal">Horizontal</option>
-                    <option value="Vertical">Vertical</option>
-                    <option value="Monocromo">Monocromo</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Archivo del Logo</label>
-                  <input
-                    id="logo-input"
-                    type="file"
-                    accept="image/*,.svg,.pdf"
-                    onChange={handleLogoUpload}
-                    className="w-full p-2 border border-gray-300 rounded-md"
-                  />
-                  {logoPreview && (
-                    <div className="mt-2">
-                      <img
-                        src={logoPreview}
-                        alt="Preview"
-                        className="w-32 h-32 object-contain border border-gray-300 rounded-md"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleLogoDelete}
-                        className="mt-2"
-                      >
-                        Eliminar archivo
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">Etiquetas</label>
-                  <Input
-                    placeholder="Ej: Textil, Oficial, Web (separadas por comas)"
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Botones */}
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={handleCloseLogoModal}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  onClick={() => {
-                    const name = (document.getElementById('logo-name') as HTMLInputElement)?.value
-                    if (!name) {
-                      alert('Por favor ingresa un nombre para el logo')
-                      return
-                    }
-                    if (!logoFile) {
-                      alert('Por favor selecciona un archivo')
-                      return
-                    }
-                    handleCreateLogoFromModal({
-                      name,
-                      file: logoFile
-                    })
-                  }}
-                  className="flex-1"
-                >
-                  Crear Logo
-                </Button>
-              </div>
-            </div>
-          )}
-        </ActionModal>
       </div>
     </MainLayout>
   )
