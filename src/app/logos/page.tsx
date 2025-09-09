@@ -866,7 +866,7 @@ export default function LogosPage() {
               // Vista de logos de un cliente específico
               <div className="space-y-6">
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 justify-items-center">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-items-center">
                   {selectedClient.logos.map((logo) => (
                     <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                       {/* Imagen centrada en la parte superior */}
@@ -1134,7 +1134,7 @@ export default function LogosPage() {
                 </div>
                 
                 {/* Grid de Logos del Cliente */}
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 justify-items-center">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-items-center">
                   {selectedClient.logos.map((logo) => (
                     <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                       {/* Imagen centrada en la parte superior */}
@@ -1332,7 +1332,7 @@ export default function LogosPage() {
                       </div>
 
                       {/* Grid de Logos del Cliente */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 justify-items-center">
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-items-center">
                         {client.logos.map((logo) => (
                           <Card key={logo.id} className="hover:shadow-lg transition-shadow flex flex-col h-72 overflow-hidden max-w-xs">
                             {/* Imagen centrada en la parte superior */}
