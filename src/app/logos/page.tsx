@@ -266,6 +266,21 @@ export default function LogosPage() {
     }
   }, [modals.edit.isOpen])
 
+  // Actualizar selectedClient cuando cambien los logos
+  useEffect(() => {
+    if (selectedClient) {
+      // Filtrar logos del cliente seleccionado
+      const clientLogos = logos.filter(logo => logo.brand === selectedClient.name)
+      
+      // Actualizar selectedClient con los logos actualizados
+      setSelectedClient(prev => prev ? {
+        ...prev,
+        logos: clientLogos,
+        primaryLogoId: clientLogos.find(logo => logo.isPrimary)?.id || null
+      } : null)
+    }
+  }, [logos, selectedClient?.name])
+
   const filteredLogos = logos.filter(logo => {
     const searchLower = searchTerm.toLowerCase()
     
