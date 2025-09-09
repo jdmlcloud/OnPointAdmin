@@ -8,8 +8,39 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLogos } from "@/hooks/use-logos"
 import { ArrowLeft, Image, Save, X, Upload, FileText } from "lucide-react"
+
+const LOGO_CATEGORIES = [
+  'Principal',
+  'Variante',
+  'Iconos',
+  'Monocromo',
+  'Horizontal',
+  'Vertical',
+  'Aplicaciones',
+  'Firma',
+  'Sello',
+  'Otros'
+]
+
+const LOGO_VARIANTS = [
+  'Oficial',
+  'Horizontal',
+  'Vertical',
+  'Monocromo',
+  'Color',
+  'Blanco',
+  'Negro',
+  'Transparente',
+  'Fondo Blanco',
+  'Fondo Negro',
+  'Aplicación',
+  'Sello',
+  'Firma',
+  'Otros'
+]
 
 export default function NewLogoPage() {
   const router = useRouter()
@@ -18,6 +49,9 @@ export default function NewLogoPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [availableTags, setAvailableTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -64,6 +98,48 @@ export default function NewLogoPage() {
     }))
   }
 
+  const handleSelectChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  // Función para normalizar texto (quitar tildes, convertir a minúsculas)
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Quitar tildes
+  }
+
+  // Función para agregar etiqueta
+  const addTag = (tag: string) => {
+    const normalizedTag = normalizeText(tag.trim())
+    if (normalizedTag && !selectedTags.some(t => normalizeText(t) === normalizedTag)) {
+      setSelectedTags(prev => [...prev, tag.trim()])
+      setTagInput('')
+    }
+  }
+
+  // Función para remover etiqueta
+  const removeTag = (tagToRemove: string) => {
+    setSelectedTags(prev => prev.filter(tag => tag !== tagToRemove))
+  }
+
+  // Función para manejar el input de etiquetas
+  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      addTag(tagInput)
+    }
+  }
+
+  // Función para manejar el cambio en el input de etiquetas
+  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTagInput(e.target.value)
+  }
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -99,7 +175,7 @@ export default function NewLogoPage() {
         variant: formData.variant,
         brand: formData.brand,
         version: formData.version,
-        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+        tags: selectedTags,
         status: formData.status,
         isPrimary: formData.isPrimary
       }, selectedFile)
@@ -235,13 +311,18 @@ export default function NewLogoPage() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="variant">Variante del Logo</Label>
-                    <Input
-                      id="variant"
-                      name="variant"
-                      value={formData.variant}
-                      onChange={handleInputChange}
-                      placeholder="Ej: Oficial, Horizontal, Vertical, Monocromo"
-                    />
+                    <Select value={formData.variant} onValueChange={(value) => handleSelectChange('variant', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una variante" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LOGO_VARIANTS.map((variant) => (
+                          <SelectItem key={variant} value={variant}>
+                            {variant}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
@@ -264,14 +345,18 @@ export default function NewLogoPage() {
                   
                   <div className="space-y-2">
                     <Label htmlFor="category">Categoría *</Label>
-                    <Input
-                      id="category"
-                      name="category"
-                      value={formData.category}
-                      onChange={handleInputChange}
-                      placeholder="Ej: Principal, Variantes, Iconos"
-                      required
-                    />
+                    <Select value={formData.category} onValueChange={(value) => handleSelectChange('category', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona una categoría" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LOGO_CATEGORIES.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div className="space-y-2">
@@ -314,13 +399,36 @@ export default function NewLogoPage() {
               {/* Etiquetas */}
               <div className="space-y-2">
                 <Label htmlFor="tags">Etiquetas</Label>
-                <Input
-                  id="tags"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleInputChange}
-                  placeholder="oficial, principal, horizontal, vertical (separadas por comas)"
-                />
+                <div className="space-y-2">
+                  {/* Input para agregar etiquetas */}
+                  <Input
+                    value={tagInput}
+                    onChange={handleTagInputChange}
+                    onKeyDown={handleTagInputKeyDown}
+                    placeholder="Escribe una etiqueta y presiona Enter o coma"
+                  />
+                  
+                  {/* Etiquetas seleccionadas */}
+                  {selectedTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTags.map((tag, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 px-2 py-1 bg-primary text-primary-foreground rounded-full text-sm"
+                        >
+                          <span>{tag}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Configuración adicional */}
