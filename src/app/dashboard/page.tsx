@@ -21,13 +21,26 @@ import {
   Zap,
   Cpu,
   Bot,
-  MessageCircle
+  MessageCircle,
+  Activity,
+  Clock,
+  Database,
+  Server,
+  Shield,
+  Globe,
+  Smartphone,
+  Monitor,
+  Laptop,
+  HardDrive
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/lib/auth/auth-context"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useStats } from "@/hooks/use-stats"
+import { useLogos } from "@/hooks/use-logos"
+import { useProducts } from "@/hooks/use-products"
+import { useClients } from "@/hooks/use-clients"
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -35,6 +48,9 @@ export default function DashboardPage() {
   const { users, loading: usersLoading } = useUsers()
   const { providers, loading: providersLoading } = useProviders()
   const { stats, loading: statsLoading } = useStats()
+  const { logos, loading: logosLoading } = useLogos()
+  const { products, loading: productsLoading } = useProducts()
+  const { clients, loading: clientsLoading } = useClients()
 
   const services = [
     {
@@ -150,9 +166,11 @@ export default function DashboardPage() {
         </div>
 
         {/* Métricas del Sistema */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           <h2 className="text-xl font-semibold">Métricas del Sistema</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          
+          {/* Primera fila - Datos principales */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Proveedores */}
             <Card>
               <CardContent className="p-6">
@@ -171,15 +189,72 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Usuarios Activos */}
+            {/* Productos */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-white" />
+                    <Package className="h-5 w-5 text-white" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-green-600">
+                      {productsLoading ? "..." : products.length}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Productos</p>
+                    <p className="text-xs text-gray-500">En el catálogo</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Logos */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+                    <Image className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {logosLoading ? "..." : logos.length}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Logos</p>
+                    <p className="text-xs text-gray-500">Archivos de marca</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Clientes */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {clientsLoading ? "..." : clients.length}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Clientes</p>
+                    <p className="text-xs text-gray-500">Empresas registradas</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Segunda fila - Usuarios y actividad */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Usuarios Activos */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-600">
                       {usersLoading ? "..." : users.filter(u => u.status === 'active').length}
                     </p>
                     <p className="text-sm text-muted-foreground">Usuarios Activos</p>
@@ -193,11 +268,11 @@ export default function DashboardPage() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
                     <Zap className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-purple-600">{services.length}</p>
+                    <p className="text-2xl font-bold text-indigo-600">{services.length}</p>
                     <p className="text-sm text-muted-foreground">Servicios</p>
                     <p className="text-xs text-gray-500">Disponibles en la plataforma</p>
                   </div>
@@ -220,12 +295,272 @@ export default function DashboardPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Uptime */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-cyan-500 flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-cyan-600">99.9%</p>
+                    <p className="text-sm text-muted-foreground">Uptime</p>
+                    <p className="text-xs text-gray-500">Disponibilidad del sistema</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tercera fila - Infraestructura y rendimiento */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Base de Datos */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-red-500 flex items-center justify-center">
+                    <Database className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-red-600">DynamoDB</p>
+                    <p className="text-sm text-muted-foreground">Base de Datos</p>
+                    <p className="text-xs text-gray-500">AWS DynamoDB activa</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Almacenamiento */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center">
+                    <HardDrive className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-600">S3</p>
+                    <p className="text-sm text-muted-foreground">Almacenamiento</p>
+                    <p className="text-xs text-gray-500">AWS S3 para archivos</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Servidor */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-teal-500 flex items-center justify-center">
+                    <Server className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-teal-600">Lambda</p>
+                    <p className="text-sm text-muted-foreground">Servidor</p>
+                    <p className="text-xs text-gray-500">AWS Lambda functions</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Seguridad */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-full bg-pink-500 flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-pink-600">HTTPS</p>
+                    <p className="text-sm text-muted-foreground">Seguridad</p>
+                    <p className="text-xs text-gray-500">Conexión encriptada</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
+        {/* Actividad Reciente y Estadísticas */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Actividad Reciente */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Actividad Reciente
+              </CardTitle>
+              <CardDescription>
+                Últimas acciones realizadas en el sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Nuevo proveedor agregado</p>
+                    <p className="text-xs text-muted-foreground">Hace 2 minutos</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                  <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                    <Image className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Logo actualizado</p>
+                    <p className="text-xs text-muted-foreground">Hace 15 minutos</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+                  <div className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center">
+                    <Package className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Producto creado</p>
+                    <p className="text-xs text-muted-foreground">Hace 1 hora</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
+                  <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Cliente registrado</p>
+                    <p className="text-xs text-muted-foreground">Hace 2 horas</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
+          {/* Estadísticas de Uso */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Estadísticas de Uso
+              </CardTitle>
+              <CardDescription>
+                Métricas de rendimiento y uso del sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Uso de CPU */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Uso de CPU</span>
+                    <span className="text-sm text-muted-foreground">45%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-blue-500 h-2 rounded-full" style={{width: '45%'}}></div>
+                  </div>
+                </div>
 
+                {/* Memoria */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Memoria</span>
+                    <span className="text-sm text-muted-foreground">2.1GB / 4GB</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-green-500 h-2 rounded-full" style={{width: '52%'}}></div>
+                  </div>
+                </div>
 
+                {/* Almacenamiento */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Almacenamiento</span>
+                    <span className="text-sm text-muted-foreground">15.2GB / 100GB</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-yellow-500 h-2 rounded-full" style={{width: '15%'}}></div>
+                  </div>
+                </div>
+
+                {/* Requests por minuto */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Requests/min</span>
+                    <span className="text-sm text-muted-foreground">127</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{width: '63%'}}></div>
+                  </div>
+                </div>
+
+                {/* Tiempo de respuesta */}
+                <div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium">Tiempo de respuesta</span>
+                    <span className="text-sm text-muted-foreground">245ms</span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div className="bg-cyan-500 h-2 rounded-full" style={{width: '25%'}}></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Información del Sistema */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Versión del Sistema */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center">
+                  <Globe className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold">v1.0.0</p>
+                  <p className="text-sm text-muted-foreground">Versión del Sistema</p>
+                  <p className="text-xs text-gray-500">Última actualización: Hoy</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Entorno */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center">
+                  <Monitor className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold">Sandbox</p>
+                  <p className="text-sm text-muted-foreground">Entorno Actual</p>
+                  <p className="text-xs text-gray-500">Desarrollo y pruebas</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Región AWS */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center">
+                  <Server className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-lg font-bold">us-east-1</p>
+                  <p className="text-sm text-muted-foreground">Región AWS</p>
+                  <p className="text-xs text-gray-500">N. Virginia, Estados Unidos</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Chat Flotante con IA */}
         <div className="fixed bottom-6 right-6 z-50">
