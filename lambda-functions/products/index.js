@@ -116,40 +116,57 @@ exports.handler = async (event) => {
 
     // PUT /products/{id} - Actualizar producto
     if (event.httpMethod === 'PUT') {
+      console.log('📝 PUT request received');
+      console.log('Event pathParameters:', event.pathParameters);
+      console.log('Event path:', event.path);
+      
       const productId = event.pathParameters?.id;
+      console.log('Product ID extracted:', productId);
+      
       if (!productId) {
         return createResponse(400, {
           success: false,
-          error: 'ID de producto requerido'
+          error: 'ID de producto requerido',
+          message: 'No se encontró el ID del producto en la URL'
         });
       }
 
       const updateData = JSON.parse(event.body);
+      console.log('Update data received:', updateData);
       
+      // Construir la expresión de actualización dinámicamente
+      const updateExpression = [];
+      const expressionAttributeNames = {};
+      const expressionAttributeValues = {};
+
+      // Agregar campos que están presentes en updateData
+      Object.keys(updateData).forEach(key => {
+        if (key !== 'id' && key !== 'createdAt') {
+          updateExpression.push(`#${key} = :${key}`);
+          expressionAttributeNames[`#${key}`] = key;
+          expressionAttributeValues[`:${key}`] = updateData[key];
+        }
+      });
+
+      // Siempre agregar updatedAt
+      updateExpression.push('#updatedAt = :updatedAt');
+      expressionAttributeNames['#updatedAt'] = 'updatedAt';
+      expressionAttributeValues[':updatedAt'] = new Date().toISOString();
+
+      if (updateExpression.length === 0) {
+        return createResponse(400, {
+          success: false,
+          error: 'No hay datos para actualizar',
+          message: 'Debe proporcionar al menos un campo para actualizar'
+        });
+      }
+
       const params = {
         TableName: tableName,
         Key: { id: productId },
-        UpdateExpression: 'SET #name = :name, #description = :description, #category = :category, #price = :price, #currency = :currency, #stock = :stock, #status = :status, #updatedAt = :updatedAt',
-        ExpressionAttributeNames: {
-          '#name': 'name',
-          '#description': 'description',
-          '#category': 'category',
-          '#price': 'price',
-          '#currency': 'currency',
-          '#stock': 'stock',
-          '#status': 'status',
-          '#updatedAt': 'updatedAt'
-        },
-        ExpressionAttributeValues: {
-          ':name': updateData.name,
-          ':description': updateData.description || '',
-          ':category': updateData.category,
-          ':price': updateData.price,
-          ':currency': updateData.currency || 'USD',
-          ':stock': updateData.stock || 0,
-          ':status': updateData.status || 'active',
-          ':updatedAt': new Date().toISOString()
-        },
+        UpdateExpression: `SET ${updateExpression.join(', ')}`,
+        ExpressionAttributeNames: expressionAttributeNames,
+        ExpressionAttributeValues: expressionAttributeValues,
         ReturnValues: 'ALL_NEW'
       };
 
@@ -164,11 +181,18 @@ exports.handler = async (event) => {
 
     // DELETE /products/{id} - Eliminar producto
     if (event.httpMethod === 'DELETE') {
+      console.log('🗑️ DELETE request received');
+      console.log('Event pathParameters:', event.pathParameters);
+      console.log('Event path:', event.path);
+      
       const productId = event.pathParameters?.id;
+      console.log('Product ID extracted:', productId);
+      
       if (!productId) {
         return createResponse(400, {
           success: false,
-          error: 'ID de producto requerido'
+          error: 'ID de producto requerido',
+          message: 'No se encontró el ID del producto en la URL'
         });
       }
 
