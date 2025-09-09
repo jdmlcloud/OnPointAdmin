@@ -1057,7 +1057,8 @@ export default function LogosPage() {
               </div>
             )
           ) : (
-            // Vista de Todos los Logos
+            // Vista de Logos (modo original)
+            selectedClient ? (
               // Vista de logos de un cliente específico
               <div className="space-y-6">
                 {/* Header del Cliente Seleccionado */}
