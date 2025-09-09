@@ -114,6 +114,7 @@ export default function LogosPage() {
   // Estado para modal de cliente
   const [isClientModalOpen, setIsClientModalOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<Client | null>(null)
+  const [deletingClient, setDeletingClient] = useState<{ clientId: string; clientName: string; logos: Logo[] } | null>(null)
   
   // Estado para archivo de logo en edición
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -197,19 +198,25 @@ export default function LogosPage() {
     setEditingClient(null)
   }
 
-  const handleDeleteClient = async (client: { clientId: string; clientName: string; logos: Logo[] }) => {
-    if (confirm(`¿Estás seguro de que quieres eliminar el cliente "${client.clientName}" y todos sus ${client.logos.length} logos? Esta acción no se puede deshacer.`)) {
-      try {
-        // Eliminar todos los logos del cliente
-        for (const logo of client.logos) {
-          await deleteLogo(logo.id)
-        }
-        // Refrescar la lista
-        await refreshLogos()
-      } catch (error) {
-        console.error('Error deleting client:', error)
-        alert('Error al eliminar el cliente')
+  const handleDeleteClient = (client: { clientId: string; clientName: string; logos: Logo[] }) => {
+    setDeletingClient(client)
+  }
+
+  const handleConfirmDeleteClient = async () => {
+    if (!deletingClient) return
+    
+    try {
+      // Eliminar todos los logos del cliente
+      for (const logo of deletingClient.logos) {
+        await deleteLogo(logo.id)
       }
+      // Refrescar la lista
+      await refreshLogos()
+      // Cerrar modal
+      setDeletingClient(null)
+    } catch (error) {
+      console.error('Error deleting client:', error)
+      alert('Error al eliminar el cliente')
     }
   }
 
@@ -1470,6 +1477,43 @@ export default function LogosPage() {
           client={editingClient}
           title={editingClient ? 'Editar Cliente' : 'Nuevo Cliente'}
         />
+
+        {/* Modal de Eliminar Cliente */}
+        <ActionModal
+          isOpen={!!deletingClient}
+          onClose={() => setDeletingClient(null)}
+          title="Eliminar Cliente"
+          description="¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer."
+          type="delete"
+          onConfirm={handleConfirmDeleteClient}
+          confirmText="Eliminar Cliente"
+          destructive={true}
+        >
+          {deletingClient && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <Building2 className="h-8 w-8 text-red-600" />
+                <div>
+                  <h4 className="font-medium text-red-900 dark:text-red-100">
+                    {deletingClient.clientName}
+                  </h4>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {deletingClient.logos.length} logo{deletingClient.logos.length !== 1 ? 's' : ''} asociado{deletingClient.logos.length !== 1 ? 's' : ''}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-sm text-muted-foreground">
+                <p>Al eliminar este cliente:</p>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Se eliminarán todos los {deletingClient.logos.length} logos asociados</li>
+                  <li>Se perderá toda la información del cliente</li>
+                  <li>Esta acción no se puede deshacer</li>
+                </ul>
+              </div>
+            </div>
+          )}
+        </ActionModal>
       </div>
     </MainLayout>
   )
