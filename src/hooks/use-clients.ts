@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useLogos } from './use-logos'
+import { apiRequest, API_CONFIG } from '@/config/api'
 
 interface Client {
   id: string
@@ -24,9 +24,7 @@ interface UseClientsReturn {
 }
 
 export function useClients(): UseClientsReturn {
-  const { logos, isLoading: logosLoading } = useLogos()
   const [clients, setClients] = useState<Client[]>([])
-  const [manualClients, setManualClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,53 +33,19 @@ export function useClients(): UseClientsReturn {
       setIsLoading(true)
       setError(null)
       
-      // Generar clientes desde logos
-      const logosByClient = logos.reduce((acc: any, logo: any) => {
-        const clientKey = logo.brand || 'Sin Marca'
-        if (!acc[clientKey]) {
-          acc[clientKey] = {
-            id: clientKey.toLowerCase().replace(/\s+/g, '-'),
-            name: clientKey,
-            description: `Cliente con logos de ${clientKey}`,
-            industry: 'Entertainment',
-            contactEmail: `${clientKey.toLowerCase().replace(/\s+/g, '')}@example.com`,
-            logos: [],
-            primaryLogoId: null,
-            createdAt: logo.createdAt,
-            updatedAt: logo.updatedAt
-          }
-        }
-        acc[clientKey].logos.push(logo)
-        return acc
-      }, {})
-
-      // Encontrar el logo principal de cada cliente
-      Object.values(logosByClient).forEach((client: any) => {
-        const primaryLogo = client.logos.find((logo: any) => logo.isPrimary)
-        if (primaryLogo) {
-          client.primaryLogoId = primaryLogo.id
-        }
-      })
-
-      // Combinar clientes generados desde logos con clientes manuales
-      const logoClients = Object.values(logosByClient)
-      const allClients = [...logoClients, ...manualClients]
+      const data = await apiRequest<{
+        success: boolean
+        clients: Client[]
+        pagination: any
+        message: string
+      }>(API_CONFIG.ENDPOINTS.CLIENTS)
       
-      // Eliminar duplicados basándose en el nombre del cliente
-      const uniqueClients = allClients.reduce((acc, client) => {
-        const existingClient = acc.find(c => c.name === client.name)
-        if (existingClient) {
-          // Si ya existe, combinar logos
-          existingClient.logos = [...existingClient.logos, ...client.logos]
-          existingClient.primaryLogoId = existingClient.logos.find(logo => logo.isPrimary)?.id || null
-        } else {
-          acc.push(client)
-        }
-        return acc
-      }, [] as Client[])
-      
-      setClients(uniqueClients)
-      setError(null)
+      if (data.success) {
+        setClients(data.clients || [])
+        setError(null)
+      } else {
+        throw new Error('Error al obtener clientes desde la API')
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
       setError(errorMessage)
@@ -95,21 +59,21 @@ export function useClients(): UseClientsReturn {
     try {
       setError(null)
       
-      // Crear nuevo cliente
-      const newClient: Client = {
-        ...clientData,
-        id: `client-${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        logos: []
+      const data = await apiRequest<{
+        success: boolean
+        client: Client
+        message: string
+      }>(API_CONFIG.ENDPOINTS.CLIENTS, {
+        method: 'POST',
+        body: JSON.stringify(clientData),
+      })
+      
+      if (data.success) {
+        setClients(prev => [...prev, data.client])
+        return true
+      } else {
+        throw new Error('Error al crear cliente')
       }
-      
-      // Agregar a clientes manuales
-      setManualClients(prev => [...prev, newClient])
-      
-      // Refrescar la lista para que aparezca inmediatamente
-      await fetchClients()
-      
-      return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al crear cliente')
       console.error('Error creating client:', err)
@@ -121,17 +85,21 @@ export function useClients(): UseClientsReturn {
     try {
       setError(null)
       
-      // Actualizar en clientes manuales
-      setManualClients(prev => prev.map(client => 
-        client.id === id 
-          ? { ...client, ...clientData, updatedAt: new Date().toISOString() }
-          : client
-      ))
+      const data = await apiRequest<{
+        success: boolean
+        client: Client
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.CLIENTS}/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(clientData),
+      })
       
-      // Refrescar la lista
-      await fetchClients()
-      
-      return true
+      if (data.success) {
+        setClients(prev => prev.map(client => client.id === id ? data.client : client))
+        return true
+      } else {
+        throw new Error('Error al actualizar cliente')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar cliente')
       console.error('Error updating client:', err)
@@ -143,13 +111,19 @@ export function useClients(): UseClientsReturn {
     try {
       setError(null)
       
-      // Eliminar de clientes manuales
-      setManualClients(prev => prev.filter(client => client.id !== id))
+      const data = await apiRequest<{
+        success: boolean
+        message: string
+      }>(`${API_CONFIG.ENDPOINTS.CLIENTS}/${id}`, {
+        method: 'DELETE',
+      })
       
-      // Refrescar la lista
-      await fetchClients()
-      
-      return true
+      if (data.success) {
+        setClients(prev => prev.filter(client => client.id !== id))
+        return true
+      } else {
+        throw new Error('Error al eliminar cliente')
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar cliente')
       console.error('Error deleting client:', err)
@@ -163,13 +137,7 @@ export function useClients(): UseClientsReturn {
 
   useEffect(() => {
     fetchClients()
-  }, [logos])
-
-  useEffect(() => {
-    if (!logosLoading) {
-      fetchClients()
-    }
-  }, [logosLoading])
+  }, [])
 
   return {
     clients,
