@@ -33,7 +33,7 @@ export default function DashboardPage() {
       description: "Administra proveedores, logos y información comercial",
       icon: Users,
       href: "/providers",
-      status: "V1 - Disponible",
+      status: "Disponible",
       color: "bg-blue-500"
     },
     {
@@ -41,40 +41,88 @@ export default function DashboardPage() {
       description: "CRUD de productos, variantes y precios escalonados",
       icon: Package,
       href: "/products",
-      status: "V1 - Disponible",
+      status: "Disponible",
       color: "bg-green-500"
+    },
+    {
+      title: "Gestión de Usuarios",
+      description: "Administra usuarios y permisos del sistema",
+      icon: Users,
+      href: "/users",
+      status: "Disponible",
+      color: "bg-indigo-500"
     },
     {
       title: "WhatsApp + IA",
       description: "Procesamiento automático de mensajes con IA",
       icon: MessageSquare,
       href: "/whatsapp",
-      status: "V2 - En desarrollo",
+      status: "Disponible",
       color: "bg-yellow-500"
     },
     {
-      title: "Cotización Inteligente",
-      description: "Sistema de recomendación y cotizador automático",
+      title: "Cotizaciones",
+      description: "Sistema de cotizaciones y presupuestos",
       icon: TrendingUp,
       href: "/quotations",
-      status: "V3 - Planificado",
+      status: "Disponible",
       color: "bg-purple-500"
     },
     {
-      title: "Diseño de Propuestas",
-      description: "Generación de mockups y diseño visual",
+      title: "Propuestas",
+      description: "Generación y gestión de propuestas",
       icon: FileText,
       href: "/proposals",
-      status: "V4 - Planificado",
+      status: "Disponible",
       color: "bg-pink-500"
     },
     {
-      title: "Configuración",
-      description: "Ajustes del sistema y preferencias",
+      title: "Analytics",
+      description: "Análisis y métricas del sistema",
+      icon: TrendingUp,
+      href: "/analytics",
+      status: "Disponible",
+      color: "bg-orange-500"
+    },
+    {
+      title: "Reportes",
+      description: "Generación de reportes y estadísticas",
+      icon: FileText,
+      href: "/reports",
+      status: "Disponible",
+      color: "bg-red-500"
+    },
+    {
+      title: "Integraciones",
+      description: "Configuración de integraciones externas",
       icon: Settings,
-      href: "/settings",
-      status: "V1 - Disponible",
-      color: "bg-gray-500"
+      href: "/integrations",
+      status: "Disponible",
+      color: "bg-cyan-500"
+    },
+    {
+      title: "Editor",
+      description: "Editor de documentos y contenido",
+      icon: FileText,
+      href: "/editor",
+      status: "Disponible",
+      color: "bg-teal-500"
+    },
+    {
+      title: "Tracking",
+      description: "Seguimiento y monitoreo de actividades",
+      icon: TrendingUp,
+      href: "/tracking",
+      status: "Disponible",
+      color: "bg-violet-500"
+    },
+    {
+      title: "AI Test",
+      description: "Pruebas y configuración de IA",
+      icon: MessageSquare,
+      href: "/ai-test",
+      status: "Disponible",
+      color: "bg-emerald-500"
     }
   ]
 

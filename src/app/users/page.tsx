@@ -110,6 +110,11 @@ export default function UsersPage() {
   }, [])
 
   const filteredUsers = users.filter(user => {
+    // Verificar que el usuario tenga las propiedades necesarias
+    if (!user || !user.name || !user.email) {
+      return false
+    }
+    
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesRole = selectedRole === "all" || user.role === selectedRole

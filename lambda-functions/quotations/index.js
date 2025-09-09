@@ -22,15 +22,15 @@ const createResponse = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
-// GET /products
-exports.getProducts = async (event) => {
+// GET /quotations
+exports.getQuotations = async (event, tableName) => {
   try {
-    console.log('🔍 Lambda: Obteniendo productos...');
+    console.log('🔍 Lambda: Obteniendo cotizaciones...');
     
     const { page = 1, limit = 10, status } = event.queryStringParameters || {};
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Limit: parseInt(limit),
       ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
     };
@@ -45,7 +45,7 @@ exports.getProducts = async (event) => {
     
     return createResponse(200, {
       success: true,
-      products: result.Items || [],
+      quotations: result.Items || [],
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -53,7 +53,7 @@ exports.getProducts = async (event) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error obteniendo productos:', error);
+    console.error('❌ Error obteniendo cotizaciones:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -61,22 +61,22 @@ exports.getProducts = async (event) => {
   }
 };
 
-// GET /products/{id}
-exports.getProduct = async (event) => {
+// GET /quotations/{id}
+exports.getQuotation = async (event, tableName) => {
   try {
     const { id } = event.pathParameters || {};
     
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de cotización requerido'
       });
     }
     
-    console.log(`🔍 Lambda: Obteniendo producto ${id}...`);
+    console.log(`🔍 Lambda: Obteniendo cotización ${id}...`);
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id }
     };
     
@@ -85,16 +85,16 @@ exports.getProduct = async (event) => {
     if (!result.Item) {
       return createResponse(404, {
         success: false,
-        error: 'Producto no encontrado'
+        error: 'Cotización no encontrada'
       });
     }
     
     return createResponse(200, {
       success: true,
-      product: result.Item
+      quotation: result.Item
     });
   } catch (error) {
-    console.error('❌ Error obteniendo producto:', error);
+    console.error('❌ Error obteniendo cotización:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -102,42 +102,42 @@ exports.getProduct = async (event) => {
   }
 };
 
-// POST /products
-exports.createProduct = async (event) => {
+// POST /quotations
+exports.createQuotation = async (event, tableName) => {
   try {
-    const productData = JSON.parse(event.body || '{}');
+    const quotationData = JSON.parse(event.body || '{}');
     
-    if (!productData.name || !productData.description) {
+    if (!quotationData.clientName || !quotationData.products) {
       return createResponse(400, {
         success: false,
-        error: 'Nombre y descripción son requeridos'
+        error: 'Nombre del cliente y productos son requeridos'
       });
     }
     
-    console.log('➕ Lambda: Creando producto...');
+    console.log('➕ Lambda: Creando cotización...');
     
-    const product = {
-      id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...productData,
+    const quotation = {
+      id: `quotation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...quotationData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: 'active'
+      status: 'pending'
     };
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Item: product
+      TableName: tableName,
+      Item: quotation
     };
     
     await docClient.send(new PutCommand(params));
     
     return createResponse(201, {
       success: true,
-      product,
-      message: 'Producto creado exitosamente'
+      quotation,
+      message: 'Cotización creada exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error creando producto:', error);
+    console.error('❌ Error creando cotización:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -145,8 +145,8 @@ exports.createProduct = async (event) => {
   }
 };
 
-// PUT /products/{id}
-exports.updateProduct = async (event) => {
+// PUT /quotations/{id}
+exports.updateQuotation = async (event, tableName) => {
   try {
     const { id } = event.pathParameters || {};
     const updateData = JSON.parse(event.body || '{}');
@@ -154,11 +154,11 @@ exports.updateProduct = async (event) => {
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de cotización requerido'
       });
     }
     
-    console.log(`✏️ Lambda: Actualizando producto ${id}...`);
+    console.log(`✏️ Lambda: Actualizando cotización ${id}...`);
     
     const updateExpression = [];
     const expressionAttributeNames = {};
@@ -184,7 +184,7 @@ exports.updateProduct = async (event) => {
     expressionAttributeValues[':updatedAt'] = new Date().toISOString();
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: expressionAttributeNames,
@@ -196,11 +196,11 @@ exports.updateProduct = async (event) => {
     
     return createResponse(200, {
       success: true,
-      product: result.Attributes,
-      message: 'Producto actualizado exitosamente'
+      quotation: result.Attributes,
+      message: 'Cotización actualizada exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error actualizando producto:', error);
+    console.error('❌ Error actualizando cotización:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -208,22 +208,22 @@ exports.updateProduct = async (event) => {
   }
 };
 
-// DELETE /products/{id}
-exports.deleteProduct = async (event) => {
+// DELETE /quotations/{id}
+exports.deleteQuotation = async (event, tableName) => {
   try {
     const { id } = event.pathParameters || {};
     
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de cotización requerido'
       });
     }
     
-    console.log(`🗑️ Lambda: Eliminando producto ${id}...`);
+    console.log(`🗑️ Lambda: Eliminando cotización ${id}...`);
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id }
     };
     
@@ -231,10 +231,10 @@ exports.deleteProduct = async (event) => {
     
     return createResponse(200, {
       success: true,
-      message: 'Producto eliminado exitosamente'
+      message: 'Cotización eliminada exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error eliminando producto:', error);
+    console.error('❌ Error eliminando cotización:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -244,24 +244,26 @@ exports.deleteProduct = async (event) => {
 
 // Handler principal
 exports.handler = async (event) => {
-  console.log('📦 Lambda Products - Evento recibido:', JSON.stringify(event, null, 2));
+  console.log('📋 Lambda Quotations - Evento recibido:', JSON.stringify(event, null, 2));
   
   const { httpMethod, pathParameters, queryStringParameters } = event;
+  const stage = event.requestContext.stage; // Obtener el stage de la solicitud
+  const tableName = `OnPointAdmin-Quotations-${stage}`; // Construir el nombre de la tabla dinámicamente
   
   try {
     switch (httpMethod) {
       case 'GET':
         if (pathParameters && pathParameters.id) {
-          return await exports.getProduct(event);
+          return await exports.getQuotation(event, tableName);
         } else {
-          return await exports.getProducts(event);
+          return await exports.getQuotations(event, tableName);
         }
       case 'POST':
-        return await exports.createProduct(event);
+        return await exports.createQuotation(event, tableName);
       case 'PUT':
-        return await exports.updateProduct(event);
+        return await exports.updateQuotation(event, tableName);
       case 'DELETE':
-        return await exports.deleteProduct(event);
+        return await exports.deleteQuotation(event, tableName);
       case 'OPTIONS':
         return createResponse(200, { message: 'CORS preflight' });
       default:

@@ -1,7 +1,7 @@
 // Configuración de la API Gateway + Lambda
 export const API_CONFIG = {
   // URL base de la API Gateway
-  BASE_URL: 'https://7z4skk6jy0.execute-api.us-east-1.amazonaws.com/prod',
+  BASE_URL: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
   
   // Endpoints
   ENDPOINTS: {
@@ -9,7 +9,16 @@ export const API_CONFIG = {
     USERS: '/users',
     STATS: '/stats',
     TAGS: '/tags',
-    PRODUCTS: '/products'
+    PRODUCTS: '/products',
+    QUOTATIONS: '/quotations',
+    PROPOSALS: '/proposals',
+    WHATSAPP: '/whatsapp',
+    ANALYTICS: '/analytics',
+    REPORTS: '/reports',
+    INTEGRATIONS: '/integrations',
+    EDITOR: '/editor',
+    TRACKING: '/tracking',
+    AI_TEST: '/ai-test'
   },
   
   // Headers por defecto

@@ -19,7 +19,7 @@ import {
   Play,
   CheckCircle,
   XCircle,
-  Loader2,
+  Loader,
   Zap,
   Brain,
   Sparkles
@@ -69,9 +69,9 @@ export default function AITestPage() {
   }
 
   const getStatusIcon = (type: string) => {
-    if (loading) return <Loader2 className="h-4 w-4 animate-spin" />
-    if (results[type]) return <CheckCircle className="h-4 w-4 text-green-500" />
-    return <XCircle className="h-4 w-4 text-gray-400" />
+    if (loading) return <Loader className="h14 w-4 animate-spin" />
+    if (results[type]) return <CheckCircle className="h14 w-4 text-green-500" />
+    return <XCircle className="h14 w-4 text-gray-500" />
   }
 
   const getProviderBadge = (provider: string) => {
@@ -93,8 +93,8 @@ export default function AITestPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Bot className="h-8 w-8 text-blue-500" />
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Bot className="h14 w-4 text-blue-500" />
               Testing de Servicios de IA
             </h1>
             <p className="text-muted-foreground">
@@ -112,11 +112,11 @@ export default function AITestPage() {
         </div>
 
         {/* Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Zap className="h-8 w-8 text-orange-500" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Zap className="h14 w-4 text-orange-500" />
                 <div>
                   <p className="text-2xl font-bold">AWS Bedrock</p>
                   <p className="text-sm text-muted-foreground">Proveedor Principal</p>
@@ -125,9 +125,9 @@ export default function AITestPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Brain className="h-8 w-8 text-green-500" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Brain className="h14 w-4 text-green-500" />
                 <div>
                   <p className="text-2xl font-bold">OpenAI</p>
                   <p className="text-sm text-muted-foreground">Fallback 1</p>
@@ -136,12 +136,12 @@ export default function AITestPage() {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <Sparkles className="h-8 w-8 text-purple-500" />
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h14 w-4 text-purple-500" />
                 <div>
                   <p className="text-2xl font-bold">Anthropic</p>
-                  <p className="text-sm text-muted-foreground">Fallback 2</p>
+                  <p className="text-sm text-muted-foreground">Fallback 1</p>
                 </div>
               </div>
             </CardContent>
@@ -161,22 +161,22 @@ export default function AITestPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
+                  <FileText className="h14 w-4" />
                   Generación de Texto
                 </CardTitle>
                 <CardDescription>
                   Prueba la generación de texto con diferentes proveedores de IA
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
+              <CardContent className="space-y-6">
+                <div className="space-y-6">
                   <Label htmlFor="text-prompt">Prompt de prueba</Label>
                   <Textarea
                     id="text-prompt"
                     placeholder="Escribe un prompt para probar la generación de texto..."
                     value={textPrompt}
                     onChange={(e) => setTextPrompt(e.target.value)}
-                    rows={3}
+                    rows={4}
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -185,14 +185,14 @@ export default function AITestPage() {
                     disabled={loading || !textPrompt}
                     className="bg-primary hover:bg-primary/90"
                   >
-                    <Play className="h-4 w-4 mr-2" />
+                    <Play className="h1- w-- mr-2" />
                     Probar Generación
                   </AnimatedButton>
                   {getStatusIcon('text')}
                 </div>
                 {results.text && (
                   <div className="mt-4 p-4 bg-muted rounded-lg">
-                    <h4 className="font-semibold mb-2">Resultado:</h4>
+                    <h1 className="font-semibold mb-2">Resultado:</h1>
                     <p className="text-sm">{results.text.result}</p>
                   </div>
                 )}
@@ -205,22 +205,22 @@ export default function AITestPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
+                  <MessageSquare className="h14 w-4" />
                   Análisis de Mensajes WhatsApp
                 </CardTitle>
                 <CardDescription>
                   Prueba el análisis inteligente de mensajes de WhatsApp
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
+              <CardContent className="space-y-6">
+                <div className="space-y-6">
                   <Label htmlFor="whatsapp-message">Mensaje de WhatsApp</Label>
                   <Textarea
                     id="whatsapp-message"
                     placeholder="Hola, me interesa automatizar las ventas de mi empresa..."
                     value={whatsappMessage}
                     onChange={(e) => setWhatsappMessage(e.target.value)}
-                    rows={3}
+                    rows={4}
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -229,29 +229,29 @@ export default function AITestPage() {
                     disabled={loading || !whatsappMessage}
                     className="bg-primary hover:bg-primary/90"
                   >
-                    <Play className="h-4 w-4 mr-2" />
+                    <Play className="h1- w-- mr-2" />
                     Analizar Mensaje
                   </AnimatedButton>
                   {getStatusIcon('whatsapp')}
                 </div>
                 {results.whatsapp && (
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-4 space-y-6">
                     <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-semibold mb-2">Respuesta:</h4>
+                      <h1 className="font-semibold mb-2">Respuesta:</h1>
                       <p className="text-sm">{results.whatsapp.result.response}</p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                       <div className="p-4 bg-muted rounded-lg">
-                        <h4 className="font-semibold mb-2">Intención:</h4>
+                        <h1 className="font-semibold mb-2">Intención:</h1>
                         <Badge variant="outline">{results.whatsapp.result.intent}</Badge>
                       </div>
                       <div className="p-4 bg-muted rounded-lg">
-                        <h4 className="font-semibold mb-2">Confianza:</h4>
+                        <h1 className="font-semibold mb-2">Confianza:</h1>
                         <Badge variant="outline">{(results.whatsapp.result.confidence * 100).toFixed(1)}%</Badge>
                       </div>
                     </div>
                     <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-semibold mb-2">Acciones Sugeridas:</h4>
+                      <h1 className="font-semibold mb-2">Acciones Sugeridas:</h1>
                       <ul className="text-sm list-disc list-inside">
                         {results.whatsapp.result.suggestedActions.map((action: string, index: number) => (
                           <li key={index}>{action}</li>
@@ -269,16 +269,16 @@ export default function AITestPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
+                  <FileText className="h14 w-4" />
                   Generación de Cotizaciones
                 </CardTitle>
                 <CardDescription>
                   Prueba la generación inteligente de cotizaciones
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="space-y-6">
                     <Label htmlFor="client-name">Nombre del Cliente</Label>
                     <Input
                       id="client-name"
@@ -287,7 +287,7 @@ export default function AITestPage() {
                       onChange={(e) => setQuotationData(prev => ({ ...prev, clientName: e.target.value }))}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-6">
                     <Label htmlFor="client-email">Email</Label>
                     <Input
                       id="client-email"
@@ -297,7 +297,7 @@ export default function AITestPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-6">
                   <Label htmlFor="client-company">Empresa</Label>
                   <Input
                     id="client-company"
@@ -306,14 +306,14 @@ export default function AITestPage() {
                     onChange={(e) => setQuotationData(prev => ({ ...prev, clientCompany: e.target.value }))}
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-6">
                   <Label htmlFor="requirements">Requerimientos</Label>
                   <Textarea
                     id="requirements"
                     placeholder="Necesito automatizar las ventas de mi empresa, integrar WhatsApp Business y generar cotizaciones automáticas..."
                     value={quotationData.requirements}
                     onChange={(e) => setQuotationData(prev => ({ ...prev, requirements: e.target.value }))}
-                    rows={3}
+                    rows={4}
                   />
                 </div>
                 <div className="flex items-center gap-2">
@@ -322,28 +322,28 @@ export default function AITestPage() {
                     disabled={loading || !quotationData.clientName || !quotationData.requirements}
                     className="bg-primary hover:bg-primary/90"
                   >
-                    <Play className="h-4 w-4 mr-2" />
+                    <Play className="h1- w-- mr-2" />
                     Generar Cotización
                   </AnimatedButton>
                   {getStatusIcon('quotation')}
                 </div>
                 {results.quotation && (
-                  <div className="mt-4 space-y-4">
+                  <div className="mt-4 space-y-6">
                     <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-semibold mb-2">Título:</h4>
+                      <h1 className="font-semibold mb-2">Título:</h1>
                       <p className="text-sm">{results.quotation.result.title}</p>
                     </div>
                     <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-semibold mb-2">Descripción:</h4>
+                      <h1 className="font-semibold mb-2">Descripción:</h1>
                       <p className="text-sm">{results.quotation.result.description}</p>
                     </div>
                     <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-semibold mb-2">Total:</h4>
+                      <h1 className="font-semibold mb-2">Total:</h1>
                       <p className="text-lg font-bold">${results.quotation.result.total}</p>
                     </div>
                     <div className="p-4 bg-muted rounded-lg">
-                      <h4 className="font-semibold mb-2">Productos/Servicios:</h4>
-                      <ul className="text-sm space-y-1">
+                      <h1 className="font-semibold mb-2">Productos/Servicios:</h1>
+                      <ul className="text-sm space-y-6">
                         {results.quotation.result.products.map((product: any, index: number) => (
                           <li key={index} className="flex justify-between">
                             <span>{product.name}</span>

@@ -22,30 +22,30 @@ const createResponse = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
-// GET /products
-exports.getProducts = async (event) => {
+// GET /editor
+exports.getEditorContent = async (event) => {
   try {
-    console.log('🔍 Lambda: Obteniendo productos...');
+    console.log('🔍 Lambda: Obteniendo contenido del editor...');
     
-    const { page = 1, limit = 10, status } = event.queryStringParameters || {};
+    const { page = 1, limit = 10, type } = event.queryStringParameters || {};
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Limit: parseInt(limit),
       ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
     };
     
-    if (status) {
-      params.FilterExpression = '#status = :status';
-      params.ExpressionAttributeNames = { '#status': 'status' };
-      params.ExpressionAttributeValues = { ':status': status };
+    if (type) {
+      params.FilterExpression = '#type = :type';
+      params.ExpressionAttributeNames = { '#type': 'type' };
+      params.ExpressionAttributeValues = { ':type': type };
     }
     
     const result = await docClient.send(new ScanCommand(params));
     
     return createResponse(200, {
       success: true,
-      products: result.Items || [],
+      content: result.Items || [],
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -53,7 +53,7 @@ exports.getProducts = async (event) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error obteniendo productos:', error);
+    console.error('❌ Error obteniendo contenido del editor:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -61,22 +61,22 @@ exports.getProducts = async (event) => {
   }
 };
 
-// GET /products/{id}
-exports.getProduct = async (event) => {
+// GET /editor/{id}
+exports.getEditorItem = async (event) => {
   try {
     const { id } = event.pathParameters || {};
     
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de contenido requerido'
       });
     }
     
-    console.log(`🔍 Lambda: Obteniendo producto ${id}...`);
+    console.log(`🔍 Lambda: Obteniendo contenido del editor ${id}...`);
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id }
     };
     
@@ -85,16 +85,16 @@ exports.getProduct = async (event) => {
     if (!result.Item) {
       return createResponse(404, {
         success: false,
-        error: 'Producto no encontrado'
+        error: 'Contenido no encontrado'
       });
     }
     
     return createResponse(200, {
       success: true,
-      product: result.Item
+      content: result.Item
     });
   } catch (error) {
-    console.error('❌ Error obteniendo producto:', error);
+    console.error('❌ Error obteniendo contenido del editor:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -102,42 +102,42 @@ exports.getProduct = async (event) => {
   }
 };
 
-// POST /products
-exports.createProduct = async (event) => {
+// POST /editor
+exports.createEditorContent = async (event) => {
   try {
-    const productData = JSON.parse(event.body || '{}');
+    const contentData = JSON.parse(event.body || '{}');
     
-    if (!productData.name || !productData.description) {
+    if (!contentData.title || !contentData.content) {
       return createResponse(400, {
         success: false,
-        error: 'Nombre y descripción son requeridos'
+        error: 'Título y contenido son requeridos'
       });
     }
     
-    console.log('➕ Lambda: Creando producto...');
+    console.log('➕ Lambda: Creando contenido del editor...');
     
-    const product = {
-      id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...productData,
+    const content = {
+      id: `editor-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...contentData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: 'active'
+      status: 'draft'
     };
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Item: product
+      TableName: tableName,
+      Item: content
     };
     
     await docClient.send(new PutCommand(params));
     
     return createResponse(201, {
       success: true,
-      product,
-      message: 'Producto creado exitosamente'
+      content,
+      message: 'Contenido del editor creado exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error creando producto:', error);
+    console.error('❌ Error creando contenido del editor:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -145,8 +145,8 @@ exports.createProduct = async (event) => {
   }
 };
 
-// PUT /products/{id}
-exports.updateProduct = async (event) => {
+// PUT /editor/{id}
+exports.updateEditorContent = async (event) => {
   try {
     const { id } = event.pathParameters || {};
     const updateData = JSON.parse(event.body || '{}');
@@ -154,11 +154,11 @@ exports.updateProduct = async (event) => {
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de contenido requerido'
       });
     }
     
-    console.log(`✏️ Lambda: Actualizando producto ${id}...`);
+    console.log(`✏️ Lambda: Actualizando contenido del editor ${id}...`);
     
     const updateExpression = [];
     const expressionAttributeNames = {};
@@ -184,7 +184,7 @@ exports.updateProduct = async (event) => {
     expressionAttributeValues[':updatedAt'] = new Date().toISOString();
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: expressionAttributeNames,
@@ -196,11 +196,11 @@ exports.updateProduct = async (event) => {
     
     return createResponse(200, {
       success: true,
-      product: result.Attributes,
-      message: 'Producto actualizado exitosamente'
+      content: result.Attributes,
+      message: 'Contenido del editor actualizado exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error actualizando producto:', error);
+    console.error('❌ Error actualizando contenido del editor:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -208,22 +208,22 @@ exports.updateProduct = async (event) => {
   }
 };
 
-// DELETE /products/{id}
-exports.deleteProduct = async (event) => {
+// DELETE /editor/{id}
+exports.deleteEditorContent = async (event) => {
   try {
     const { id } = event.pathParameters || {};
     
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de contenido requerido'
       });
     }
     
-    console.log(`🗑️ Lambda: Eliminando producto ${id}...`);
+    console.log(`🗑️ Lambda: Eliminando contenido del editor ${id}...`);
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id }
     };
     
@@ -231,10 +231,10 @@ exports.deleteProduct = async (event) => {
     
     return createResponse(200, {
       success: true,
-      message: 'Producto eliminado exitosamente'
+      message: 'Contenido del editor eliminado exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error eliminando producto:', error);
+    console.error('❌ Error eliminando contenido del editor:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -244,7 +244,7 @@ exports.deleteProduct = async (event) => {
 
 // Handler principal
 exports.handler = async (event) => {
-  console.log('📦 Lambda Products - Evento recibido:', JSON.stringify(event, null, 2));
+  console.log('✏️ Lambda Editor - Evento recibido:', JSON.stringify(event, null, 2));
   
   const { httpMethod, pathParameters, queryStringParameters } = event;
   
@@ -252,16 +252,16 @@ exports.handler = async (event) => {
     switch (httpMethod) {
       case 'GET':
         if (pathParameters && pathParameters.id) {
-          return await exports.getProduct(event);
+          return await exports.getEditorItem(event);
         } else {
-          return await exports.getProducts(event);
+          return await exports.getEditorContent(event);
         }
       case 'POST':
-        return await exports.createProduct(event);
+        return await exports.createEditorContent(event);
       case 'PUT':
-        return await exports.updateProduct(event);
+        return await exports.updateEditorContent(event);
       case 'DELETE':
-        return await exports.deleteProduct(event);
+        return await exports.deleteEditorContent(event);
       case 'OPTIONS':
         return createResponse(200, { message: 'CORS preflight' });
       default:

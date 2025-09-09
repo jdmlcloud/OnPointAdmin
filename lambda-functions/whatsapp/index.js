@@ -22,15 +22,15 @@ const createResponse = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
-// GET /products
-exports.getProducts = async (event) => {
+// GET /whatsapp
+exports.getWhatsAppMessages = async (event) => {
   try {
-    console.log('🔍 Lambda: Obteniendo productos...');
+    console.log('🔍 Lambda: Obteniendo mensajes de WhatsApp...');
     
     const { page = 1, limit = 10, status } = event.queryStringParameters || {};
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Limit: parseInt(limit),
       ExclusiveStartKey: page > 1 ? { id: `page-${page}` } : undefined
     };
@@ -45,7 +45,7 @@ exports.getProducts = async (event) => {
     
     return createResponse(200, {
       success: true,
-      products: result.Items || [],
+      messages: result.Items || [],
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -53,7 +53,7 @@ exports.getProducts = async (event) => {
       }
     });
   } catch (error) {
-    console.error('❌ Error obteniendo productos:', error);
+    console.error('❌ Error obteniendo mensajes de WhatsApp:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -61,22 +61,22 @@ exports.getProducts = async (event) => {
   }
 };
 
-// GET /products/{id}
-exports.getProduct = async (event) => {
+// GET /whatsapp/{id}
+exports.getWhatsAppMessage = async (event) => {
   try {
     const { id } = event.pathParameters || {};
     
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de mensaje requerido'
       });
     }
     
-    console.log(`🔍 Lambda: Obteniendo producto ${id}...`);
+    console.log(`🔍 Lambda: Obteniendo mensaje de WhatsApp ${id}...`);
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id }
     };
     
@@ -85,16 +85,16 @@ exports.getProduct = async (event) => {
     if (!result.Item) {
       return createResponse(404, {
         success: false,
-        error: 'Producto no encontrado'
+        error: 'Mensaje no encontrado'
       });
     }
     
     return createResponse(200, {
       success: true,
-      product: result.Item
+      message: result.Item
     });
   } catch (error) {
-    console.error('❌ Error obteniendo producto:', error);
+    console.error('❌ Error obteniendo mensaje de WhatsApp:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -102,42 +102,42 @@ exports.getProduct = async (event) => {
   }
 };
 
-// POST /products
-exports.createProduct = async (event) => {
+// POST /whatsapp
+exports.createWhatsAppMessage = async (event) => {
   try {
-    const productData = JSON.parse(event.body || '{}');
+    const messageData = JSON.parse(event.body || '{}');
     
-    if (!productData.name || !productData.description) {
+    if (!messageData.phoneNumber || !messageData.message) {
       return createResponse(400, {
         success: false,
-        error: 'Nombre y descripción son requeridos'
+        error: 'Número de teléfono y mensaje son requeridos'
       });
     }
     
-    console.log('➕ Lambda: Creando producto...');
+    console.log('➕ Lambda: Creando mensaje de WhatsApp...');
     
-    const product = {
-      id: `product-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      ...productData,
+    const message = {
+      id: `whatsapp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      ...messageData,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      status: 'active'
+      status: 'pending'
     };
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
-      Item: product
+      TableName: tableName,
+      Item: message
     };
     
     await docClient.send(new PutCommand(params));
     
     return createResponse(201, {
       success: true,
-      product,
-      message: 'Producto creado exitosamente'
+      message,
+      message: 'Mensaje de WhatsApp creado exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error creando producto:', error);
+    console.error('❌ Error creando mensaje de WhatsApp:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -145,8 +145,8 @@ exports.createProduct = async (event) => {
   }
 };
 
-// PUT /products/{id}
-exports.updateProduct = async (event) => {
+// PUT /whatsapp/{id}
+exports.updateWhatsAppMessage = async (event) => {
   try {
     const { id } = event.pathParameters || {};
     const updateData = JSON.parse(event.body || '{}');
@@ -154,11 +154,11 @@ exports.updateProduct = async (event) => {
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de mensaje requerido'
       });
     }
     
-    console.log(`✏️ Lambda: Actualizando producto ${id}...`);
+    console.log(`✏️ Lambda: Actualizando mensaje de WhatsApp ${id}...`);
     
     const updateExpression = [];
     const expressionAttributeNames = {};
@@ -184,7 +184,7 @@ exports.updateProduct = async (event) => {
     expressionAttributeValues[':updatedAt'] = new Date().toISOString();
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id },
       UpdateExpression: `SET ${updateExpression.join(', ')}`,
       ExpressionAttributeNames: expressionAttributeNames,
@@ -196,11 +196,11 @@ exports.updateProduct = async (event) => {
     
     return createResponse(200, {
       success: true,
-      product: result.Attributes,
-      message: 'Producto actualizado exitosamente'
+      message: result.Attributes,
+      message: 'Mensaje de WhatsApp actualizado exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error actualizando producto:', error);
+    console.error('❌ Error actualizando mensaje de WhatsApp:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -208,22 +208,22 @@ exports.updateProduct = async (event) => {
   }
 };
 
-// DELETE /products/{id}
-exports.deleteProduct = async (event) => {
+// DELETE /whatsapp/{id}
+exports.deleteWhatsAppMessage = async (event) => {
   try {
     const { id } = event.pathParameters || {};
     
     if (!id) {
       return createResponse(400, {
         success: false,
-        error: 'ID de producto requerido'
+        error: 'ID de mensaje requerido'
       });
     }
     
-    console.log(`🗑️ Lambda: Eliminando producto ${id}...`);
+    console.log(`🗑️ Lambda: Eliminando mensaje de WhatsApp ${id}...`);
     
     const params = {
-      TableName: 'onpoint-admin-products-dev',
+      TableName: tableName,
       Key: { id }
     };
     
@@ -231,10 +231,10 @@ exports.deleteProduct = async (event) => {
     
     return createResponse(200, {
       success: true,
-      message: 'Producto eliminado exitosamente'
+      message: 'Mensaje de WhatsApp eliminado exitosamente'
     });
   } catch (error) {
-    console.error('❌ Error eliminando producto:', error);
+    console.error('❌ Error eliminando mensaje de WhatsApp:', error);
     return createResponse(500, {
       success: false,
       error: 'Error interno del servidor'
@@ -244,7 +244,7 @@ exports.deleteProduct = async (event) => {
 
 // Handler principal
 exports.handler = async (event) => {
-  console.log('📦 Lambda Products - Evento recibido:', JSON.stringify(event, null, 2));
+  console.log('📱 Lambda WhatsApp - Evento recibido:', JSON.stringify(event, null, 2));
   
   const { httpMethod, pathParameters, queryStringParameters } = event;
   
@@ -252,16 +252,16 @@ exports.handler = async (event) => {
     switch (httpMethod) {
       case 'GET':
         if (pathParameters && pathParameters.id) {
-          return await exports.getProduct(event);
+          return await exports.getWhatsAppMessage(event);
         } else {
-          return await exports.getProducts(event);
+          return await exports.getWhatsAppMessages(event);
         }
       case 'POST':
-        return await exports.createProduct(event);
+        return await exports.createWhatsAppMessage(event);
       case 'PUT':
-        return await exports.updateProduct(event);
+        return await exports.updateWhatsAppMessage(event);
       case 'DELETE':
-        return await exports.deleteProduct(event);
+        return await exports.deleteWhatsAppMessage(event);
       case 'OPTIONS':
         return createResponse(200, { message: 'CORS preflight' });
       default:
