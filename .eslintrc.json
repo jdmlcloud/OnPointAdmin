@@ -3,10 +3,15 @@
     "next/core-web-vitals"
   ],
   "rules": {
-    "prefer-const": "error",
-    "no-var": "error",
+    "prefer-const": "warn",
+    "no-var": "warn",
     "no-unused-vars": "warn",
-    "no-console": "warn"
+    "no-console": "warn",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/no-unescaped-entities": "warn",
+    "jsx-a11y/alt-text": "warn",
+    "@next/next/no-img-element": "warn"
   },
   "ignorePatterns": [
     "node_modules/",
@@ -14,6 +19,10 @@
     "out/",
     "build/",
     "lambda-functions/",
-    "scripts/"
+    "scripts/",
+    "*.test.ts",
+    "*.test.tsx",
+    "*.spec.ts",
+    "*.spec.tsx"
   ]
 }

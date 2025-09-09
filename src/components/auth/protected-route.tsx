@@ -21,8 +21,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requiredPermission,
   fallbackPath = '/auth/login'
 }) => {
-  const { isAuthenticated, user, isLoading } = useAuthContext()
+  const { isAuthenticated, user, isLoading, hasPermission } = useAuthContext()
   const router = useRouter()
+
+  // Redirigir si no está autenticado
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || !user)) {
+      router.push(fallbackPath)
+    }
+  }, [isAuthenticated, user, router, fallbackPath, isLoading])
 
   // Mostrar loading mientras se verifica la autenticación
   if (isLoading) {
@@ -31,25 +38,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Verificando permisos...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Redirigir si no está autenticado
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      router.push(fallbackPath)
-    }
-  }, [isAuthenticated, user, router, fallbackPath])
-
-  // Mostrar loading mientras se verifica autenticación
-  if (isLoading) {
-    return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center space-x-2">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span>Verificando autenticación...</span>
         </div>
       </div>
     )
@@ -103,10 +91,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
-    // Verificar permiso requerido
-    if (requiredPermission) {
-      const { hasPermission } = useAuthContext()
-      if (!hasPermission(requiredPermission.resource, requiredPermission.action)) {
+  // Verificar permiso requerido
+  if (requiredPermission) {
+    if (!hasPermission(requiredPermission.resource, requiredPermission.action)) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">

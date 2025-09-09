@@ -158,7 +158,7 @@ export function TagSelector({
               className="w-full px-3 py-2 text-left text-sm hover:bg-muted flex items-center justify-between text-primary"
               onClick={() => addTag(searchTerm)}
             >
-              <span>Crear "{searchTerm.trim()}"</span>
+              <span>Crear &quot;{searchTerm.trim()}&quot;</span>
               <Plus className="h-3 w-3" />
             </button>
           )}
