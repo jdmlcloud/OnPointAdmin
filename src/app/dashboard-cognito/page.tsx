@@ -33,9 +33,9 @@ export default function DashboardCognitoPage() {
     
     switch (permission) {
       case 'canManageUsers':
-        return user.role === 'admin'
+        return user.role.name === 'admin'
       case 'canManageProviders':
-        return user.role === 'admin'
+        return user.role.name === 'admin'
       default:
         return false
     }
@@ -107,7 +107,7 @@ export default function DashboardCognitoPage() {
                 🔐 AWS Cognito Real
               </Badge>
               <Badge variant="outline">
-                {user?.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                {user?.role?.name === 'admin' ? 'Administrador' : 'Ejecutivo'}
               </Badge>
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function DashboardCognitoPage() {
                   Autenticación AWS Cognito Activa
                 </h3>
                 <p className="text-blue-700 dark:text-blue-300">
-                  Usuario: {user?.email} • Rol: {user?.role} • ID: {user?.id}
+                  Usuario: {user?.email} • Rol: {user?.role?.name} • ID: {user?.id}
                 </p>
               </div>
             </div>

@@ -124,10 +124,10 @@ export class CognitoRealService {
     
     // Lógica para determinar rol basado en email o otros atributos
     if (userInfo.email?.includes('admin')) {
-      return 'admin'
+      return { id: "role-admin", name: "admin", level: 1, permissions: [], description: "Administrador", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: "system" }
     }
     
-    return 'ejecutivo'
+    return { id: "role-ejecutivo", name: "ejecutivo", level: 3, permissions: [], description: "Ejecutivo", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), createdBy: "system" }
   }
 
   /**
