@@ -733,9 +733,10 @@ export default function ProductsPage() {
         isOpen={modals.delete.isOpen}
         onClose={() => closeModal('delete')}
         title="Eliminar Producto"
-        onSave={() => handleDeleteProduct(modals.delete.data)}
-        saveText="Eliminar"
-        saveVariant="destructive"
+        type="delete"
+        onConfirm={() => handleDeleteProduct(modals.delete.data)}
+        confirmText="Eliminar"
+        destructive={true}
       >
         {modals.delete.data && (
           <div className="space-y-4">
