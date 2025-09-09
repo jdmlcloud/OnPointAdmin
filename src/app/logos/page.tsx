@@ -11,7 +11,6 @@ import { AnimatedButton } from "@/components/ui/animated-button"
 import { ActionModal } from "@/components/ui/action-modal"
 import { useCardActions } from "@/hooks/use-card-actions"
 import { useLogos } from "@/hooks/use-logos"
-import { useClients } from "@/hooks/use-clients"
 import { LogoListSkeleton } from "@/components/ui/logo-skeleton"
 import { ClientModal } from "@/components/ui/client-modal"
 import { 
@@ -123,33 +122,30 @@ export default function LogosPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [logoDeleted, setLogoDeleted] = useState(false)
 
-  // Crear un mapa de clientes solo desde el hook useClients
-  const allClientsMap = useMemo(() => {
-    console.log('🔍 CALCULANDO allClientsMap con clients:', clients)
+  // Crear un mapa de clientes agrupando logos por cliente (arquitectura limpia)
+  const logosByClient = useMemo(() => {
+    console.log('🔍 CALCULANDO logosByClient con logos:', logos)
     const clientMap = new Map<string, { clientId: string; clientName: string; logos: Logo[] }>()
     
-    // Agregar clientes del hook (clientes reales de la API)
-    clients.forEach(client => {
-      console.log('📝 Agregando cliente al mapa:', {
-        name: client.name,
-        id: client.id,
-        logosCount: client.logos?.length || 0,
-        logos: client.logos
-      })
-      clientMap.set(client.name, {
-        clientId: client.id,
-        clientName: client.name,
-        logos: client.logos || []
-      })
+    // Agrupar logos por cliente (usando brand como identificador del cliente)
+    logos.forEach(logo => {
+      const clientName = logo.brand || logo.clientName || 'Sin Cliente'
+      const clientId = logo.clientId || `client-${clientName.toLowerCase().replace(/\s+/g, '-')}`
+      
+      if (!clientMap.has(clientName)) {
+        clientMap.set(clientName, {
+          clientId: clientId,
+          clientName: clientName,
+          logos: []
+        })
+      }
+      
+      clientMap.get(clientName)!.logos.push(logo)
     })
     
-    console.log('✅ allClientsMap final:', Array.from(clientMap.entries()))
-    return clientMap
-  }, [clients])
-
-  // Convertir el mapa a objeto para compatibilidad
-  const logosByClient = Object.fromEntries(allClientsMap)
-  console.log('🎯 logosByClient final:', logosByClient)
+    console.log('✅ logosByClient final:', Object.fromEntries(clientMap))
+    return Object.fromEntries(clientMap)
+  }, [logos])
 
   // Funciones para manejar la navegación entre vistas
   const handleClientClick = (client: { clientId: string; clientName: string; logos: Logo[] }) => {
@@ -207,11 +203,8 @@ export default function LogosPage() {
   }
 
   const handleSaveClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>) => {
-    if (editingClient) {
-      await updateClient(editingClient.id, clientData)
-    } else {
-      await createClient(clientData)
-    }
+    // En arquitectura limpia, solo creamos logos (no clientes separados)
+    console.log('⚠️ handleSaveClient: No implementado en arquitectura limpia')
     setIsClientModalOpen(false)
     setEditingClient(null)
   }
@@ -240,13 +233,8 @@ export default function LogosPage() {
   }
 
   const handleSaveClientWithLogo = async (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>) => {
-    if (editingClient) {
-      // Si estamos editando un cliente existente, solo actualizar el cliente
-      await updateClient(editingClient.id, clientData)
-    } else {
-      // Si es un cliente nuevo, crear el cliente
-      await createClient(clientData)
-    }
+    // En arquitectura limpia, solo creamos logos (no clientes separados)
+    console.log('⚠️ handleSaveClientWithLogo: No implementado en arquitectura limpia')
     setIsClientModalOpen(false)
     setEditingClient(null)
   }
@@ -255,15 +243,15 @@ export default function LogosPage() {
     if (!deletingClient) return
     
     try {
-      // Eliminar el cliente usando el hook useClients
-      const success = await deleteClient(deletingClient.clientId)
+      // En arquitectura limpia, eliminamos todos los logos del cliente
+      const clientLogos = logos.filter(logo => logo.brand === deletingClient.clientName)
       
-      if (success) {
-        // Cerrar modal
-        setDeletingClient(null)
-      } else {
-        alert('Error al eliminar el cliente')
+      for (const logo of clientLogos) {
+        await deleteLogo(logo.id)
       }
+      
+      setDeletingClient(null)
+      console.log(`✅ Cliente ${deletingClient.clientName} eliminado (${clientLogos.length} logos eliminados)`)
     } catch (error) {
       console.error('Error deleting client:', error)
       alert('Error al eliminar el cliente')
@@ -511,11 +499,11 @@ export default function LogosPage() {
             </p>
             {/* Debug: Mostrar información de logos */}
             <div className="text-xs text-gray-500 mt-2">
-              <div>🔍 DEBUG LOGOS:</div>
+              <div>🔍 DEBUG ARQUITECTURA:</div>
               <div>• Total logos: {logos.length}</div>
-              <div>• Logos filtrados: {filteredLogos.length}</div>
-              <div>• Clientes con logos: {Object.keys(logosByClient).length}</div>
+              <div>• Clientes agrupados: {Object.keys(logosByClient).length}</div>
               <div>• View mode: {viewMode}</div>
+              <div>• Fuente: Solo logos (arquitectura limpia)</div>
             </div>
           </div>
           {viewMode === 'clients' && (
