@@ -219,14 +219,15 @@ export default function LogosPage() {
     if (!deletingClient) return
     
     try {
-      // Eliminar todos los logos del cliente
-      for (const logo of deletingClient.logos) {
-        await deleteLogo(logo.id)
+      // Eliminar el cliente usando el hook useClients
+      const success = await deleteClient(deletingClient.clientId)
+      
+      if (success) {
+        // Cerrar modal
+        setDeletingClient(null)
+      } else {
+        alert('Error al eliminar el cliente')
       }
-      // Refrescar la lista
-      await refreshLogos()
-      // Cerrar modal
-      setDeletingClient(null)
     } catch (error) {
       console.error('Error deleting client:', error)
       alert('Error al eliminar el cliente')
