@@ -24,6 +24,7 @@ interface UseClientsReturn {
 
 export function useClients(): UseClientsReturn {
   const [clients, setClients] = useState<Client[]>([])
+  const [manualClients, setManualClients] = useState<Client[]>([]) // Clientes creados manualmente
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -69,7 +70,24 @@ export function useClients(): UseClientsReturn {
         }
       })
 
-      setClients(Object.values(logosByClient))
+      // Combinar clientes generados desde logos con clientes manuales
+      const logoClients = Object.values(logosByClient)
+      const allClients = [...logoClients, ...manualClients]
+      
+      // Eliminar duplicados basándose en el nombre del cliente
+      const uniqueClients = allClients.reduce((acc, client) => {
+        const existingClient = acc.find(c => c.name === client.name)
+        if (existingClient) {
+          // Si ya existe, combinar logos
+          existingClient.logos = [...existingClient.logos, ...client.logos]
+          existingClient.primaryLogoId = existingClient.logos.find(logo => logo.isPrimary)?.id || null
+        } else {
+          acc.push(client)
+        }
+        return acc
+      }, [] as Client[])
+      
+      setClients(uniqueClients)
     } catch (err) {
       console.error('Error fetching clients:', err)
       setError(err instanceof Error ? err.message : 'Error desconocido')
@@ -80,8 +98,7 @@ export function useClients(): UseClientsReturn {
 
   const createClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>): Promise<boolean> => {
     try {
-      // Por ahora, simulamos la creación de cliente
-      // En el futuro, esto se conectará con una API real de clientes
+      // Crear nuevo cliente
       const newClient: Client = {
         ...clientData,
         id: `client-${Date.now()}`,
@@ -89,7 +106,8 @@ export function useClients(): UseClientsReturn {
         logos: []
       }
       
-      setClients(prev => [...prev, newClient])
+      // Agregar a clientes manuales
+      setManualClients(prev => [...prev, newClient])
       
       // Refrescar la lista para que aparezca en la UI
       await fetchClients()
@@ -104,12 +122,16 @@ export function useClients(): UseClientsReturn {
 
   const updateClient = async (id: string, clientData: Partial<Omit<Client, 'id' | 'createdAt' | 'logos'>>): Promise<boolean> => {
     try {
-      // Por ahora, simulamos la actualización de cliente
-      setClients(prev => prev.map(client => 
+      // Actualizar en clientes manuales
+      setManualClients(prev => prev.map(client => 
         client.id === id 
           ? { ...client, ...clientData, updatedAt: new Date().toISOString() }
           : client
       ))
+      
+      // Refrescar la lista
+      await fetchClients()
+      
       return true
     } catch (err) {
       console.error('Error updating client:', err)
@@ -120,8 +142,12 @@ export function useClients(): UseClientsReturn {
 
   const deleteClient = async (id: string): Promise<boolean> => {
     try {
-      // Por ahora, simulamos la eliminación de cliente
-      setClients(prev => prev.filter(client => client.id !== id))
+      // Eliminar de clientes manuales
+      setManualClients(prev => prev.filter(client => client.id !== id))
+      
+      // Refrescar la lista
+      await fetchClients()
+      
       return true
     } catch (err) {
       console.error('Error deleting client:', err)
