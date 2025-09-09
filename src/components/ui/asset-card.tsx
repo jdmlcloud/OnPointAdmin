@@ -233,11 +233,11 @@ export function AssetCard({
           <img
             src={thumbnailUrl}
             alt={name}
-            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-out"
+            className="max-w-full max-h-full object-contain"
           />
         ) : (
           <div className="text-muted-foreground text-center group-hover:text-purple-400 transition-colors duration-500">
-            <div className="group-hover:scale-110 transition-transform duration-500 ease-out">
+            <div>
               {getTypeIcon()}
             </div>
             <p className="text-xs">{fallbackText || 'Sin vista previa'}</p>
