@@ -917,100 +917,124 @@ export default function LogosPage() {
                     className="hover:shadow-lg transition-shadow cursor-pointer h-80 w-full"
                     onClick={() => handleClientClick(client)}
                   >
-                    <CardContent className="p-4 h-full flex flex-col justify-between">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                            <Building2 className="h-4 w-4 text-primary" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <h3 className="text-sm font-semibold truncate">{client.clientName}</h3>
-                            <p className="text-xs text-muted-foreground">Cliente</p>
-                          </div>
+                    <CardContent className="p-0 h-full flex flex-col">
+                      {/* Foto del cliente */}
+                      <div className="relative h-32 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center overflow-hidden">
+                        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                          <Building2 className="h-8 w-8 text-white" />
                         </div>
-                        <Badge variant="outline" className="text-xs">
-                          {client.logos.length}
-                        </Badge>
+                        <div className="absolute top-2 right-2">
+                          <Badge variant="secondary" className="text-xs bg-white/90 text-gray-800">
+                            {client.logos.length}
+                          </Badge>
+                        </div>
                       </div>
                       
-                      {/* Contenido principal */}
-                      <div className="space-y-3 flex-1">
-                        {/* Información de logos y formatos */}
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Image className="h-3 w-3" />
-                          <span>{client.logos.length} logos</span>
-                          {client.logos.length > 0 && (
-                            <>
-                              <span>•</span>
-                              <span>
-                                {new Set(client.logos.map(logo => logo.fileType)).size} formatos
-                              </span>
-                            </>
-                          )}
+                      {/* Contenido de la card */}
+                      <div className="p-4 flex-1 flex flex-col">
+                        {/* Header con nombre y tipo */}
+                        <div className="mb-3">
+                          <h3 className="text-lg font-semibold truncate mb-1">{client.clientName}</h3>
+                          <p className="text-sm text-muted-foreground">Cliente</p>
                         </div>
                         
-                        {/* Etiquetas de formatos agrupados */}
-                        {client.logos.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {Object.entries(
-                              client.logos.reduce((acc, logo) => {
+                        {/* Información detallada */}
+                        <div className="space-y-3 flex-1">
+                          {/* Estadísticas de logos */}
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Image className="h-4 w-4" />
+                            <span>{client.logos.length} logos</span>
+                            {client.logos.length > 0 && (
+                              <>
+                                <span>•</span>
+                                <span>
+                                  {new Set(client.logos.map(logo => logo.fileType)).size} formatos
+                                </span>
+                              </>
+                            )}
+                          </div>
+                          
+                          {/* Logo principal si existe */}
+                          {client.logos.some(logo => logo.isPrimary) && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Star className="h-4 w-4 text-yellow-500" />
+                              <span className="text-muted-foreground">Logo principal</span>
+                            </div>
+                          )}
+                          
+                          {/* Etiquetas de formatos */}
+                          {client.logos.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {Object.entries(
+                                client.logos.reduce((acc, logo) => {
+                                  const type = logo.fileType || 'UNKNOWN'
+                                  acc[type] = (acc[type] || 0) + 1
+                                  return acc
+                                }, {} as Record<string, number>)
+                              ).slice(0, 3).map(([format, count]) => (
+                                <Badge key={format} variant="secondary" className="text-xs px-2 py-1">
+                                  {format} {count > 1 ? `(${count})` : ''}
+                                </Badge>
+                              ))}
+                              {Object.keys(client.logos.reduce((acc, logo) => {
                                 const type = logo.fileType || 'UNKNOWN'
                                 acc[type] = (acc[type] || 0) + 1
                                 return acc
-                              }, {} as Record<string, number>)
-                            ).map(([format, count]) => (
-                              <Badge key={format} variant="secondary" className="text-xs px-2 py-1">
-                                {format} {count > 1 ? `(${count})` : ''}
-                              </Badge>
-                            ))}
+                              }, {} as Record<string, number>)).length > 3 && (
+                                <Badge variant="outline" className="text-xs px-2 py-1">
+                                  +{Object.keys(client.logos.reduce((acc, logo) => {
+                                    const type = logo.fileType || 'UNKNOWN'
+                                    acc[type] = (acc[type] || 0) + 1
+                                    return acc
+                                  }, {} as Record<string, number>)).length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Fecha de creación */}
+                          <div className="text-xs text-muted-foreground">
+                            Creado: {new Date(client.logos[0]?.createdAt || new Date()).toLocaleDateString()}
                           </div>
-                        )}
+                        </div>
                         
-                        {/* Indicador de logo principal */}
-                        {client.logos.some(logo => logo.isPrimary) && (
-                          <div className="flex items-center gap-1 text-xs text-yellow-600">
-                            <Star className="h-3 w-3" />
-                            <span>Logo principal</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Botones de acción */}
-                      <div className="flex gap-2 pt-3 border-t border-border/50">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleClientClick(client)
-                          }}
-                          className="h-8 px-3 text-sm flex-1"
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleAddLogoToClient(client)
-                          }}
-                          className="h-8 px-3 text-sm"
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteClient(client)
-                          }}
-                          className="h-8 px-3 text-sm text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {/* Botones de acción */}
+                        <div className="flex gap-2 mt-4">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleClientClick(client)
+                            }}
+                            className="h-8 px-3 text-sm flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleAddLogoToClient(client)
+                            }}
+                            className="h-8 px-3 text-sm"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteClient(client)
+                            }}
+                            className="h-8 px-3 text-sm text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
