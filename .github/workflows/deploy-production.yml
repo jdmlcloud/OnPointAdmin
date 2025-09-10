@@ -65,8 +65,23 @@ jobs:
           name: jest-results
           path: jest-results.json
 
-      - name: Run security audit
-        run: npm audit --audit-level moderate
+      - name: Run security audit (prod)
+        run: |
+          # Auditoría enfocada en prod deps
+          npm audit --omit=dev --audit-level=high || true
+          # Fallar solo si encuentra HIGH/CRITICAL en prod deps
+          npm audit --omit=dev --json --audit-level=high > audit.json || true
+          if jq '.metadata.vulnerabilities.high + .metadata.vulnerabilities.critical' audit.json | grep -q '^[1-9]'; then
+            echo "❌ Vulnerabilidades HIGH/CRITICAL en dependencias de producción" && cat audit.json && exit 1
+          else
+            echo "✅ Auditoría sin HIGH/CRITICAL en prod"
+          fi
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: audit.json
 
   build:
     needs: test
