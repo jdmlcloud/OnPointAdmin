@@ -66,7 +66,7 @@ export const detectEnvironment = (): 'sandbox' | 'prod' | 'local' => {
     }
   }
   
-  // Fallback a variable de entorno o local (NUNCA producción)
+  // Fallback a variable de entorno o local (por seguridad)
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'local'
   console.log('⚠️ Usando fallback - entorno:', environment)
   
@@ -95,11 +95,20 @@ export const getBaseUrl = (): string => {
 
 // Función helper para construir URLs completas
 export const buildApiUrl = (endpoint: string): string => {
-  // Si es el endpoint de clientes, usar el API Gateway específico de clientes
+  const env = detectEnvironment()
+  // En producción forzar siempre prod para todos los endpoints
+  if (env === 'prod') {
+    // Si hay un API Gateway dedicado para clientes en prod, usarlo aquí.
+    if (endpoint === '/clients') {
+      return `https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/prod${endpoint}`
+    }
+    return `${API_CONFIG.BASE_URLS.prod}${endpoint}`
+  }
+
+  // Para local/sandbox conservamos lógica previa
   if (endpoint === '/clients') {
     return `https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox${endpoint}`
   }
-  
   return `${getBaseUrl()}${endpoint}`
 }
 
