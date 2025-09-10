@@ -1,0 +1,23 @@
+{
+  "name": "onpoint-admin-auth-handler",
+  "version": "1.0.0",
+  "description": "Lambda function for OnPoint Admin authentication system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1691.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "authentication",
+    "dynamodb",
+    "onpoint"
+  ],
+  "author": "OnPoint Admin Team",
+  "license": "MIT"
+}
