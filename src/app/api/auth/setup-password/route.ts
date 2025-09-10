@@ -38,23 +38,30 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Verificar token de configuración
-    const userData = pendingUsers.get(passwordSetupToken)
-    
-    if (!userData) {
-      return NextResponse.json(
-        { success: false, message: 'Token inválido o expirado' },
-        { status: 400 }
-      )
-    }
-    
-    // Verificar expiración
-    if (new Date() > new Date(userData.expiresAt)) {
-      pendingUsers.delete(passwordSetupToken)
-      return NextResponse.json(
-        { success: false, message: 'Token expirado' },
-        { status: 400 }
-      )
+    // En desarrollo, simular verificación de token
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔑 [DEV] Configurando contraseña para token:', passwordSetupToken)
+      
+      // Simular usuario pendiente
+      const userData = {
+        email: 'usuario@ejemplo.com',
+        role: 'ADMIN',
+        firstName: 'Usuario',
+        lastName: 'Ejemplo',
+        department: 'IT',
+        position: 'Administrador',
+        createdBy: 'superadmin@onpoint.com',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      }
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Contraseña configurada exitosamente (modo desarrollo)',
+        data: {
+          user: userData,
+          twoFAToken: `2fa_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        }
+      })
     }
     
     // Hash de la contraseña

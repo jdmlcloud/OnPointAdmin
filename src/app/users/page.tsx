@@ -440,9 +440,9 @@ export default function UsersPage() {
     }
   }
 
-  const canManageUsers = hasPermission('users', 'manage')
-  const canManageRoles = hasPermission('roles', 'manage')
-  const canManagePermissions = hasPermission('permissions', 'manage')
+  const canManageUsers = hasPermission(currentUser, 'users', 'manage')
+  const canManageRoles = hasPermission(currentUser, 'roles', 'manage')
+  const canManagePermissions = hasPermission(currentUser, 'permissions', 'manage')
 
   return (
     <MainLayout>
