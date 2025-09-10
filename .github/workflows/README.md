@@ -53,11 +53,9 @@ Amplify   Amplify   Amplify
 ## 🛠️ Configuración Requerida
 
 ### Secrets de GitHub:
-- `AWS_ACCESS_KEY_ID_PROD`
-- `AWS_SECRET_ACCESS_KEY_PROD`
-- `AWS_ACCESS_KEY_ID_SANDBOX`
-- `AWS_SECRET_ACCESS_KEY_SANDBOX`
-- `GITHUB_TOKEN`
+- `AWS_ACCESS_KEY_ID` - Credenciales AWS para todos los entornos
+- `AWS_SECRET_ACCESS_KEY` - Credenciales AWS para todos los entornos
+- `GITHUB_TOKEN` - Token automático de GitHub
 
 ### Variables de Entorno:
 - `AWS_REGION`: us-east-1
