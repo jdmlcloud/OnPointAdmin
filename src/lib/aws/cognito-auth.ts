@@ -1,11 +1,11 @@
 import { signIn, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth'
-import { UserRole } from '@/hooks/use-roles'
+import { UserRole, UserRoleType } from '@/types/users'
 
 export interface CognitoUser {
   id: string
   email: string
   name: string
-  role: UserRole
+  role: UserRoleType
   accessToken: string
   refreshToken: string
 }
@@ -19,7 +19,7 @@ export interface SignUpData {
   email: string
   password: string
   name: string
-  role: UserRole
+  role: UserRoleType
 }
 
 export class CognitoAuthService {
@@ -49,7 +49,7 @@ export class CognitoAuthService {
           id: user.userId,
           email: credentials.email,
           name: 'Usuario',
-          role: role as UserRole,
+          role: role as UserRoleType,
           accessToken: session.tokens?.accessToken?.toString() || '',
           refreshToken: ''
         }
@@ -90,7 +90,7 @@ export class CognitoAuthService {
         id: user.userId,
         email: user.signInDetails?.loginId || '',
         name: 'Usuario',
-        role: role as UserRole,
+        role: role,
         accessToken: session.tokens?.accessToken?.toString() || '',
         refreshToken: ''
       }

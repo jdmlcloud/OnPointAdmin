@@ -10,6 +10,8 @@ export interface Permission {
   createdAt: string
   updatedAt: string
   createdBy: string
+  isSystem?: boolean
+  status?: 'active' | 'inactive' | 'pending'
 }
 
 export interface Role {
@@ -21,6 +23,8 @@ export interface Role {
   createdAt: string
   updatedAt: string
   createdBy: string
+  isSystem?: boolean
+  status?: 'active' | 'inactive' | 'pending'
 }
 
 export interface CreatePermissionRequest {

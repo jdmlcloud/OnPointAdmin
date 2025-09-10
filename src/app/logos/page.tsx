@@ -90,7 +90,7 @@ export default function LogosPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
 
   // Usar hook de logos para datos reales de DynamoDB
-  const { logos, isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
+  const { logos, loading: isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
 
   // Estado para el item seleccionado
   const [selectedItem, setSelectedItem] = useState<Logo | null>(null)

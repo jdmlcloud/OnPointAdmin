@@ -100,7 +100,7 @@ export default function LogosPage() {
   } = useCardActions()
 
   // Usar hook de logos para datos reales de DynamoDB
-  const { logos, isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
+  const { logos, loading: isLoading, error, refreshLogos, createLogo, updateLogo, deleteLogo } = useLogos()
 
   // Agrupar logos por cliente
   const logosByClient = logos.reduce((acc, logo) => {

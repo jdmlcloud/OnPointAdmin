@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuthContext } from '@/lib/auth/auth-context'
 import ProtectedRoute from '@/components/auth/protected-route'
-import { Role, Permission } from '@/types/users'
+import { Role, Permission, UserRoleType } from '@/types/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +30,15 @@ const RolesPage: React.FC = () => {
       id: 'role-super-admin',
       name: 'Super Administrador',
       description: 'Acceso total al sistema, puede gestionar todo incluyendo otros administradores',
-      permissions: ['users:manage', 'roles:manage', 'permissions:manage', 'providers:manage', 'products:manage', 'reports:view', 'settings:manage'],
+      permissions: [
+        { id: 'perm-1', name: 'users:manage', resource: 'users', action: 'manage', description: 'Gestionar usuarios', category: 'users', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-2', name: 'roles:manage', resource: 'roles', action: 'manage', description: 'Gestionar roles', category: 'roles', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-3', name: 'permissions:manage', resource: 'permissions', action: 'manage', description: 'Gestionar permisos', category: 'permissions', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-4', name: 'providers:manage', resource: 'providers', action: 'manage', description: 'Gestionar proveedores', category: 'providers', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-5', name: 'products:manage', resource: 'products', action: 'manage', description: 'Gestionar productos', category: 'products', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-6', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-7', name: 'settings:manage', resource: 'settings', action: 'manage', description: 'Gestionar configuración', category: 'settings', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' }
+      ],
       level: 1,
       isSystem: true,
       status: 'active',
@@ -42,7 +50,12 @@ const RolesPage: React.FC = () => {
       id: 'role-admin',
       name: 'Administrador',
       description: 'Puede gestionar usuarios, proveedores y productos del sistema',
-      permissions: ['users:manage', 'providers:manage', 'products:manage', 'reports:view'],
+      permissions: [
+        { id: 'perm-8', name: 'users:manage', resource: 'users', action: 'manage', description: 'Gestionar usuarios', category: 'users', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-9', name: 'providers:manage', resource: 'providers', action: 'manage', description: 'Gestionar proveedores', category: 'providers', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-10', name: 'products:manage', resource: 'products', action: 'manage', description: 'Gestionar productos', category: 'products', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-11', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' }
+      ],
       level: 2,
       isSystem: false,
       status: 'active',
@@ -54,7 +67,11 @@ const RolesPage: React.FC = () => {
       id: 'role-executive',
       name: 'Ejecutivo',
       description: 'Puede ver y gestionar proveedores y productos asignados',
-      permissions: ['providers:read', 'products:read', 'reports:view'],
+      permissions: [
+        { id: 'perm-12', name: 'providers:read', resource: 'providers', action: 'read', description: 'Leer proveedores', category: 'providers', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-13', name: 'products:read', resource: 'products', action: 'read', description: 'Leer productos', category: 'products', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
+        { id: 'perm-14', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' }
+      ],
       level: 3,
       isSystem: false,
       status: 'active',
@@ -258,7 +275,7 @@ const RolesPage: React.FC = () => {
           isOpen={isCreateDialogOpen}
           onClose={() => setIsCreateDialogOpen(false)}
           onSubmit={handleCreateRoleSubmit}
-          currentUserRole={currentUser?.role}
+          currentUserRole={typeof currentUser?.role === 'string' ? currentUser.role as UserRoleType : currentUser?.role?.name as UserRoleType}
         />
 
         {/* Edit Role Dialog */}
@@ -270,7 +287,7 @@ const RolesPage: React.FC = () => {
           }}
           onSubmit={handleEditRoleSubmit}
           role={selectedRole}
-          currentUserRole={currentUser?.role}
+          currentUserRole={typeof currentUser?.role === 'string' ? currentUser.role as UserRoleType : currentUser?.role?.name as UserRoleType}
         />
       </div>
     </ProtectedRoute>

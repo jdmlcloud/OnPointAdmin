@@ -74,7 +74,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (data.success && data.user && data.token) {
         // Guardar token y usuario
         localStorage.setItem('auth_token', data.token)
-        setUser(data.user)
+        setUser({
+          ...data.user,
+          password: 'hashed_password_placeholder' // Placeholder para compatibilidad
+        })
         setIsAuthenticated(true)
         
         return {

@@ -105,7 +105,10 @@ export const UserForm: React.FC<UserFormProps> = ({
       return
     }
 
-    const success = await onSubmit(formData)
+    const success = await onSubmit({
+      ...formData,
+      password: 'default_password_123' // Password por defecto para nuevos usuarios
+    })
     if (success) {
       onClose()
     }

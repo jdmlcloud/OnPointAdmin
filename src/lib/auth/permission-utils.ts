@@ -45,7 +45,7 @@ export const hasPermission = (user: User | null, resource: string, action: strin
   if (user.role === 'SUPER_ADMIN') return true
 
   // Verificar permisos por defecto del rol
-  const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role] || []
+  const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role as keyof typeof DEFAULT_ROLE_PERMISSIONS] || []
   const permissionString = `${resource}:${action}`
   
   return rolePermissions.includes(permissionString)
@@ -57,7 +57,7 @@ export const hasPermission = (user: User | null, resource: string, action: strin
 export const hasRole = (user: User | null, requiredRole: string): boolean => {
   if (!user) return false
 
-  const userLevel = ROLE_HIERARCHY[user.role] || 999
+  const userLevel = ROLE_HIERARCHY[user.role as keyof typeof ROLE_HIERARCHY] || 999
   const requiredLevel = ROLE_HIERARCHY[requiredRole] || 999
 
   return userLevel <= requiredLevel
@@ -72,8 +72,8 @@ export const canManageUser = (currentUser: User | null, targetUser: User | null)
   // No se puede gestionar a sí mismo
   if (currentUser.id === targetUser.id) return false
 
-  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
-  const targetLevel = ROLE_HIERARCHY[targetUser.role] || 999
+  const currentLevel = ROLE_HIERARCHY[currentUser.role as keyof typeof ROLE_HIERARCHY] || 999
+  const targetLevel = ROLE_HIERARCHY[targetUser.role as keyof typeof ROLE_HIERARCHY] || 999
 
   // Solo se puede gestionar usuarios de nivel inferior
   return currentLevel < targetLevel
@@ -85,7 +85,7 @@ export const canManageUser = (currentUser: User | null, targetUser: User | null)
 export const canAssignRole = (currentUser: User | null, targetRole: string): boolean => {
   if (!currentUser) return false
 
-  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
+  const currentLevel = ROLE_HIERARCHY[currentUser.role as keyof typeof ROLE_HIERARCHY] || 999
   const targetLevel = ROLE_HIERARCHY[targetRole] || 999
 
   // Solo se puede asignar roles de nivel inferior
@@ -98,7 +98,7 @@ export const canAssignRole = (currentUser: User | null, targetRole: string): boo
 export const getAssignableRoles = (currentUser: User | null): string[] => {
   if (!currentUser) return []
 
-  const currentLevel = ROLE_HIERARCHY[currentUser.role] || 999
+  const currentLevel = ROLE_HIERARCHY[currentUser.role as keyof typeof ROLE_HIERARCHY] || 999
   
   return Object.entries(ROLE_HIERARCHY)
     .filter(([_, level]) => level > currentLevel)

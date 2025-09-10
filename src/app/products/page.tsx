@@ -99,7 +99,7 @@ export default function ProductsPage() {
   } = useCardActions()
 
   // Usar hook de productos para datos reales de DynamoDB
-  const { products, isLoading, error, refreshProducts, createProduct, updateProduct, deleteProduct } = useProducts()
+  const { products, loading: isLoading, error, refreshProducts, createProduct, updateProduct, deleteProduct } = useProducts()
 
   const filteredProducts = products.filter(product => {
     const searchLower = searchTerm.toLowerCase()

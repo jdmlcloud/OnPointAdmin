@@ -202,7 +202,11 @@ export default function NewLogoPage() {
       }
       
       console.log('🚀 Creando logo:', logoData)
-      const success = await createLogo(logoData, selectedFile)
+      const success = await createLogo({
+        ...logoData,
+        fileType: selectedFile?.type || 'image/png',
+        fileSize: selectedFile?.size || 0
+      }, selectedFile)
       
       if (success) {
         console.log('✅ Cliente y logo creados exitosamente')

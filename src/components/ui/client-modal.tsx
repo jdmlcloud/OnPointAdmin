@@ -131,7 +131,9 @@ export function ClientModal({ isOpen, onClose, onSave, client, title, includeLog
             version: logoFormData.version,
             tags: logoFormData.tags ? logoFormData.tags.split(',').map(t => t.trim()) : [],
             status: logoFormData.status,
-            isPrimary: logoFormData.isPrimary
+            isPrimary: logoFormData.isPrimary,
+            fileType: selectedFile?.type || 'image/png',
+            fileSize: selectedFile?.size || 0
           }, selectedFile)
           
           if (success) {

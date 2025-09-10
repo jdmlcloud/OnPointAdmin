@@ -633,7 +633,7 @@ export default function UsersPage() {
           isOpen={isCreateUserDialogOpen}
           onClose={() => setIsCreateUserDialogOpen(false)}
           onSubmit={handleCreateUserSubmit}
-          currentUserRole={currentUser?.role?.name as UserRoleType}
+          currentUserRole={typeof currentUser?.role === 'string' ? currentUser.role as UserRoleType : currentUser?.role?.name as UserRoleType}
         />
 
         <UserForm
@@ -644,14 +644,14 @@ export default function UsersPage() {
           }}
           onSubmit={handleEditUserSubmit}
           user={selectedUser}
-          currentUserRole={currentUser?.role?.name as UserRoleType}
+          currentUserRole={typeof currentUser?.role === 'string' ? currentUser.role as UserRoleType : currentUser?.role?.name as UserRoleType}
         />
 
         <RoleForm
           isOpen={isCreateRoleDialogOpen}
           onClose={() => setIsCreateRoleDialogOpen(false)}
           onSubmit={handleCreateRoleSubmit}
-          currentUserRole={currentUser?.role?.name as UserRoleType}
+          currentUserRole={typeof currentUser?.role === 'string' ? currentUser.role as UserRoleType : currentUser?.role?.name as UserRoleType}
         />
 
         <RoleForm
@@ -662,7 +662,7 @@ export default function UsersPage() {
           }}
           onSubmit={handleEditRoleSubmit}
           role={selectedRole}
-          currentUserRole={currentUser?.role?.name as UserRoleType}
+          currentUserRole={typeof currentUser?.role === 'string' ? currentUser.role as UserRoleType : currentUser?.role?.name as UserRoleType}
         />
 
         <PermissionForm

@@ -3,16 +3,22 @@ import { apiRequest, API_CONFIG } from '@/config/api'
 
 export interface Notification {
   id: string
-  type: 'urgent' | 'message' | 'task' | 'proposal' | 'client'
+  type: 'urgent' | 'message' | 'task' | 'proposal' | 'client' | 'success' | 'error' | 'warning' | 'info'
   title: string
   description: string
+  message: string
   timestamp: string
   status: 'new' | 'pending' | 'completed' | 'expired'
   priority: 'low' | 'medium' | 'high' | 'urgent'
+  read: boolean
   clientId?: string
   proposalId?: string
   taskId?: string
   messageId?: string
+  action?: {
+    label: string
+    onClick: () => void
+  }
 }
 
 export interface NotificationStats {
@@ -34,6 +40,7 @@ export const useNotifications = () => {
   })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const fetchNotifications = async () => {
     try {
@@ -67,9 +74,11 @@ export const useNotifications = () => {
           type: 'proposal',
           title: 'Propuesta ABC',
           description: 'Vence en 2 horas',
+          message: 'Vence en 2 horas',
           timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
           status: 'pending',
           priority: 'urgent',
+          read: false,
           proposalId: 'prop-123'
         },
         {
@@ -77,9 +86,11 @@ export const useNotifications = () => {
           type: 'proposal',
           title: 'Cotización HBO',
           description: 'Vence mañana',
+          message: 'Vence mañana',
           timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
           status: 'pending',
           priority: 'high',
+          read: false,
           proposalId: 'prop-456'
         },
         {
@@ -87,9 +98,11 @@ export const useNotifications = () => {
           type: 'message',
           title: 'WhatsApp +52 55 1234',
           description: 'Mensaje sin responder',
+          message: 'Mensaje sin responder',
           timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
           status: 'new',
           priority: 'medium',
+          read: false,
           messageId: 'msg-789'
         },
         {
@@ -97,9 +110,11 @@ export const useNotifications = () => {
           type: 'message',
           title: 'Email Netflix',
           description: 'Solicitud de información',
+          message: 'Solicitud de información',
           timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
           status: 'pending',
           priority: 'medium',
+          read: false,
           messageId: 'msg-101'
         },
         {
@@ -107,9 +122,11 @@ export const useNotifications = () => {
           type: 'client',
           title: 'Nuevo cliente registrado',
           description: 'Netflix se registró esta semana',
+          message: 'Netflix se registró esta semana',
           timestamp: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
           status: 'new',
           priority: 'low',
+          read: false,
           clientId: 'client-123'
         }
       ]
@@ -159,6 +176,37 @@ export const useNotifications = () => {
     }
   }
 
+  const markAllAsRead = async () => {
+    try {
+      // TODO: Implementar API call para marcar todas como leídas
+      setNotifications(prev => prev.map(n => ({ ...n, status: 'completed' as const })))
+      setUnreadCount(0)
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err)
+    }
+  }
+
+  const addNotification = async (notification: Omit<Notification, 'id' | 'timestamp'>) => {
+    try {
+      const newNotification: Notification = {
+        ...notification,
+        id: Date.now().toString(),
+        timestamp: new Date().toISOString()
+      }
+      setNotifications(prev => [newNotification, ...prev])
+    } catch (err) {
+      console.error('Error adding notification:', err)
+    }
+  }
+
+  const removeNotification = async (notificationId: string) => {
+    try {
+      setNotifications(prev => prev.filter(n => n.id !== notificationId))
+    } catch (err) {
+      console.error('Error removing notification:', err)
+    }
+  }
+
   useEffect(() => {
     fetchNotifications()
   }, [])
@@ -168,8 +216,12 @@ export const useNotifications = () => {
     stats,
     loading,
     error,
+    unreadCount,
     fetchNotifications,
     markAsRead,
-    deleteNotification
+    markAllAsRead,
+    addNotification,
+    deleteNotification,
+    removeNotification
   }
 }

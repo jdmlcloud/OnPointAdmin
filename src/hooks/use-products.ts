@@ -11,13 +11,14 @@ interface Product {
   currency?: string
   stock?: number
   images?: string[]
+  tags?: string[]
   status: string
   createdAt: string
 }
 
 interface UseProductsReturn {
   products: Product[]
-  isLoading: boolean
+  loading: boolean
   error: string | null
   refreshProducts: () => Promise<void>
   createProduct: (productData: Omit<Product, 'id' | 'createdAt'>) => Promise<boolean>
@@ -29,6 +30,9 @@ export function useProducts(): UseProductsReturn {
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Alias para compatibilidad
+  const loading = isLoading
 
   const fetchProducts = async () => {
     try {
@@ -186,7 +190,7 @@ export function useProducts(): UseProductsReturn {
 
   return {
     products,
-    isLoading,
+    loading,
     error,
     refreshProducts,
     createProduct,

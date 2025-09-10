@@ -7,13 +7,13 @@ import {
   GetUserCommand,
   AuthFlowType
 } from '@aws-sdk/client-cognito-identity-provider'
-import { UserRole } from '@/hooks/use-roles'
+import { UserRole, UserRoleType } from '@/types/users'
 
 export interface CognitoUser {
   id: string
   email: string
   name: string
-  role: UserRole
+  role: UserRoleType
   accessToken: string
   refreshToken: string
 }
@@ -124,10 +124,10 @@ export class CognitoRealService {
     
     // Lógica para determinar rol basado en email o otros atributos
     if (userInfo.email?.includes('admin')) {
-      return 'admin'
+      return 'admin' as UserRoleType
     }
     
-    return 'ejecutivo'
+    return 'ejecutivo' as UserRoleType
   }
 
   /**

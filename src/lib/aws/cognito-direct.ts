@@ -1,10 +1,10 @@
-import { UserRole } from '@/hooks/use-roles'
+import { UserRole, UserRoleType } from '@/types/users'
 
 export interface CognitoUser {
   id: string
   email: string
   name: string
-  role: UserRole
+  role: UserRoleType
   accessToken: string
   refreshToken: string
 }
@@ -26,8 +26,8 @@ export class CognitoDirectService {
     try {
       // Simular autenticación exitosa para usuarios válidos
       const validUsers = [
-        { email: 'admin@onpoint.com', password: 'Admin123!', role: 'admin' as UserRole },
-        { email: 'ejecutivo@onpoint.com', password: 'Ejecutivo123!', role: 'ejecutivo' as UserRole }
+        { email: 'admin@onpoint.com', password: 'Admin123!', role: 'admin' as UserRoleType },
+        { email: 'ejecutivo@onpoint.com', password: 'Ejecutivo123!', role: 'ejecutivo' as UserRoleType }
       ]
 
       const validUser = validUsers.find(

@@ -52,7 +52,7 @@ interface Client {
 
 interface UseLogosReturn {
   logos: Logo[]
-  isLoading: boolean
+  loading: boolean
   error: string | null
   refreshLogos: () => Promise<void>
   createLogo: (logoData: Omit<Logo, 'id' | 'createdAt' | 'downloadCount' | 'fileUrl'>, file: File) => Promise<boolean>
@@ -64,6 +64,9 @@ export function useLogos(): UseLogosReturn {
   const [logos, setLogos] = useState<Logo[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Alias para compatibilidad
+  const loading = isLoading
 
   const fetchLogos = async () => {
     try {
@@ -205,7 +208,7 @@ export function useLogos(): UseLogosReturn {
 
   return {
     logos,
-    isLoading,
+    loading,
     error,
     refreshLogos,
     createLogo,

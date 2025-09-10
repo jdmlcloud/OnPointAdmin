@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { User, CreateUserRequest, UpdateUserRequest } from '@/types/users'
+import { User, CreateUserRequest, UpdateUserRequest, UserRoleType } from '@/types/users'
 
 interface UseUsersReturn {
   users: User[]
@@ -28,8 +28,10 @@ export const useUsers = (): UseUsersReturn => {
     {
       id: 'user-super-admin',
       email: 'superadmin@onpoint.com',
+      password: 'hashed_password_123',
       firstName: 'Super',
       lastName: 'Administrador',
+      name: 'Super Administrador',
       phone: '+525512345678',
       role: 'SUPER_ADMIN',
       department: 'Tecnología',
@@ -42,8 +44,10 @@ export const useUsers = (): UseUsersReturn => {
     {
       id: 'user-admin',
       email: 'admin@onpoint.com',
+      password: 'hashed_password_123',
       firstName: 'Admin',
       lastName: 'Usuario',
+      name: 'Admin Usuario',
       phone: '+525512345679',
       role: 'ADMIN',
       department: 'Administración',
@@ -56,8 +60,10 @@ export const useUsers = (): UseUsersReturn => {
     {
       id: 'user-executive',
       email: 'ejecutivo@onpoint.com',
+      password: 'hashed_password_123',
       firstName: 'Ejecutivo',
       lastName: 'Usuario',
+      name: 'Ejecutivo Usuario',
       phone: '+525512345680',
       role: 'EXECUTIVE',
       department: 'Ventas',
@@ -117,6 +123,8 @@ export const useUsers = (): UseUsersReturn => {
       const newUser: User = {
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         ...userData,
+        name: `${userData.firstName} ${userData.lastName}`,
+        role: userData.role as UserRoleType,
         status: 'active',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -145,7 +153,15 @@ export const useUsers = (): UseUsersReturn => {
 
       setUsers(prev => prev.map(user => 
         user.id === userId 
-          ? { ...user, ...userData, updatedAt: new Date().toISOString() }
+          ? { 
+              ...user, 
+              ...userData, 
+              name: userData.firstName && userData.lastName 
+                ? `${userData.firstName} ${userData.lastName}` 
+                : user.name,
+              role: userData.role ? userData.role as UserRoleType : user.role,
+              updatedAt: new Date().toISOString() 
+            }
           : user
       ))
       return true

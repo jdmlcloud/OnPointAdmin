@@ -37,9 +37,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Usuarios',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-users-write',
@@ -50,9 +49,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Usuarios',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-users-manage',
@@ -63,9 +61,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Usuarios',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     // Roles
     {
@@ -77,9 +74,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Roles',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-roles-manage',
@@ -90,9 +86,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Roles',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     // Permisos
     {
@@ -104,9 +99,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Permisos',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-permissions-manage',
@@ -117,9 +111,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Permisos',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     // Proveedores
     {
@@ -131,9 +124,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Proveedores',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-providers-write',
@@ -144,9 +136,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Proveedores',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-providers-manage',
@@ -157,9 +148,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Proveedores',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     // Productos
     {
@@ -171,9 +161,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Productos',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-products-write',
@@ -184,9 +173,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Productos',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     {
       id: 'permission-products-manage',
@@ -197,9 +185,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Productos',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     // Reportes
     {
@@ -211,9 +198,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Reportes',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     },
     // Configuración
     {
@@ -225,9 +211,8 @@ const PermissionsPage: React.FC = () => {
       category: 'Configuración',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      createdBy: 'system',
+      updatedAt: '2024-12-19T00:00:00.000Z'
     }
   ]
 

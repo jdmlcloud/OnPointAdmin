@@ -15,7 +15,7 @@ interface Client {
 
 interface UseClientsReturn {
   clients: Client[]
-  isLoading: boolean
+  loading: boolean
   error: string | null
   refreshClients: () => Promise<void>
   createClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'logos'>) => Promise<boolean>
@@ -27,6 +27,9 @@ export function useClients(): UseClientsReturn {
   const [clients, setClients] = useState<Client[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Alias para compatibilidad
+  const loading = isLoading
 
   const fetchClients = async () => {
     try {
@@ -150,7 +153,7 @@ export function useClients(): UseClientsReturn {
 
   return {
     clients,
-    isLoading,
+    loading,
     error,
     refreshClients,
     createClient,
