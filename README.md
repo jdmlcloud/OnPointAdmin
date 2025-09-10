@@ -263,13 +263,36 @@ onPointAdmin/
 - [ ] **AWS Deployment**: Amplify, Lambda, API Gateway
 - [ ] **CI/CD Pipeline**: GitHub Actions y deployment automático
 
+## 🌿 Estrategia de Ramas
+
+### Ramas Activas
+- **main** 🚀 - Producción (solo merge via PR)
+- **sandbox** 🧪 - Testing (solo merge via PR)  
+- **develop** 💻 - Desarrollo (push directo permitido)
+
+### Flujo de Trabajo
+```
+develop → sandbox → main
+   ↓         ↓       ↓
+  Tests    Tests   Deploy
+```
+
+### Para nuevas funcionalidades:
+1. Crear rama desde `develop`: `git checkout -b feature/nueva-funcionalidad`
+2. Desarrollar y hacer commits
+3. Crear PR a `develop`
+4. Merge a `develop` → despliegue automático a sandbox
+5. Merge a `sandbox` → despliegue automático a producción
+
+Ver [BRANCH-STRATEGY.md](docs/BRANCH-STRATEGY.md) para más detalles.
+
 ## 🤝 Contribución
 
 1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+2. Crea una rama desde `develop` (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+5. Abre un Pull Request a `develop`
 
 ## 📄 Licencia
 
