@@ -117,11 +117,11 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials for Sandbox
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_SANDBOX }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_SANDBOX }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy Lambda functions to Sandbox
