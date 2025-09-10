@@ -24,7 +24,7 @@ export const UserStats: React.FC<UserStatsProps> = ({ users, roles, permissions 
       if (typeof user.role === 'string') {
         return user.role === roleType
       }
-      return user.role.name === roleType
+      return (user.role as any).name === roleType
     }).length
   }
 

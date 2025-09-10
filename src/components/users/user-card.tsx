@@ -109,8 +109,8 @@ export const UserCard: React.FC<UserCardProps> = ({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Rol:</span>
-            <Badge className={getRoleColor(typeof user.role === 'string' ? user.role : user.role.name)}>
-              {getRoleDisplayName(typeof user.role === 'string' ? user.role : user.role.name)}
+            <Badge className={getRoleColor(typeof user.role === 'string' ? user.role : (user.role as any).name)}>
+              {getRoleDisplayName(typeof user.role === 'string' ? user.role : (user.role as any).name)}
             </Badge>
           </div>
           <div className="flex items-center justify-between">

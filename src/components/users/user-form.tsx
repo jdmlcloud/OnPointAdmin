@@ -46,7 +46,7 @@ export const UserForm: React.FC<UserFormProps> = ({
         lastName: user.lastName,
         email: user.email,
         phone: user.phone,
-        role: typeof user.role === 'string' ? user.role : user.role.name as UserRoleType,
+        role: typeof user.role === 'string' ? user.role : (user.role as any).name as UserRoleType,
         department: user.department,
         position: user.position,
         password: ''

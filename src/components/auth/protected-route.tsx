@@ -77,7 +77,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
               No tienes permisos para acceder a esta sección.
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              Rol requerido: {requiredRole} | Tu rol: {typeof user.role === 'string' ? user.role : user.role.name}
+              Rol requerido: {requiredRole} | Tu rol: {typeof user.role === 'string' ? user.role : (user.role as any).name}
             </p>
             <button
               onClick={() => router.push('/dashboard')}

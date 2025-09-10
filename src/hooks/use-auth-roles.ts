@@ -13,8 +13,8 @@ export function useAuthRoles() {
     if (user?.role) {
       if (typeof user.role === 'string') {
         setCurrentRole(user.role)
-      } else if (user.role.name) {
-        setCurrentRole(user.role.name)
+      } else if ((user.role as any).name) {
+        setCurrentRole((user.role as any).name)
       }
     }
     
