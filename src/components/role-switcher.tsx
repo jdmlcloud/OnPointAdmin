@@ -84,7 +84,7 @@ export function RoleSwitcher() {
               </CardDescription>
             </CardHeader>
             
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 max-h-96 overflow-y-auto scrollbar-hide">
               {availableRoles.map((role) => {
                 const Icon = roleIcons[role as keyof typeof roleIcons] || User
                 const isActive = role === currentRole

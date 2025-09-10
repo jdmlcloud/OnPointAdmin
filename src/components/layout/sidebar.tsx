@@ -209,7 +209,10 @@ export function Sidebar() {
 
   // Auto-hide functionality
   useEffect(() => {
-    if (!collapsed) return
+    if (!collapsed) {
+      setIsAutoHidden(false)
+      return
+    }
 
     const timer = setTimeout(() => {
       if (!isHovered) {
@@ -219,6 +222,13 @@ export function Sidebar() {
 
     return () => clearTimeout(timer)
   }, [collapsed, isHovered])
+
+  // Reset auto-hide when hovering
+  useEffect(() => {
+    if (isHovered) {
+      setIsAutoHidden(false)
+    }
+  }, [isHovered])
 
   const handleToggleMenu = () => {
     setCollapsed(!collapsed)
@@ -261,7 +271,7 @@ export function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
         {Object.entries(groupedNavigation).map(([category, items]) => (
           <div key={category} className="space-y-2">
             {!shouldCollapse && (
