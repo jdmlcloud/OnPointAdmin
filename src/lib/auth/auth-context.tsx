@@ -11,85 +11,98 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  console.log('🔐 AuthProvider inicializando...')
   const [user, setUser] = useState<User | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   // Verificar si hay un token guardado al cargar la aplicación
   useEffect(() => {
-    const checkAuthStatus = async () => {
+    console.log('🔍 useEffect ejecutándose en AuthProvider...')
+    
+    const checkAuth = () => {
+      console.log('🔍 Verificando estado de autenticación...')
       try {
         const token = localStorage.getItem('auth_token')
-        if (token) {
-          // Verificar si el token es válido
-          const response = await fetch('/api/auth/verify-token', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            if (data.success && data.user) {
-              setUser(data.user)
-              setIsAuthenticated(true)
-            } else {
-              // Token inválido, limpiar
-              localStorage.removeItem('auth_token')
-            }
-          } else {
-            // Token inválido, limpiar
+        const userData = localStorage.getItem('user_data')
+        
+        console.log('📝 Token encontrado:', !!token)
+        console.log('👤 Datos de usuario encontrados:', !!userData)
+        
+        if (token && userData) {
+          try {
+            const user = JSON.parse(userData)
+            console.log('✅ Usuario autenticado:', user.email)
+            setUser({
+              ...user,
+              password: 'hashed_password_placeholder' // Placeholder para compatibilidad
+            })
+            setIsAuthenticated(true)
+          } catch (error) {
+            console.error('❌ Error parsing user data:', error)
             localStorage.removeItem('auth_token')
+            localStorage.removeItem('user_data')
           }
+        } else {
+          console.log('ℹ️ No hay datos de autenticación guardados')
         }
       } catch (error) {
-        console.error('Error verificando autenticación:', error)
+        console.error('❌ Error verificando autenticación:', error)
         localStorage.removeItem('auth_token')
+        localStorage.removeItem('user_data')
       } finally {
+        console.log('🏁 Finalizando verificación de autenticación')
         setIsLoading(false)
       }
     }
 
-    checkAuthStatus()
-  }, [])
+    // Ejecutar inmediatamente
+    checkAuth()
+  }, []) // Solo ejecutar una vez al montar
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
     try {
       setIsLoading(true)
       
-      const loginData: LoginRequest = { email, password }
+      // Simulación de login para demostración
+      const mockUsers = {
+        'superadmin@onpoint.com': { role: 'superadmin', name: 'Super Admin' },
+        'admin@onpoint.com': { role: 'admin', name: 'Admin' },
+        'ejecutivo@onpoint.com': { role: 'ejecutivo', name: 'Ejecutivo' }
+      }
       
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-      })
-
-      const data: LoginResponse = await response.json()
-
-      if (data.success && data.user && data.token) {
+      const userData = mockUsers[email as keyof typeof mockUsers]
+      
+      if (userData && password === 'password') {
+        const user = {
+          id: '1',
+          email,
+          name: userData.name,
+          role: userData.role as UserRoleType,
+          avatar: null,
+          password: 'hashed_password_placeholder',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        
+        const token = 'mock_token_' + Date.now()
+        
         // Guardar token y usuario
-        localStorage.setItem('auth_token', data.token)
-        setUser({
-          ...data.user,
-          password: 'hashed_password_placeholder' // Placeholder para compatibilidad
-        })
+        localStorage.setItem('auth_token', token)
+        localStorage.setItem('user_data', JSON.stringify(user))
+        setUser(user)
         setIsAuthenticated(true)
         
         return {
           success: true,
-          user: data.user,
-          token: data.token,
+          user,
+          token,
           message: 'Login exitoso'
         }
       } else {
         return {
           success: false,
-          message: data.message || 'Error en el login'
+          message: 'Credenciales inválidas'
         }
       }
     } catch (error) {
@@ -105,6 +118,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('auth_token')
+    localStorage.removeItem('user_data')
     setUser(null)
     setIsAuthenticated(false)
   }

@@ -6,6 +6,7 @@ import { useAuthContext } from '@/lib/auth/auth-context'
 import { getVersionString } from '@/lib/version'
 
 const LoginPage: React.FC = () => {
+  console.log('🔑 LoginPage renderizando...')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -13,10 +14,14 @@ const LoginPage: React.FC = () => {
   
   const { login, isAuthenticated, isLoading: authLoading } = useAuthContext()
   const router = useRouter()
+  
+  console.log('🔍 Estado de autenticación:', { isAuthenticated, authLoading })
 
   // Redirigir si ya está autenticado
   useEffect(() => {
+    console.log('🔄 useEffect ejecutándose:', { isAuthenticated, authLoading })
     if (isAuthenticated && !authLoading) {
+      console.log('➡️ Redirigiendo al dashboard...')
       router.push('/dashboard')
     }
   }, [isAuthenticated, authLoading, router])
@@ -44,6 +49,7 @@ const LoginPage: React.FC = () => {
 
   // Mostrar loading mientras se verifica la autenticación
   if (authLoading) {
+    console.log('⏳ Mostrando pantalla de carga...')
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -53,6 +59,8 @@ const LoginPage: React.FC = () => {
       </div>
     )
   }
+  
+  console.log('🎨 Renderizando formulario de login...')
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
