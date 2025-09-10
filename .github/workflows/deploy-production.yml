@@ -35,8 +35,17 @@ jobs:
       - name: Upgrade npm
         run: npm i -g npm@10.7.0
 
+      - name: Prepare npm config
+        run: |
+          npm config set legacy-peer-deps true
+          npm config set fund false
+          npm config set audit false
+
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: |
+          npm ci --prefer-offline --no-audit --no-fund \
+          || npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund \
+          || npm i --legacy-peer-deps --no-audit --no-fund
 
       - name: Install jq
         run: |
@@ -105,7 +114,10 @@ jobs:
         run: npm i -g npm@10.7.0
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: |
+          npm ci --prefer-offline --no-audit --no-fund \
+          || npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund \
+          || npm i --legacy-peer-deps --no-audit --no-fund
 
       - name: Build application
         run: npm run build
@@ -124,11 +136,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (AWS_PROD_*)
+        if: ${{ secrets.AWS_PROD_ACCESS_KEY_ID != '' && secrets.AWS_PROD_SECRET_ACCESS_KEY != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (AWS_*_PROD)
+        if: ${{ (secrets.AWS_PROD_ACCESS_KEY_ID == '' || secrets.AWS_PROD_SECRET_ACCESS_KEY == '') && secrets.AWS_ACCESS_KEY_ID_PROD != '' && secrets.AWS_SECRET_ACCESS_KEY_PROD != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (fallback AWS_ACCESS_KEY_ID)
+        if: ${{ (secrets.AWS_PROD_ACCESS_KEY_ID == '' && secrets.AWS_ACCESS_KEY_ID_PROD == '') && secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy Lambda functions
@@ -168,16 +197,36 @@ jobs:
         run: npm i -g npm@10.7.0
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: |
+          npm ci --prefer-offline --no-audit --no-fund \
+          || npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund \
+          || npm i --legacy-peer-deps --no-audit --no-fund
 
       - name: Build application
         run: npm run build
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (AWS_PROD_*)
+        if: ${{ secrets.AWS_PROD_ACCESS_KEY_ID != '' && secrets.AWS_PROD_SECRET_ACCESS_KEY != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_PROD_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_PROD_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (AWS_*_PROD)
+        if: ${{ (secrets.AWS_PROD_ACCESS_KEY_ID == '' || secrets.AWS_PROD_SECRET_ACCESS_KEY == '') && secrets.AWS_ACCESS_KEY_ID_PROD != '' && secrets.AWS_SECRET_ACCESS_KEY_PROD != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PROD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PROD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (fallback AWS_ACCESS_KEY_ID)
+        if: ${{ (secrets.AWS_PROD_ACCESS_KEY_ID == '' && secrets.AWS_ACCESS_KEY_ID_PROD == '') && secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_ACCESS_KEY != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy to S3
