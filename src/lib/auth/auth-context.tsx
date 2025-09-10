@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             setUser({
               ...user,
               password: 'hashed_password_placeholder' // Placeholder para compatibilidad
-            })
+            } as User)
             setIsAuthenticated(true)
           } catch (error) {
             console.error('❌ Error parsing user data:', error)
@@ -74,15 +74,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userData = mockUsers[email as keyof typeof mockUsers]
       
       if (userData && password === 'password') {
-        const user = {
+        const user: User = {
           id: '1',
           email,
-          name: userData.name,
-          role: userData.role as UserRoleType,
-          avatar: null,
           password: 'hashed_password_placeholder',
+          firstName: userData.name.split(' ')[0] || userData.name,
+          lastName: userData.name.split(' ').slice(1).join(' ') || '',
+          name: userData.name,
+          phone: '+525512345678',
+          role: userData.role as UserRoleType,
+          department: 'IT',
+          position: userData.name,
+          status: 'active',
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
+          createdBy: 'system'
         }
         
         const token = 'mock_token_' + Date.now()
