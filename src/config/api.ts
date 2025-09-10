@@ -42,6 +42,13 @@ export const API_CONFIG = {
 
 // Función para detectar el entorno automáticamente
 export const detectEnvironment = (): 'sandbox' | 'prod' | 'local' => {
+  // Primero verificar variable de entorno (prioridad)
+  const envVar = process.env.NEXT_PUBLIC_ENVIRONMENT
+  if (envVar && ['local', 'sandbox', 'prod'].includes(envVar)) {
+    console.log('✅ Entorno detectado por variable de entorno:', envVar)
+    return envVar as 'sandbox' | 'prod' | 'local'
+  }
+  
   // Si estamos en el navegador, detectar por la URL
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
@@ -54,29 +61,24 @@ export const detectEnvironment = (): 'sandbox' | 'prod' | 'local' => {
     }
     
     // Detectar sandbox específicamente
-    if (hostname.includes('sandbox')) {
+    if (hostname.includes('sandbox') || hostname.includes('sandbox.d3ts6pwgn7uyyh.amplifyapp.com')) {
       console.log('✅ Entorno detectado: sandbox')
       return 'sandbox'
     }
     
-    // Detectar producción específicamente
-    if (hostname.includes('main') || hostname === 'd3ts6pwgn7uyyh.amplifyapp.com') {
-      console.log('✅ Entorno detectado: prod')
+    // Detectar producción específicamente (Amplify)
+    if (hostname.includes('main') || 
+        hostname === 'd3ts6pwgn7uyyh.amplifyapp.com' || 
+        hostname.includes('production.d3ts6pwgn7uyyh.amplifyapp.com') ||
+        hostname.includes('production')) {
+      console.log('✅ Entorno detectado: prod (Amplify)')
       return 'prod'
     }
   }
   
-  // Fallback a variable de entorno o local (por seguridad)
-  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'local'
-  console.log('⚠️ Usando fallback - entorno:', environment)
-  
-  // Si no es local, sandbox o prod, usar local por defecto
-  if (environment !== 'local' && environment !== 'sandbox' && environment !== 'prod') {
-    console.log('🚨 Entorno no válido, usando local por seguridad')
-    return 'local'
-  }
-  
-  return environment as 'sandbox' | 'prod' | 'local'
+  // Fallback a local por seguridad
+  console.log('⚠️ Usando fallback - entorno: local')
+  return 'local'
 }
 
 // Función para obtener la URL base según el entorno
@@ -96,20 +98,20 @@ export const getBaseUrl = (): string => {
 // Función helper para construir URLs completas
 export const buildApiUrl = (endpoint: string): string => {
   const env = detectEnvironment()
-  // En producción forzar siempre prod para todos los endpoints
-  if (env === 'prod') {
-    // Si hay un API Gateway dedicado para clientes en prod, usarlo aquí.
-    if (endpoint === '/clients') {
-      return `https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/prod${endpoint}`
-    }
-    return `${API_CONFIG.BASE_URLS.prod}${endpoint}`
-  }
-
-  // Para local/sandbox conservamos lógica previa
+  
+  // Usar la configuración específica del entorno
+  const baseUrl = API_CONFIG.BASE_URLS[env]
+  
+  // Endpoints especiales que requieren API Gateway específico
   if (endpoint === '/clients') {
-    return `https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox${endpoint}`
+    if (env === 'prod') {
+      return `https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/prod${endpoint}`
+    } else {
+      return `https://mkrc6lo043.execute-api.us-east-1.amazonaws.com/sandbox${endpoint}`
+    }
   }
-  return `${getBaseUrl()}${endpoint}`
+  
+  return `${baseUrl}${endpoint}`
 }
 
 // Función helper para hacer requests a la API

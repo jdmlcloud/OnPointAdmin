@@ -131,15 +131,17 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY || secrets.AWS_SECRET_ACCESS_KEY_PROD }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy to S3
+      - name: Deploy to S3 (CloudFront backup)
         run: |
-          echo "📦 Desplegando frontend a S3..."
+          echo "📦 Desplegando frontend a S3 como respaldo de CloudFront..."
+          echo "⚠️ NOTA: El despliegue principal se hace a través de AWS Amplify"
           aws s3 sync .next/static s3://onpoint-admin-prod/static --delete
           aws s3 sync public s3://onpoint-admin-prod/ --delete
 
-      - name: Invalidate CloudFront
+      - name: Invalidate CloudFront (backup)
         run: |
-          echo "🔄 Invalidando CloudFront..."
+          echo "🔄 Invalidando CloudFront como respaldo..."
+          echo "⚠️ NOTA: El despliegue principal se hace a través de AWS Amplify"
           aws cloudfront create-invalidation \
             --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
             --paths "/*"

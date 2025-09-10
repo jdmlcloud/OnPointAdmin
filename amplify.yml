@@ -3,14 +3,10 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "🚀 OnPoint Admin - Frontend Build"
-        - echo "📋 Usando API Gateway + Lambda (no Amplify Auth)"
         - npm ci
     build:
       commands:
-        - echo "🔨 Building Next.js application..."
         - npm run build
-        - echo "✅ Build completed successfully"
   artifacts:
     baseDirectory: .next
     files:

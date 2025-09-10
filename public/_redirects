@@ -1,11 +1,1 @@
-# OnPoint Admin - SPA Redirects
-# Redirect all routes to index.html for Next.js SPA
-
 /*    /index.html   200
-
-# API Gateway endpoints (no redirect needed)
-/api/*   200
-
-# Static assets
-/_next/static/*   200
-/favicon.ico   200
