@@ -166,7 +166,7 @@ export const PermissionCard: React.FC<PermissionCardProps> = ({
           
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500">Estado:</span>
-            <Badge className={`${getStatusColor(permission.status)} text-xs`}>
+            <Badge className={`${getStatusColor(permission.status || 'active')} text-xs`}>
               {permission.status}
             </Badge>
           </div>

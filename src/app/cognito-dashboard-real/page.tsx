@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { LogOut, User, Mail, Shield, CheckCircle, Loader2, Database, Cloud, ArrowRight } from 'lucide-react'
 import { useCognitoReal } from '@/hooks/use-cognito-real'
+import { UserRoleType } from '@/types/users'
 
 export default function CognitoRealDashboardPage() {
   const { user, signOut, loading, error, initialized } = useCognitoReal()
@@ -139,7 +140,7 @@ export default function CognitoRealDashboardPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Rol:</span>
-                <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                <Badge variant={user.role === 'admin' as UserRoleType ? 'default' : 'secondary'}>
                   {user.role}
                 </Badge>
               </div>

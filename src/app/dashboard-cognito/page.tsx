@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCognitoReal } from "@/hooks/use-cognito-real"
+import { UserRoleType } from "@/types/users"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 
@@ -33,9 +34,9 @@ export default function DashboardCognitoPage() {
     
     switch (permission) {
       case 'canManageUsers':
-        return user.role === 'admin'
+        return user.role === 'admin' as UserRoleType
       case 'canManageProviders':
-        return user.role === 'admin'
+        return user.role === 'admin' as UserRoleType
       default:
         return false
     }
@@ -107,7 +108,7 @@ export default function DashboardCognitoPage() {
                 🔐 AWS Cognito Real
               </Badge>
               <Badge variant="outline">
-                {user?.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                {user?.role === 'admin' as UserRoleType ? 'Administrador' : 'Ejecutivo'}
               </Badge>
             </div>
           </div>

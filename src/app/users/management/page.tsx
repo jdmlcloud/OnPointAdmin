@@ -65,7 +65,6 @@ const UserManagementPage: React.FC = () => {
       department: 'Tecnología',
       position: 'Super Administrador',
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -81,7 +80,6 @@ const UserManagementPage: React.FC = () => {
       department: 'Administración',
       position: 'Administrador',
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -97,7 +95,6 @@ const UserManagementPage: React.FC = () => {
       department: 'Ventas',
       position: 'Ejecutivo',
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     }
@@ -109,18 +106,17 @@ const UserManagementPage: React.FC = () => {
       name: 'Super Administrador',
       description: 'Acceso total al sistema, puede gestionar todo incluyendo otros administradores',
       permissions: [
-        { id: 'perm-1', name: 'users:manage', resource: 'users', action: 'manage', description: 'Gestionar usuarios', category: 'users', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-2', name: 'roles:manage', resource: 'roles', action: 'manage', description: 'Gestionar roles', category: 'roles', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-3', name: 'permissions:manage', resource: 'permissions', action: 'manage', description: 'Gestionar permisos', category: 'permissions', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-4', name: 'providers:manage', resource: 'providers', action: 'manage', description: 'Gestionar proveedores', category: 'providers', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-5', name: 'products:manage', resource: 'products', action: 'manage', description: 'Gestionar productos', category: 'products', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-6', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-7', name: 'settings:manage', resource: 'settings', action: 'manage', description: 'Gestionar configuración', category: 'settings', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' }
+        { id: 'perm-1', name: 'users:manage', resource: 'users', action: 'manage', description: 'Gestionar usuarios', category: 'users' },
+        { id: 'perm-2', name: 'roles:manage', resource: 'roles', action: 'manage', description: 'Gestionar roles', category: 'roles' },
+        { id: 'perm-3', name: 'permissions:manage', resource: 'permissions', action: 'manage', description: 'Gestionar permisos', category: 'permissions' },
+        { id: 'perm-4', name: 'providers:manage', resource: 'providers', action: 'manage', description: 'Gestionar proveedores', category: 'providers' },
+        { id: 'perm-5', name: 'products:manage', resource: 'products', action: 'manage', description: 'Gestionar productos', category: 'products' },
+        { id: 'perm-6', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports' },
+        { id: 'perm-7', name: 'settings:manage', resource: 'settings', action: 'manage', description: 'Gestionar configuración', category: 'settings' }
       ],
       level: 1,
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -129,15 +125,14 @@ const UserManagementPage: React.FC = () => {
       name: 'Administrador',
       description: 'Puede gestionar usuarios, proveedores y productos del sistema',
       permissions: [
-        { id: 'perm-8', name: 'users:manage', resource: 'users', action: 'manage', description: 'Gestionar usuarios', category: 'users', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-9', name: 'providers:manage', resource: 'providers', action: 'manage', description: 'Gestionar proveedores', category: 'providers', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-10', name: 'products:manage', resource: 'products', action: 'manage', description: 'Gestionar productos', category: 'products', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-11', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' }
+        { id: 'perm-8', name: 'users:manage', resource: 'users', action: 'manage', description: 'Gestionar usuarios', category: 'users' },
+        { id: 'perm-9', name: 'providers:manage', resource: 'providers', action: 'manage', description: 'Gestionar proveedores', category: 'providers' },
+        { id: 'perm-10', name: 'products:manage', resource: 'products', action: 'manage', description: 'Gestionar productos', category: 'products' },
+        { id: 'perm-11', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports' }
       ],
       level: 2,
       isSystem: false,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -146,14 +141,13 @@ const UserManagementPage: React.FC = () => {
       name: 'Ejecutivo',
       description: 'Puede ver y gestionar proveedores y productos asignados',
       permissions: [
-        { id: 'perm-12', name: 'providers:read', resource: 'providers', action: 'read', description: 'Leer proveedores', category: 'providers', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-13', name: 'products:read', resource: 'products', action: 'read', description: 'Leer productos', category: 'products', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' },
-        { id: 'perm-14', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports', createdAt: '2024-12-19T00:00:00.000Z', updatedAt: '2024-12-19T00:00:00.000Z', createdBy: 'system' }
+        { id: 'perm-12', name: 'providers:read', resource: 'providers', action: 'read', description: 'Leer proveedores', category: 'providers' },
+        { id: 'perm-13', name: 'products:read', resource: 'products', action: 'read', description: 'Leer productos', category: 'products' },
+        { id: 'perm-14', name: 'reports:view', resource: 'reports', action: 'view', description: 'Ver reportes', category: 'reports' }
       ],
       level: 3,
       isSystem: false,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     }
@@ -169,7 +163,6 @@ const UserManagementPage: React.FC = () => {
       category: 'Usuarios',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -182,7 +175,6 @@ const UserManagementPage: React.FC = () => {
       category: 'Usuarios',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -195,7 +187,6 @@ const UserManagementPage: React.FC = () => {
       category: 'Roles',
       isSystem: true,
       status: 'active',
-      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     }

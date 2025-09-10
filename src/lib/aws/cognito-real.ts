@@ -64,7 +64,7 @@ export class CognitoRealService {
           id: userInfo.sub,
           email: credentials.email,
           name: userInfo.name || userInfo.email?.split('@')[0] || 'Usuario',
-          role: this.getUserRole(userInfo),
+          role: this.getUserRole(userInfo) as unknown as UserRoleType,
           accessToken: response.AuthenticationResult.AccessToken!,
           refreshToken: response.AuthenticationResult.RefreshToken || ''
         }

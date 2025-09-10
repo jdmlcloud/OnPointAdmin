@@ -1026,29 +1026,21 @@ export default function LogosPage() {
 
         {/* Modales */}
         <ActionModal
-          isOpen={modals.view}
+          isOpen={modals.view.isOpen}
           onClose={() => closeModal('view')}
-          mode="view"
           title="Ver Logo"
-          data={modals.selectedItem}
         />
 
         <ActionModal
-          isOpen={modals.edit}
+          isOpen={modals.edit.isOpen}
           onClose={() => closeModal('edit')}
-          mode="edit"
           title="Editar Logo"
-          data={modals.selectedItem}
-          onSave={handleSave}
         />
 
         <ActionModal
-          isOpen={modals.delete}
+          isOpen={modals.delete.isOpen}
           onClose={() => closeModal('delete')}
-          mode="delete"
           title="Eliminar Logo"
-          data={modals.selectedItem}
-          onConfirm={handleDeleteConfirm}
         />
       </div>
     </MainLayout>

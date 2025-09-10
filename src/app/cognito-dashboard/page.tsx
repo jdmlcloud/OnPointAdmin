@@ -19,6 +19,7 @@ import { useAuthRoles } from "@/hooks/use-auth-roles"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useCognitoAuth } from "@/hooks/use-cognito-auth"
+import { UserRoleType } from "@/types/users"
 
 export default function CognitoDashboardPage() {
   const router = useRouter()
@@ -209,7 +210,7 @@ export default function CognitoDashboardPage() {
         </div>
 
         {/* Gestión de Usuarios - Solo para Administradores */}
-        {hasPermission('canManageUsers') && (
+        {hasPermission('users', 'manage') && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -354,7 +355,7 @@ export default function CognitoDashboardPage() {
               <div>
                 <p className="text-sm font-medium text-blue-900">Rol:</p>
                 <p className="text-sm text-blue-700">
-                  {cognitoUser?.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                  {cognitoUser?.role === 'admin' as UserRoleType ? 'Administrador' : 'Ejecutivo'}
                 </p>
               </div>
               <div>

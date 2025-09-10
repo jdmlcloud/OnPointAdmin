@@ -43,7 +43,13 @@ export function useMicrointeractions() {
       }
       
       if (options?.notification) {
-        addNotification(options.notification)
+        addNotification({
+          ...options.notification,
+          description: options.notification.message,
+          status: 'new',
+          priority: 'medium',
+          read: false
+        })
       }
     } catch (error) {
       toast({

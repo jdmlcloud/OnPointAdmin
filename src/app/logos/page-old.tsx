@@ -253,8 +253,8 @@ export default function LogosPage() {
   }
 
   // Obtener categorías únicas para filtros
-  const categories = [...new Set(logos.map(l => l.category))]
-  const tags = [...new Set(logos.flatMap(l => l.tags || []))]
+  const categories = Array.from(new Set(logos.map(l => l.category)))
+  const tags = Array.from(new Set(logos.flatMap(l => l.tags || [])))
 
   if (isLoading) {
     return (
@@ -856,7 +856,6 @@ export default function LogosPage() {
         onClose={() => closeModal('edit')}
         title="Editar Logo"
         size="lg"
-        onSave={() => handleSaveLogo(modals.edit.data)}
       >
         {modals.edit.data && (
           <div className="space-y-6">
@@ -933,9 +932,6 @@ export default function LogosPage() {
         isOpen={modals.delete.isOpen}
         onClose={() => closeModal('delete')}
         title="Eliminar Logo"
-        onSave={() => handleDeleteLogo(modals.delete.data)}
-        saveText="Eliminar"
-        saveVariant="destructive"
       >
         {modals.delete.data && (
           <div className="space-y-4">

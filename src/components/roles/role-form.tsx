@@ -76,7 +76,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
       setFormData({
         name: role.name,
         description: role.description,
-        permissions: role.permissions
+        permissions: role.permissions.map(p => p.id)
       })
     } else {
       setFormData({
@@ -146,7 +146,7 @@ export const RoleForm: React.FC<RoleFormProps> = ({
     setFormData(prev => ({
       ...prev,
       permissions: checked
-        ? [...new Set([...prev.permissions, ...permissionIds])]
+        ? Array.from(new Set([...prev.permissions, ...permissionIds]))
         : prev.permissions.filter(p => !permissionIds.includes(p))
     }))
   }

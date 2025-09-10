@@ -231,7 +231,7 @@ export default function ProductsPage() {
   }
 
   // Obtener categorías únicas para filtros
-  const categories = [...new Set(products.map(p => p.category))]
+  const categories = Array.from(new Set(products.map(p => p.category)))
 
   if (isLoading) {
     return (
@@ -625,7 +625,6 @@ export default function ProductsPage() {
         onClose={() => closeModal('edit')}
         title="Editar Producto"
         size="lg"
-        onSave={() => handleSaveProduct(modals.edit.data)}
       >
         {modals.edit.data && (
           <div className="space-y-6">
@@ -734,7 +733,6 @@ export default function ProductsPage() {
         onClose={() => closeModal('delete')}
         title="Eliminar Producto"
         type="delete"
-        onConfirm={() => handleDeleteProduct(modals.delete.data)}
         confirmText="Eliminar"
         destructive={true}
       >

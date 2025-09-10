@@ -163,7 +163,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Estado:</span>
-            <Badge className={getStatusColor(role.status)}>
+            <Badge className={getStatusColor(role.status || 'active')}>
               {role.status}
             </Badge>
           </div>

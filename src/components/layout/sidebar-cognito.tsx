@@ -28,6 +28,8 @@ import {
 import { useState } from "react"
 import { useRoles } from "@/hooks/use-roles"
 import { useCognitoAuth } from "@/hooks/use-cognito-auth"
+import { useAuthRoles } from "@/hooks/use-auth-roles"
+import { UserRoleType } from "@/types/users"
 
 const navigation = [
   {
@@ -132,7 +134,7 @@ const navigation = [
 export function SidebarCognito() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
-  const { hasPermission } = useRoles()
+  const { hasPermission } = useAuthRoles()
   const { user, signOut } = useCognitoAuth()
 
   const handleSignOut = async () => {
@@ -144,7 +146,7 @@ export function SidebarCognito() {
   }
 
   const filteredNavigation = navigation.filter(item => 
-    hasPermission(item.permission as any)
+    hasPermission(item.permission as any, 'read')
   )
 
   return (
@@ -235,7 +237,7 @@ export function SidebarCognito() {
                   variant="outline" 
                   className="text-xs mt-1"
                 >
-                  {user.role === 'admin' ? 'Administrador' : 'Ejecutivo'}
+                  {user.role === 'admin' as UserRoleType ? 'Administrador' : 'Ejecutivo'}
                 </Badge>
               </div>
             )}

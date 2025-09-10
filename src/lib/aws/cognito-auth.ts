@@ -90,7 +90,7 @@ export class CognitoAuthService {
         id: user.userId,
         email: user.signInDetails?.loginId || '',
         name: 'Usuario',
-        role: role,
+        role: role as UserRoleType,
         accessToken: session.tokens?.accessToken?.toString() || '',
         refreshToken: ''
       }

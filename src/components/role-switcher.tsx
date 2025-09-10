@@ -52,7 +52,7 @@ export function RoleSwitcher() {
     )
   }
 
-  const CurrentIcon = roleIcons[currentRole] || User
+  const CurrentIcon = roleIcons[currentRole as keyof typeof roleIcons] || User
 
   return (
     <div className="relative">
@@ -86,7 +86,7 @@ export function RoleSwitcher() {
             
             <CardContent className="space-y-3">
               {availableRoles.map((role) => {
-                const Icon = roleIcons[role] || User
+                const Icon = roleIcons[role as keyof typeof roleIcons] || User
                 const isActive = role === currentRole
                 
                 return (
@@ -103,7 +103,7 @@ export function RoleSwitcher() {
                     }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${roleColors[role]} text-white`}>
+                      <div className={`p-2 rounded-lg ${roleColors[role as keyof typeof roleColors]} text-white`}>
                         <Icon className="h-4 w-4" />
                       </div>
                       
