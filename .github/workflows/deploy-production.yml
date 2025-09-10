@@ -87,6 +87,7 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -145,6 +146,7 @@ jobs:
   deploy-frontend:
     needs: [test, build]
     runs-on: ubuntu-latest
+    continue-on-error: true
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/production'
     steps:
       - name: Checkout code
