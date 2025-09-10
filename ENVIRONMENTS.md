@@ -2,11 +2,11 @@
 
 ## 📋 Resumen de Entornos
 
-| Entorno | URL | API Gateway | Descripción |
-|---------|-----|-------------|-------------|
-| **Local** | `http://localhost:3000` | Sandbox | Desarrollo local |
-| **Sandbox** | `https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com` | Sandbox | Pruebas y desarrollo |
-| **Production** | `https://production.d3ts6pwgn7uyyh.amplifyapp.com` | Production | Producción |
+| Entorno | URL | API Gateway | Rama | Descripción |
+|---------|-----|-------------|------|-------------|
+| **Local** | `http://localhost:3000` | Sandbox | develop | Desarrollo local |
+| **Sandbox** | `https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com` | Sandbox | sandbox | Pruebas y desarrollo |
+| **Production** | `https://production.d3ts6pwgn7uyyh.amplifyapp.com` | Production | main | Producción |
 
 ## 🔧 Configuración por Entorno
 
@@ -41,8 +41,14 @@ NEXT_PUBLIC_CLIENTS_API_URL=https://mkrc6lo043.execute-api.us-east-1.amazonaws.c
 - **Sandbox**: Se despliega automáticamente desde la rama `sandbox`
 
 ### GitHub Actions (Respaldo)
-- **Producción**: Se despliega desde la rama `main` o `production`
+- **Producción**: Se despliega desde la rama `main`
+- **Sandbox**: Se despliega desde la rama `sandbox`
 - **CloudFront**: Como respaldo de Amplify
+
+### Ramas del Proyecto
+- **main**: Producción (despliegue automático)
+- **sandbox**: Sandbox (despliegue automático)
+- **develop**: Desarrollo local (no se despliega automáticamente)
 
 ## 🔍 Verificación
 
