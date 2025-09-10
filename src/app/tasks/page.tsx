@@ -21,6 +21,7 @@ import {
   Trash2,
   Eye
 } from "lucide-react"
+import { TasksPageSkeleton } from "@/components/ui/page-skeletons"
 
 interface Task {
   id: string
@@ -112,25 +113,7 @@ export default function TasksPage() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Tareas Pendientes</h1>
-              <p className="text-muted-foreground">Gestiona y organiza tus tareas</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
-                  <div className="h-6 bg-muted rounded w-1/4"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <TasksPageSkeleton />
       </MainLayout>
     )
   }

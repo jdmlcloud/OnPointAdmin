@@ -11,8 +11,8 @@ import { AnimatedButton } from "@/components/ui/animated-button"
 import { ActionModal } from "@/components/ui/action-modal"
 import { useCardActions } from "@/hooks/use-card-actions"
 import { useProducts } from "@/hooks/use-products"
-import { ProductListSkeleton } from "@/components/ui/product-skeleton"
-import { AssetCard } from "@/components/ui/asset-card"
+import { ProductsPageSkeleton } from "@/components/ui/page-skeletons"
+import { ProductCard, ProductCardSkeleton } from "@/components/atomic"
 import { 
   Plus, 
   Search, 
@@ -236,21 +236,7 @@ export default function ProductsPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">Gestión de Productos</h1>
-              <p className="text-muted-foreground">
-                Administra tu catálogo de productos
-              </p>
-            </div>
-            <Button onClick={() => router.push('/products/new')}>
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Producto
-            </Button>
-          </div>
-          <ProductListSkeleton />
-        </div>
+        <ProductsPageSkeleton />
       </MainLayout>
     )
   }
@@ -274,7 +260,7 @@ export default function ProductsPage() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -283,30 +269,30 @@ export default function ProductsPage() {
               Administra tu catálogo de productos ({filteredProducts.length} productos)
             </p>
           </div>
-          <Button onClick={() => router.push('/products/new')}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Producto
-          </Button>
-        </div>
+            <Button onClick={() => router.push('/products/new')}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo Producto
+            </Button>
+          </div>
 
         {/* Search and Filters */}
         <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
               placeholder="Buscar productos por nombre, categoría o proveedor..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           <Button 
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
           >
-            <Filter className="h-4 w-4 mr-2" />
+              <Filter className="h-4 w-4 mr-2" />
             Filtros {activeFilters.length > 0 && `(${activeFilters.length})`}
-          </Button>
+            </Button>
         </div>
 
         {/* Filtros Activos */}
@@ -322,7 +308,7 @@ export default function ProductsPage() {
               >
                 Limpiar todos
               </Button>
-            </div>
+                </div>
             
             {/* Filtros Predefinidos */}
             <div className="flex flex-wrap gap-2 mb-3">
@@ -352,7 +338,7 @@ export default function ProductsPage() {
                   {filter.icon} {filter.label}
                 </button>
               ))}
-            </div>
+              </div>
 
             {/* Filtros por Categoría */}
             {categories.length > 0 && (
@@ -377,10 +363,10 @@ export default function ProductsPage() {
                     🏷️ {category}
                   </button>
                 ))}
-              </div>
-            )}
-          </div>
-        )}
+                    </div>
+                  )}
+                    </div>
+                  )}
 
         {/* Filtros Activos Seleccionados */}
         {activeFilters.length > 0 && (
@@ -408,34 +394,32 @@ export default function ProductsPage() {
                     ×
                   </button>
                 </div>
-              ))}
-            </div>
+          ))}
+        </div>
           </div>
         )}
 
         {/* Products Grid */}
         <div className="flex-1 overflow-auto scrollbar-hide">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {filteredProducts.map((product) => (
-            <AssetCard
+          <div className="grid gap-4 items-stretch px-0 md:px-0 justify-start [grid-template-columns:repeat(auto-fill,minmax(280px,280px))]">
+          {isLoading && Array.from({ length: 6 }).map((_, i) => (
+            <ProductCardSkeleton key={`prod-skel-${i}`} />
+          ))}
+          {!isLoading && filteredProducts.map((product) => (
+            <ProductCard
               key={product.id}
               id={product.id}
-              name={product.name}
+              title={product.name}
               description={product.description}
-              thumbnailUrl={product.images?.[0]}
-              fallbackText="Sin imagen"
-              type="product"
-              productData={{
-                category: product.category,
-                price: product.price,
-                status: product.status,
-                tags: product.tags
-              }}
+              image={product.images?.[0]}
+              status={product.status === 'active' ? 'active' : 'inactive'}
+              price={product.price}
+              stock={product.stock}
+              category={product.category}
               onView={() => handleView(product)}
               onEdit={() => handleEdit(product)}
               onDelete={() => handleDelete(product)}
-              className="h-full"
-              maxWidth="max-w-none"
+              className="card-consistent w-full"
             />
           ))}
           </div>
@@ -492,8 +476,8 @@ export default function ProductsPage() {
                 <label className="text-sm font-medium text-muted-foreground">Estado</label>
                 <Badge variant={getStatusBadgeVariant(modals.view.data.status)}>
                   {getStatusText(modals.view.data.status)}
-                </Badge>
-              </div>
+                  </Badge>
+                </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Proveedor</label>
                 <p className="text-lg">{modals.view.data.providerName || 'No especificado'}</p>
@@ -503,7 +487,7 @@ export default function ProductsPage() {
                 <p className="text-lg">{modals.view.data.capacity || 'No especificado'}</p>
               </div>
             </div>
-
+            
             {/* Colores disponibles */}
             {modals.view.data.colors && modals.view.data.colors.length > 0 && (
               <div>
@@ -540,13 +524,13 @@ export default function ProductsPage() {
                     </div>
                   )}
                   {modals.view.data.weight && (
-                    <div>
+                <div>
                       <p className="text-sm font-medium">Peso</p>
                       <p className="text-sm text-muted-foreground">{modals.view.data.weight} g</p>
-                    </div>
+                </div>
                   )}
                   {modals.view.data.materials && modals.view.data.materials.length > 0 && (
-                    <div>
+                <div>
                       <p className="text-sm font-medium">Materiales</p>
                       <p className="text-sm text-muted-foreground">{modals.view.data.materials.join(', ')}</p>
                     </div>
@@ -554,18 +538,18 @@ export default function ProductsPage() {
                 </div>
               </div>
             )}
-
+              
             {/* Área de impresión */}
             {modals.view.data.printingArea && (
-              <div>
+                <div>
                 <label className="text-sm font-medium text-muted-foreground">Área de Impresión</label>
                 <p className="text-lg">{modals.view.data.printingArea.width} x {modals.view.data.printingArea.height} cm</p>
-              </div>
+                </div>
             )}
 
             {/* Métodos de impresión */}
             {modals.view.data.printingMethods && modals.view.data.printingMethods.length > 0 && (
-              <div>
+                <div>
                 <label className="text-sm font-medium text-muted-foreground">Métodos de Impresión</label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {modals.view.data.printingMethods.map((method: string, index: number) => (
@@ -591,13 +575,13 @@ export default function ProductsPage() {
                       {modals.view.data.packaging.dimensions.depth && ` x ${modals.view.data.packaging.dimensions.depth}`} cm
                     </p>
                   </div>
-                  <div>
+                <div>
                     <p className="text-sm font-medium">Peso del empaque</p>
                     <p className="text-sm text-muted-foreground">{modals.view.data.packaging.weight} kg</p>
                   </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {/* Descripción */}
             <div>
@@ -631,7 +615,7 @@ export default function ProductsPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="edit-name" className="block text-sm font-medium mb-2">Nombre *</label>
-                <Input
+                <Input 
                   id="edit-name"
                   defaultValue={modals.edit.data.name}
                   placeholder="Nombre del producto"
@@ -647,23 +631,23 @@ export default function ProductsPage() {
               </div>
               <div>
                 <label htmlFor="edit-category" className="block text-sm font-medium mb-2">Categoría *</label>
-                <Input
+                <Input 
                   id="edit-category"
                   defaultValue={modals.edit.data.category}
                   placeholder="Categoría del producto"
                 />
               </div>
-              <div>
+            <div>
                 <label htmlFor="edit-capacity" className="block text-sm font-medium mb-2">Capacidad</label>
                 <Input
                   id="edit-capacity"
                   defaultValue={modals.edit.data.capacity || ''}
                   placeholder="Ej: 660ml, 500ml"
-                />
-              </div>
+              />
+            </div>
               <div>
                 <label htmlFor="edit-price" className="block text-sm font-medium mb-2">Precio *</label>
-                <Input
+                <Input 
                   id="edit-price"
                   type="number"
                   step="0.01"
@@ -685,7 +669,7 @@ export default function ProductsPage() {
               </div>
               <div>
                 <label htmlFor="edit-stock" className="block text-sm font-medium mb-2">Stock Total</label>
-                <Input
+                <Input 
                   id="edit-stock"
                   type="number"
                   defaultValue={modals.edit.data.stock || 0}

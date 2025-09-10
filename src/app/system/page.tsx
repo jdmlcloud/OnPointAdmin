@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimatedButton } from "@/components/ui/animated-button"
+import { useNotifications } from "@/hooks/use-notifications"
+import { SystemPageSkeleton } from "@/components/ui/page-skeletons"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
 import { 
   Settings, 
@@ -45,6 +47,19 @@ import {
 } from "lucide-react"
 
 export default function SystemPage() {
+  const { loading } = useNotifications()
+  const [splashLoading, setSplashLoading] = useState(true)
+  useEffect(() => {
+    const t = setTimeout(() => setSplashLoading(false), 300)
+    return () => clearTimeout(t)
+  }, [])
+  if (loading || splashLoading) {
+    return (
+      <MainLayout>
+        <SystemPageSkeleton />
+      </MainLayout>
+    )
+  }
   const { simulateAction } = useMicrointeractions()
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")

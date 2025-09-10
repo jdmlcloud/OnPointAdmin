@@ -4,8 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MainLayout } from "@/components/layout/main-layout"
 import { FileText, Download, Calendar, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ReportsPageSkeleton } from "@/components/ui/page-skeletons"
+import { useNotifications } from "@/hooks/use-notifications"
 
 export default function ReportsPage() {
+  const { loading } = useNotifications()
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <ReportsPageSkeleton />
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="space-y-6">

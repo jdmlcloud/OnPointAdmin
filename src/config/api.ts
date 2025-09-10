@@ -125,11 +125,23 @@ export const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<T> => {
   const url = buildApiUrl(endpoint)
-  
-  // Debug: mostrar la URL que se está usando
-  console.log(`🌐 API Request: ${url}`)
-  console.log(`🔍 Endpoint: ${endpoint}`)
-  console.log(`🌍 Entorno detectado: ${detectEnvironment()}`)
+
+  // Cache y deduplicación en memoria (solo para GET)
+  // TTL ajustado: 5s para navegación fluida entre secciones sin refetchs agresivos
+  const CACHE_TTL_MS = 5000
+  const method = (options.method || 'GET').toUpperCase()
+  const isGet = method === 'GET' && !options.body
+  const cacheKey = `${method}:${url}`
+  ;(globalThis as any).__apiCache = (globalThis as any).__apiCache || new Map<string, { timestamp: number; data: any }>()
+  ;(globalThis as any).__apiInflight = (globalThis as any).__apiInflight || new Map<string, Promise<any>>()
+  const requestCache: Map<string, { timestamp: number; data: any }> = (globalThis as any).__apiCache
+  const inflight: Map<string, Promise<any>> = (globalThis as any).__apiInflight
+
+  if (process.env.NODE_ENV === 'development' && endpoint !== API_CONFIG.ENDPOINTS.STATS) {
+    console.log(`🌐 API Request: ${url}`)
+    console.log(`🔍 Endpoint: ${endpoint}`)
+    console.log(`🌍 Entorno detectado: ${detectEnvironment()}`)
+  }
   
   const config: RequestInit = {
     ...options,
@@ -139,8 +151,35 @@ export const apiRequest = async <T>(
     }
   }
   
+  const abortController = new AbortController()
+  const signal = abortController.signal
+
   try {
-    const response = await fetch(url, config)
+    // Cache rápido
+    if (isGet) {
+      const cached = requestCache.get(cacheKey)
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+        return cached.data as T
+      }
+      const pending = inflight.get(cacheKey)
+      if (pending) {
+        return (await pending) as T
+      }
+    }
+
+    const fetchPromise = fetch(url, { ...config, signal })
+    if (isGet) {
+      inflight.set(cacheKey, fetchPromise.then(async (resp) => {
+        if (!resp.ok) return Promise.reject(resp)
+        const json = await resp.json()
+        requestCache.set(cacheKey, { timestamp: Date.now(), data: json })
+        return json
+      }).finally(() => {
+        inflight.delete(cacheKey)
+      }))
+    }
+
+    const response = await (isGet ? inflight.get(cacheKey)! : fetchPromise)
     
     if (!response.ok) {
       // Intentar obtener el mensaje de error del response
@@ -156,9 +195,15 @@ export const apiRequest = async <T>(
       throw new Error(errorMessage)
     }
     
-    const data = await response.json()
-    return data
+    if (!isGet) {
+      const data = await response.json()
+      return data
+    }
+    return response as T
   } catch (error) {
+    if ((error as any).name === 'AbortError') {
+      throw new Error('Solicitud cancelada')
+    }
     // Mejorar el manejo de errores de red
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
       throw new Error('Error de conexión. Verifica tu conexión a internet o contacta al administrador.')

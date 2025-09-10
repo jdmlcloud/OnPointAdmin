@@ -46,6 +46,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuthContext } from "@/lib/auth/auth-context"
+import { DashboardSkeleton } from "@/components/ui/page-skeletons"
 import { useUsers } from "@/hooks/use-users"
 import { useProviders } from "@/hooks/use-providers"
 import { useStats } from "@/hooks/use-stats"
@@ -141,6 +142,16 @@ export default function DashboardPage() {
       color: "bg-gray-500"
     }
   ]
+
+  const isLoading = usersLoading || providersLoading || statsLoading || logosLoading || productsLoading || clientsLoading || notificationsLoading || productivityLoading || systemLoading
+
+  if (!user || isLoading) {
+    return (
+      <MainLayout>
+        <DashboardSkeleton />
+      </MainLayout>
+    )
+  }
 
   return (
     <MainLayout>
@@ -552,7 +563,7 @@ export default function DashboardPage() {
                     <p className="text-2xl font-bold text-indigo-600">{services.length}</p>
                     <p className="text-sm text-muted-foreground">Servicios</p>
                     <p className="text-xs text-gray-500">Disponibles en la plataforma</p>
-                  </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -579,8 +590,8 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-cyan-500 flex items-center justify-center">
                     <Clock className="h-5 w-5 text-white" />
-                  </div>
-                  <div>
+                    </div>
+                    <div>
                     <p className="text-2xl font-bold text-cyan-600">
                       {systemLoading ? "..." : `${systemMetrics.uptime}%`}
                     </p>
@@ -793,10 +804,10 @@ export default function DashboardPage() {
                       style={{width: `${systemLoading ? 0 : Math.min(systemMetrics.requestsPerMinute / 200 * 100, 100)}%`}}
                     ></div>
                   </div>
-                </div>
+          </div>
 
                 {/* Tiempo de respuesta */}
-                <div>
+              <div>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-medium">Tiempo de respuesta</span>
                     <span className="text-sm text-muted-foreground">

@@ -4,8 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MainLayout } from "@/components/layout/main-layout"
 import { Plug, Settings, CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { IntegrationsPageSkeleton } from "@/components/ui/page-skeletons"
+import { useNotifications } from "@/hooks/use-notifications"
 
 export default function IntegrationsPage() {
+  const { loading } = useNotifications()
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <IntegrationsPageSkeleton />
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="space-y-6">

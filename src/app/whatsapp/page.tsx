@@ -26,6 +26,7 @@ import {
   Eye,
   PhoneCall
 } from "lucide-react"
+import { WhatsAppPageSkeleton } from "@/components/ui/page-skeletons"
 
 interface WhatsAppMessage {
   id: string
@@ -47,6 +48,12 @@ export default function WhatsAppPage() {
   const [selectedMessage, setSelectedMessage] = useState<WhatsAppMessage | null>(null)
   const [replyText, setReplyText] = useState("")
   const { notifications, loading } = useNotifications()
+  const [splashLoading, setSplashLoading] = useState(true)
+
+  useEffect(() => {
+    const t = setTimeout(() => setSplashLoading(false), 350)
+    return () => clearTimeout(t)
+  }, [])
 
   // Datos mock de mensajes de WhatsApp (después se conectarán con AWS)
   const [messages, setMessages] = useState<WhatsAppMessage[]>([
@@ -183,28 +190,10 @@ export default function WhatsAppPage() {
     ))
   }
 
-  if (loading) {
+  if (loading || splashLoading) {
     return (
       <MainLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">WhatsApp</h1>
-              <p className="text-muted-foreground">Gestiona tus mensajes de WhatsApp</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} className="animate-pulse">
-                <CardContent className="p-6">
-                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-muted rounded w-1/2 mb-4"></div>
-                  <div className="h-6 bg-muted rounded w-1/4"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <WhatsAppPageSkeleton />
       </MainLayout>
     )
   }

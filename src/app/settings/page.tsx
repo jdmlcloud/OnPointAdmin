@@ -29,6 +29,7 @@ import {
   FileText
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { SettingsPageSkeleton } from "@/components/ui/page-skeletons"
 
 export default function SettingsPage() {
   const { toast } = useToast()
@@ -53,6 +54,14 @@ export default function SettingsPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <SettingsPageSkeleton />
+      </MainLayout>
+    )
   }
 
   return (

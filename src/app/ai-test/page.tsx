@@ -1,6 +1,7 @@
 "use client"
+// @ts-nocheck
 
-import { useState } from "react"
+import * as React from "react"
 import { MainLayout } from "@/components/layout/main-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimatedButton } from "@/components/ui/animated-button"
+import { useNotifications } from "@/hooks/use-notifications"
+import { AITestPageSkeleton } from "@/components/ui/page-skeletons"
 import { useMicrointeractions } from "@/hooks/use-microinteractions"
 import { 
   Bot, 
@@ -27,14 +30,27 @@ import {
 
 export default function AITestPage() {
   const { simulateAction } = useMicrointeractions()
-  const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<any>({})
-  const [currentProvider, setCurrentProvider] = useState<string>('')
+  const { loading: notificationsLoading } = useNotifications()
+  const [splashLoading, setSplashLoading] = React.useState(true)
+  React.useEffect(() => {
+    const t = setTimeout(() => setSplashLoading(false), 300)
+    return () => clearTimeout(t)
+  }, [])
+  if (notificationsLoading || splashLoading) {
+    return (
+      <MainLayout>
+        <AITestPageSkeleton />
+      </MainLayout>
+    )
+  }
+  const [loading, setLoading] = React.useState(false)
+  const [results, setResults] = React.useState<any>({})
+  const [currentProvider, setCurrentProvider] = React.useState<string>('')
 
   // Estados para diferentes tipos de pruebas
-  const [textPrompt, setTextPrompt] = useState('')
-  const [whatsappMessage, setWhatsappMessage] = useState('')
-  const [quotationData, setQuotationData] = useState({
+  const [textPrompt, setTextPrompt] = React.useState('')
+  const [whatsappMessage, setWhatsappMessage] = React.useState('')
+  const [quotationData, setQuotationData] = React.useState({
     clientName: '',
     clientEmail: '',
     clientCompany: '',

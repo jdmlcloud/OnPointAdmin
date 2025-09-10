@@ -3,8 +3,25 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainLayout } from "@/components/layout/main-layout"
 import { BarChart3, TrendingUp, Users, Package } from "lucide-react"
+import { useNotifications } from "@/hooks/use-notifications"
+import { AnalyticsPageSkeleton } from "@/components/ui/page-skeletons"
 
 export default function AnalyticsPage() {
+  const { loading } = useNotifications()
+  const [splashLoading, setSplashLoading] = React.useState(true)
+  React.useEffect(() => {
+    const t = setTimeout(() => setSplashLoading(false), 300)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (loading || splashLoading) {
+    return (
+      <MainLayout>
+        <AnalyticsPageSkeleton />
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="space-y-8">

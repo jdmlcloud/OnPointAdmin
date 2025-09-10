@@ -41,9 +41,12 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [lastFetchedAt, setLastFetchedAt] = useState<number>(0)
 
   const fetchNotifications = async () => {
     try {
+      const now = Date.now()
+      if (now - lastFetchedAt < 4000 && notifications.length > 0) return
       setLoading(true)
       setError(null)
       
@@ -62,6 +65,7 @@ export const useNotifications = () => {
         }
         
         setStats(newStats)
+        setLastFetchedAt(Date.now())
         return
       } catch (apiError) {
         console.warn('⚠️ Error al conectar con AWS, usando datos mock:', apiError)

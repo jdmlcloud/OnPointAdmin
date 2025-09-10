@@ -4,8 +4,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MainLayout } from "@/components/layout/main-layout"
 import { Calculator, FileText, Plus, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { QuotationsPageSkeleton } from "@/components/ui/page-skeletons"
+import { useNotifications } from "@/hooks/use-notifications"
 
 export default function QuotationsPage() {
+  const { loading } = useNotifications()
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <QuotationsPageSkeleton />
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="space-y-6">

@@ -35,30 +35,12 @@ export function HeaderCognitoIntegrated() {
   }
 
   const toggleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark")
-    } else if (theme === "dark") {
-      setTheme("system")
-    } else if (theme === "system") {
-      setTheme("light")
-    } else {
-      // Si theme es undefined o cualquier otro valor, empezar con light
-      setTheme("light")
-    }
+    // Alternancia binaria: light <-> dark
+    if (theme === "light") setTheme("dark")
+    else setTheme("light")
   }
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case "light":
-        return <Sun className="h-4 w-4" />
-      case "dark":
-        return <Moon className="h-4 w-4" />
-      case "system":
-        return <Monitor className="h-4 w-4" />
-      default:
-        return <Sun className="h-4 w-4" />
-    }
-  }
+  const getThemeIcon = () => (theme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />)
 
   return (
     <header className="h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

@@ -3,8 +3,26 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MainLayout } from "@/components/layout/main-layout"
 import { MapPin, Clock, Users, TrendingUp } from "lucide-react"
+import { useState, useEffect } from "react"
+import { useNotifications } from "@/hooks/use-notifications"
+import { TrackingPageSkeleton } from "@/components/ui/page-skeletons"
 
 export default function TrackingPage() {
+  const { loading } = useNotifications()
+  const [splashLoading, setSplashLoading] = useState(true)
+  useEffect(() => {
+    const t = setTimeout(() => setSplashLoading(false), 300)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (loading || splashLoading) {
+    return (
+      <MainLayout>
+        <TrackingPageSkeleton />
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="space-y-6">

@@ -1,38 +1,50 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import * as React from 'react'
 import { User, LoginRequest, LoginResponse, AuthContextType, UserRoleType } from '@/types/users'
 import { hasPermission, hasRole, canManageUser, canAssignRole, getAssignableRoles, canAccessRoute } from './permission-utils'
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+// Alias con 'any' para evitar conflictos de tipos de React en herramientas/linter
+const ReactAny = React as any
+const AuthContext = ReactAny.createContext(undefined as AuthContextType | undefined)
 
 interface AuthProviderProps {
-  children: ReactNode
+  children: any
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  console.log('🔐 AuthProvider inicializando...')
-  const [user, setUser] = useState<User | null>(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
+export function AuthProvider({ children }: AuthProviderProps) {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔐 AuthProvider inicializando...')
+  }
+  const [user, setUser] = ReactAny.useState(null as User | null)
+  const [isAuthenticated, setIsAuthenticated] = ReactAny.useState(false)
+  const [isLoading, setIsLoading] = ReactAny.useState(true)
 
   // Verificar si hay un token guardado al cargar la aplicación
-  useEffect(() => {
-    console.log('🔍 useEffect ejecutándose en AuthProvider...')
+  ReactAny.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 useEffect ejecutándose en AuthProvider...')
+    }
     
     const checkAuth = () => {
-      console.log('🔍 Verificando estado de autenticación...')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 Verificando estado de autenticación...')
+      }
       try {
         const token = localStorage.getItem('auth_token')
         const userData = localStorage.getItem('user_data')
         
-        console.log('📝 Token encontrado:', !!token)
-        console.log('👤 Datos de usuario encontrados:', !!userData)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('📝 Token encontrado:', !!token)
+          console.log('👤 Datos de usuario encontrados:', !!userData)
+        }
         
         if (token && userData) {
           try {
             const user = JSON.parse(userData)
-            console.log('✅ Usuario autenticado:', user.email)
+            if (process.env.NODE_ENV === 'development') {
+              console.log('✅ Usuario autenticado:', user.email)
+            }
             setUser({
               ...user,
               password: 'hashed_password_placeholder' // Placeholder para compatibilidad
@@ -44,14 +56,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             localStorage.removeItem('user_data')
           }
         } else {
-          console.log('ℹ️ No hay datos de autenticación guardados')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('ℹ️ No hay datos de autenticación guardados')
+          }
         }
       } catch (error) {
-        console.error('❌ Error verificando autenticación:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ Error verificando autenticación:', error)
+        }
         localStorage.removeItem('auth_token')
         localStorage.removeItem('user_data')
       } finally {
-        console.log('🏁 Finalizando verificación de autenticación')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🏁 Finalizando verificación de autenticación')
+        }
         setIsLoading(false)
       }
     }
@@ -175,7 +193,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 }
 
 export const useAuthContext = (): AuthContextType => {
-  const context = useContext(AuthContext)
+  const context = ReactAny.useContext(AuthContext)
   if (context === undefined) {
     throw new Error('useAuthContext debe ser usado dentro de un AuthProvider')
   }

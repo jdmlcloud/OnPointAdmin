@@ -203,30 +203,34 @@ const categoryLabels = {
 export function Sidebar() {
   const pathname = usePathname()
   const { user, logout } = useAuthContext()
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(true)
   const [isHovered, setIsHovered] = useState(false)
   const [isAutoHidden, setIsAutoHidden] = useState(false)
 
   // Auto-hide functionality
   useEffect(() => {
-    if (!collapsed) {
+    let timer: NodeJS.Timeout
+
+    console.log('🔄 useEffect ejecutándose - isHovered:', isHovered, 'collapsed:', collapsed, 'isAutoHidden:', isAutoHidden)
+
+    if (isHovered) {
+      // Cuando se hace hover, expandir inmediatamente
+      console.log('✅ Hover detectado - expandiendo menú')
       setIsAutoHidden(false)
-      return
+    } else {
+      // Cuando se quita el hover, iniciar timer de 2 segundos para colapsar
+      console.log('⏰ Iniciando timer de 2 segundos para colapsar')
+      timer = setTimeout(() => {
+        console.log('⏰ Timer completado - colapsando menú')
+        setIsAutoHidden(true)
+      }, 2000)
     }
 
-    const timer = setTimeout(() => {
-      if (!isHovered) {
-        setIsAutoHidden(true)
+    return () => {
+      if (timer) {
+        console.log('🧹 Limpiando timer')
+        clearTimeout(timer)
       }
-    }, 2000) // 2 segundos
-
-    return () => clearTimeout(timer)
-  }, [collapsed, isHovered])
-
-  // Reset auto-hide when hovering
-  useEffect(() => {
-    if (isHovered) {
-      setIsAutoHidden(false)
     }
   }, [isHovered])
 
@@ -235,20 +239,34 @@ export function Sidebar() {
     setIsAutoHidden(false)
   }
 
+  // El menú debe estar colapsado si:
+  // 1. Está en estado collapsed Y
+  // 2. No hay hover O está en auto-hidden
   const shouldCollapse = collapsed && (!isHovered || isAutoHidden)
+  
+  console.log('🎯 Estado del menú - shouldCollapse:', shouldCollapse, 'collapsed:', collapsed, 'isHovered:', isHovered, 'isAutoHidden:', isAutoHidden)
+  console.log('🎨 Clases aplicadas - justify-center:', shouldCollapse ? 'SÍ' : 'NO', 'space-x-3:', !shouldCollapse ? 'SÍ' : 'NO')
+  console.log('🔘 Botón toggle visible:', !shouldCollapse ? 'SÍ' : 'NO', 'Logo redondeado:', shouldCollapse ? 'SÍ' : 'NO')
+  console.log('⚡ Transición - ancho:', shouldCollapse ? '16px' : '64px', 'overflow-hidden: SÍ')
 
   return (
     <div 
       className={cn(
-        "flex flex-col h-full bg-background border-r transition-all duration-300 ease-in-out",
-        collapsed ? "w-16" : "w-64"
+        "flex flex-col h-full bg-background border-r transition-all duration-300 ease-in-out overflow-hidden",
+        shouldCollapse ? "w-16" : "w-64"
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => {
+        console.log('🖱️ Mouse enter - expandiendo menú')
+        setIsHovered(true)
+      }}
+      onMouseLeave={() => {
+        console.log('🖱️ Mouse leave - iniciando timer de 2 segundos')
+        setIsHovered(false)
+      }}
     >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
-        {!shouldCollapse && (
+        {!shouldCollapse ? (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">JD</span>
@@ -258,20 +276,26 @@ export function Sidebar() {
               <p className="text-xs text-muted-foreground">Servicios de Infraestructura</p>
             </div>
           </div>
+        ) : (
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center mx-auto">
+            <span className="text-primary-foreground font-bold text-sm">JD</span>
+          </div>
         )}
         
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleToggleMenu}
-          className="ml-auto"
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
+        {!shouldCollapse && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleMenu}
+            className="ml-auto"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-hide transition-all duration-300 ease-in-out">
         {Object.entries(groupedNavigation).map(([category, items]) => (
           <div key={category} className="space-y-2">
             {!shouldCollapse && (
@@ -287,7 +311,10 @@ export function Sidebar() {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                      "flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out",
+                      shouldCollapse 
+                        ? "justify-center" 
+                        : "space-x-3",
                       isActive
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -313,7 +340,7 @@ export function Sidebar() {
       </nav>
 
       {/* User Profile */}
-      <div className="p-4 border-t">
+      <div className="p-4 border-t transition-all duration-300 ease-in-out">
         {!shouldCollapse ? (
           <div className="flex items-center space-x-3">
             <Avatar className="h-8 w-8">

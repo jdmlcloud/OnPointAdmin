@@ -18,9 +18,14 @@ export function useUsers(): UseUsersReturn {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastFetchedAt, setLastFetchedAt] = useState<number>(0)
 
   const fetchUsers = async () => {
     try {
+      // rudimentary throttle: evita refetchs en < 2s
+      const now = Date.now()
+      // 2s throttle -> subimos a 4s para acompasar con cache global
+      if (now - lastFetchedAt < 4000 && users.length > 0) return
       setLoading(true)
       setError(null)
       
@@ -33,6 +38,7 @@ export function useUsers(): UseUsersReturn {
       
       if (data.success) {
         setUsers(data.users || [])
+        setLastFetchedAt(Date.now())
       } else {
         throw new Error('Error al obtener usuarios desde la API')
       }

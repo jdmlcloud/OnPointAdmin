@@ -18,9 +18,12 @@ export function useProviders(): UseProvidersReturn {
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastFetchedAt, setLastFetchedAt] = useState<number>(0)
 
   const fetchProviders = async () => {
     try {
+      const now = Date.now()
+      if (now - lastFetchedAt < 4000 && providers.length > 0) return
       setLoading(true)
       setError(null)
       
@@ -33,6 +36,7 @@ export function useProviders(): UseProvidersReturn {
       
       if (data.success) {
         setProviders(data.providers || [])
+        setLastFetchedAt(Date.now())
         // Limpiar error si la petición fue exitosa
         setError(null)
       } else {

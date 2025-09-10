@@ -14,8 +14,8 @@ import { useProviders } from "@/hooks/use-providers"
 import { useTags } from "@/hooks/use-tags"
 import { TagSelector } from "@/components/ui/tag-selector"
 import { TagBadge } from "@/components/ui/tag-badge"
-import { ProviderListSkeleton } from "@/components/ui/provider-skeleton"
-import { AssetCard } from "@/components/ui/asset-card"
+import { ProvidersPageSkeleton } from "@/components/ui/page-skeletons"
+import { ProviderCard, ProviderCardSkeleton } from "@/components/atomic"
 import { Provider } from "@/lib/db/repositories/dynamodb-provider-repository"
 import { 
   Plus, 
@@ -116,10 +116,7 @@ export default function ProvidersPage() {
     return matchesSearch
   })
 
-  // Recargar datos cuando se regrese de crear un proveedor
-  useEffect(() => {
-    refreshProviders()
-  }, [])
+  // Evitar doble fetch innecesario: ya se carga en el hook; usar refresh solo cuando sea necesario
 
   // Limpiar el estado del logo cuando se abra el modal de editar
   useEffect(() => {
@@ -335,27 +332,7 @@ export default function ProvidersPage() {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="h-full flex flex-col space-y-6">
-          {/* Header skeleton */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="h-8 w-48 bg-muted animate-pulse rounded mb-2"></div>
-              <div className="h-4 w-64 bg-muted animate-pulse rounded"></div>
-            </div>
-            <div className="h-10 w-32 bg-muted animate-pulse rounded"></div>
-          </div>
-          
-          {/* Search skeleton */}
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-80 bg-muted animate-pulse rounded"></div>
-            <div className="h-10 w-24 bg-muted animate-pulse rounded"></div>
-          </div>
-          
-          {/* Providers skeleton */}
-          <div className="flex-1 overflow-auto scrollbar-hide">
-            <ProviderListSkeleton count={6} />
-          </div>
-        </div>
+        <ProvidersPageSkeleton />
       </MainLayout>
     )
   }
@@ -528,26 +505,28 @@ export default function ProvidersPage() {
 
         {/* Providers Grid */}
         <div className="flex-1 overflow-auto scrollbar-hide">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-          {filteredProviders.map((provider) => (
-            <AssetCard
+          <div className="grid gap-4 items-stretch px-0 md:px-0 justify-start [grid-template-columns:repeat(auto-fill,minmax(280px,280px))]">
+          {isLoading && Array.from({ length: 6 }).map((_, i) => (
+            <ProviderCardSkeleton key={`prov-skel-${i}`} />
+          ))}
+          {!isLoading && filteredProviders.map((provider) => (
+            <ProviderCard
               key={provider.id}
               id={provider.id}
-              name={provider.name}
+              title={provider.name}
               description={provider.description}
-              thumbnailUrl={provider.logo}
-              fallbackText="Sin logo"
-              type="provider"
-              providerData={{
-                industry: provider.company,
-                contactEmail: provider.email,
-                status: provider.status
-              }}
+              image={provider.logo}
+              status={provider.status === 'active' ? 'active' : 'inactive'}
+              rating={provider.rating}
+              email={provider.email}
+              phone={provider.phone}
+              website={provider.website}
+              company={provider.company}
+              industry={provider.industry}
               onView={() => handleView(provider)}
               onEdit={() => handleEdit(provider)}
               onDelete={() => handleDelete(provider)}
-              className="h-full"
-              maxWidth="max-w-none"
+              className="card-consistent w-full"
             />
           ))}
           </div>

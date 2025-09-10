@@ -64,32 +64,42 @@ export function useLogos(): UseLogosReturn {
   const [logos, setLogos] = useState<Logo[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [lastFetchedAt, setLastFetchedAt] = useState<number>(0)
 
   // Alias para compatibilidad
   const loading = isLoading
 
   const fetchLogos = async () => {
     try {
+      const now = Date.now()
+      if (now - lastFetchedAt < 4000 && logos.length > 0) return
       setIsLoading(true)
       setError(null)
       
-      console.log('🔍 FETCHING LOGOS: Iniciando consulta a /api/logos')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 FETCHING LOGOS: Iniciando consulta a /api/logos')
+      }
       const response = await fetch('/api/logos')
       const data = await response.json()
       
-      console.log('📡 LOGOS API RESPONSE:', {
-        status: response.status,
-        ok: response.ok,
-        data: data,
-        logosCount: data.logos?.length || 0
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📡 LOGOS API RESPONSE:', {
+          status: response.status,
+          ok: response.ok,
+          data: data,
+          logosCount: data.logos?.length || 0
+        })
+      }
       
       if (!response.ok) {
         throw new Error(data.message || 'Error al obtener logos')
       }
       
-      console.log('✅ LOGOS SET:', data.logos || [])
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ LOGOS SET:', data.logos || [])
+      }
       setLogos(data.logos || [])
+      setLastFetchedAt(Date.now())
     } catch (err) {
       console.error('❌ Error fetching logos:', err)
       setError(err instanceof Error ? err.message : 'Error desconocido')

@@ -4,8 +4,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MainLayout } from "@/components/layout/main-layout"
 import { Edit, Save, FileText, Palette } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useNotifications } from "@/hooks/use-notifications"
+import { EditorPageSkeleton } from "@/components/ui/page-skeletons"
 
 export default function EditorPage() {
+  const { loading } = useNotifications()
+  const [splashLoading, setSplashLoading] = React.useState(true)
+  React.useEffect(() => {
+    const t = setTimeout(() => setSplashLoading(false), 300)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (loading || splashLoading) {
+    return (
+      <MainLayout>
+        <EditorPageSkeleton />
+      </MainLayout>
+    )
+  }
+
   return (
     <MainLayout>
       <div className="space-y-6">
