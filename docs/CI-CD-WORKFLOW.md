@@ -73,8 +73,8 @@ Develop → Sandbox → Production
 - 🚀 **Lambda Functions**: Todas las funciones necesarias
 - 🗄️ **Base de Datos**: Tablas y configuraciones
 - 🌐 **API Gateway**: Endpoints y configuraciones
-- 📱 **Frontend**: Aplicación optimizada
-- ☁️ **CloudFront**: CDN y cache
+- 📱 **Frontend**: Aplicación optimizada (via AWS Amplify)
+- ☁️ **AWS Amplify**: Hosting y CDN automático
 - 🏥 **Health Checks**: Verificaciones de salud
 
 ## 🚨 Buenas Prácticas
@@ -123,9 +123,9 @@ Develop → Sandbox → Production
 
 ### En Producción:
 - URL: `https://production.d3ts6pwgn7uyyh.amplifyapp.com`
-- Logs: CloudWatch Logs
+- Logs: CloudWatch Logs + Amplify Logs
 - Health: Health checks automáticos
-- Monitoreo: CloudWatch Alarms
+- Monitoreo: CloudWatch Alarms + Amplify Monitoring
 
 ## 🚨 Troubleshooting
 

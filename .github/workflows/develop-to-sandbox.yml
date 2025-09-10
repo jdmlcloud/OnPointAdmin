@@ -136,18 +136,12 @@ jobs:
           chmod +x scripts/setup-api-gateway-sandbox.sh
           ./scripts/setup-api-gateway-sandbox.sh
 
-      - name: Deploy frontend to Sandbox
+      - name: Deploy frontend to Sandbox (Amplify)
         run: |
-          echo "📦 Desplegando frontend a sandbox..."
-          aws s3 sync .next/static s3://onpoint-admin-sandbox/static --delete
-          aws s3 sync public s3://onpoint-admin-sandbox/ --delete
-
-      - name: Invalidate CloudFront Sandbox
-        run: |
-          echo "🔄 Invalidando CloudFront sandbox..."
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_SANDBOX }} \
-            --paths "/*"
+          echo "📦 Desplegando frontend a sandbox (Amplify)..."
+          echo "✅ El despliegue a sandbox se maneja automáticamente por AWS Amplify"
+          echo "🔗 URL: https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com"
+          echo "📋 Verifica el estado en la consola de Amplify"
 
       - name: Run health checks
         run: |

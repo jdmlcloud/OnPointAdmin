@@ -85,27 +85,22 @@ else
     warning "Script setup-api-endpoints.sh no encontrado, saltando..."
 fi
 
-# 5. Desplegar frontend
-log "📱 Desplegando frontend..."
+# 5. Desplegar frontend (Amplify)
+log "📱 Desplegando frontend (Amplify)..."
 if [ -d ".next" ]; then
-    aws s3 sync .next/static s3://onpoint-admin-prod/static --delete
-    aws s3 sync public s3://onpoint-admin-prod/ --delete
-    success "Frontend desplegado"
+    success "Frontend listo para Amplify"
+    log "✅ El despliegue del frontend se maneja automáticamente por AWS Amplify"
+    log "🔗 URL: https://production.d3ts6pwgn7uyyh.amplifyapp.com"
+    log "📋 Verifica el estado en la consola de Amplify"
 else
     error "Directorio .next no encontrado. Ejecuta 'npm run build' primero"
     exit 1
 fi
 
-# 6. Invalidar CloudFront
-log "🔄 Invalidando CloudFront..."
-if [ ! -z "$CLOUDFRONT_DISTRIBUTION_ID_PROD" ]; then
-    aws cloudfront create-invalidation \
-        --distribution-id $CLOUDFRONT_DISTRIBUTION_ID_PROD \
-        --paths "/*"
-    success "CloudFront invalidado"
-else
-    warning "CLOUDFRONT_DISTRIBUTION_ID_PROD no definido, saltando invalidación"
-fi
+# 6. Verificar estado de Amplify
+log "🔍 Verificando estado de Amplify..."
+log "✅ Amplify maneja automáticamente el despliegue del frontend"
+log "📋 Revisa la consola de Amplify para el estado del despliegue"
 
 # 7. Ejecutar health checks
 log "🏥 Ejecutando health checks..."

@@ -183,18 +183,12 @@ jobs:
           chmod +x scripts/setup-api-gateway-prod.sh
           ./scripts/setup-api-gateway-prod.sh
 
-      - name: Deploy frontend to Production
+      - name: Deploy frontend to Production (Amplify)
         run: |
-          echo "📦 Desplegando frontend a producción..."
-          aws s3 sync .next/static s3://onpoint-admin-prod/static --delete
-          aws s3 sync public s3://onpoint-admin-prod/ --delete
-
-      - name: Invalidate CloudFront Production
-        run: |
-          echo "🔄 Invalidando CloudFront producción..."
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PROD }} \
-            --paths "/*"
+          echo "📦 Desplegando frontend a producción (Amplify)..."
+          echo "✅ El despliegue a producción se maneja automáticamente por AWS Amplify"
+          echo "🔗 URL: https://production.d3ts6pwgn7uyyh.amplifyapp.com"
+          echo "📋 Verifica el estado en la consola de Amplify"
 
       - name: Run health checks
         run: |
