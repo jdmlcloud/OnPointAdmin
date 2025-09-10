@@ -132,7 +132,7 @@ export default function CognitoDashboardDirectPage() {
                 <Shield className="h-4 w-4 mr-2 text-gray-500" />
                 <span className="text-sm font-medium">Rol:</span>
                 <Badge variant="outline" className="ml-2">
-                  {user.role.name}
+                  {typeof user.role === 'string' ? user.role : user.role.name}
                 </Badge>
               </div>
               <div className="flex items-center">

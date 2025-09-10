@@ -20,7 +20,12 @@ export const UserStats: React.FC<UserStatsProps> = ({ users, roles, permissions 
   const customPermissions = permissions.filter(permission => !permission.resource.startsWith('system')).length
 
   const getUserRoleCount = (roleType: string) => {
-    return users.filter(user => user.role.name === roleType).length
+    return users.filter(user => {
+      if (typeof user.role === 'string') {
+        return user.role === roleType
+      }
+      return user.role.name === roleType
+    }).length
   }
 
   const superAdmins = getUserRoleCount('SUPER_ADMIN')

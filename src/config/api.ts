@@ -25,7 +25,7 @@ export const API_CONFIG = {
     AI_TEST: '/ai-test',
     CLIENTS: '/clients',
     // Nuevos endpoints para dashboard
-    NOTIFICATIONS: '/notifications',
+    NOTIFICATIONS: '/stats',
     PRODUCTIVITY: '/productivity',
     SYSTEM_METRICS: '/system/metrics',
     SYSTEM_HEALTH: '/system/health',
