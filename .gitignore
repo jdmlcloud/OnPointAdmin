@@ -123,3 +123,56 @@ config/secrets.json
 # Logs de AWS
 aws-logs/
 *.aws-log
+
+# Archivos de seguridad y limpieza
+src-backup-*/
+production-checklist.md
+security-audit-report.txt
+
+# Archivos de configuración de producción
+.env.production
+.env.prod
+config/production.json
+secrets/
+
+# Archivos de backup
+*.backup
+*.bak
+*.tmp
+
+# Archivos de desarrollo local
+.env.local
+.env.development
+.env.test
+
+# Archivos de credenciales específicos
+credentials/
+aws-credentials/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Archivos de logs de aplicación
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de cache
+.cache/
+.parcel-cache/
+.next/cache/
+
+# Archivos de IDE específicos
+.vscode/settings.json
+.idea/workspace.xml
+*.swp
+*.swo
+*~
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db

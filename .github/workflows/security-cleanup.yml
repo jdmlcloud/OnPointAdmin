@@ -1,0 +1,166 @@
+name: Security Cleanup & Code Quality
+
+on:
+  push:
+    branches: [ develop, sandbox, main ]
+  pull_request:
+    branches: [ main, sandbox ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit
+        run: |
+          echo "🔍 Ejecutando auditoría de seguridad..."
+          npm audit --audit-level moderate
+          echo "✅ Auditoría de seguridad completada"
+
+      - name: Check for hardcoded credentials
+        run: |
+          echo "🔍 Buscando credenciales hardcodeadas..."
+          # Buscar patrones de credenciales
+          if grep -r -i "password.*=" src/ --exclude-dir=node_modules; then
+            echo "❌ Se encontraron contraseñas hardcodeadas"
+            exit 1
+          fi
+          
+          if grep -r -i "secret.*=" src/ --exclude-dir=node_modules; then
+            echo "❌ Se encontraron secretos hardcodeados"
+            exit 1
+          fi
+          
+          if grep -r -i "api.*key.*=" src/ --exclude-dir=node_modules; then
+            echo "❌ Se encontraron API keys hardcodeadas"
+            exit 1
+          fi
+          
+          echo "✅ No se encontraron credenciales hardcodeadas"
+
+      - name: Check for console.log statements
+        run: |
+          echo "🔍 Verificando console.log statements..."
+          CONSOLE_COUNT=$(grep -r "console\." src/ --exclude-dir=node_modules | wc -l)
+          if [ $CONSOLE_COUNT -gt 0 ]; then
+            echo "⚠️ Se encontraron $CONSOLE_COUNT console.log statements"
+            echo "📋 Lista de console.log encontrados:"
+            grep -r "console\." src/ --exclude-dir=node_modules
+            echo "💡 Considera remover o reemplazar con un logger apropiado"
+          else
+            echo "✅ No se encontraron console.log statements"
+          fi
+
+      - name: Check for TODO/FIXME comments
+        run: |
+          echo "🔍 Verificando comentarios TODO/FIXME..."
+          TODO_COUNT=$(grep -r "TODO\|FIXME\|HACK" src/ --exclude-dir=node_modules | wc -l)
+          if [ $TODO_COUNT -gt 0 ]; then
+            echo "⚠️ Se encontraron $TODO_COUNT comentarios TODO/FIXME"
+            echo "📋 Lista de comentarios encontrados:"
+            grep -r "TODO\|FIXME\|HACK" src/ --exclude-dir=node_modules
+          else
+            echo "✅ No se encontraron comentarios TODO/FIXME"
+          fi
+
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: |
+          echo "🔍 Ejecutando linting..."
+          npm run lint
+          echo "✅ Linting completado"
+
+      - name: Run type checking
+        run: |
+          echo "🔍 Ejecutando verificación de tipos..."
+          npm run type-check
+          echo "✅ Verificación de tipos completada"
+
+      - name: Run tests
+        run: |
+          echo "🔍 Ejecutando tests..."
+          npm run test
+          echo "✅ Tests completados"
+
+  build-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: |
+          echo "🔨 Construyendo aplicación..."
+          npm run build
+          echo "✅ Build completado exitosamente"
+
+      - name: Check build artifacts
+        run: |
+          echo "🔍 Verificando artefactos de build..."
+          if [ -d ".next" ]; then
+            echo "✅ Directorio .next creado correctamente"
+            ls -la .next/
+          else
+            echo "❌ Directorio .next no encontrado"
+            exit 1
+          fi
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [security-scan, code-quality, build-verification]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          echo "🔍 Verificando resultados de seguridad y calidad..."
+          echo "Security scan: ${{ needs.security-scan.result }}"
+          echo "Code quality: ${{ needs.code-quality.result }}"
+          echo "Build verification: ${{ needs.build-verification.result }}"
+          
+          if [ "${{ needs.security-scan.result }}" == "success" ] && 
+             [ "${{ needs.code-quality.result }}" == "success" ] && 
+             [ "${{ needs.build-verification.result }}" == "success" ]; then
+            echo "✅ Todas las verificaciones de seguridad y calidad pasaron"
+            echo "🚀 El código está listo para despliegue"
+          else
+            echo "❌ Algunas verificaciones fallaron"
+            echo "🔧 Revisa los logs para más detalles"
+            exit 1
+          fi
