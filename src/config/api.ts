@@ -2,7 +2,7 @@
 export const API_CONFIG = {
   // URLs base de la API Gateway por entorno
   BASE_URLS: {
-    local: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox', // Local usa sandbox
+    local: '', // Local usa endpoints de Next.js
     sandbox: 'https://m4ijnyg5da.execute-api.us-east-1.amazonaws.com/sandbox',
     prod: 'https://9o43ckvise.execute-api.us-east-1.amazonaws.com/prod'
   },
@@ -98,6 +98,11 @@ export const getBaseUrl = (): string => {
 // Función helper para construir URLs completas
 export const buildApiUrl = (endpoint: string): string => {
   const env = detectEnvironment()
+  
+  // Para entorno local, usar endpoints de Next.js
+  if (env === 'local') {
+    return `/api${endpoint}`
+  }
   
   // Usar la configuración específica del entorno
   const baseUrl = API_CONFIG.BASE_URLS[env]
