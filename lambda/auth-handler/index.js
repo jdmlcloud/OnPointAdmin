@@ -352,8 +352,8 @@ async function handleSetupPassword(body) {
   const twoFACode = generate2FACode();
   const twoFAExpiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // 10 minutos
   
-  // Crear usuario
-  const userId = `user_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
+  // Crear usuario con estructura compatible
+  const userId = `user-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
   const user = {
     id: userId,
     email: result.Item.email,
@@ -362,7 +362,7 @@ async function handleSetupPassword(body) {
     firstName: result.Item.firstName,
     lastName: result.Item.lastName,
     name: `${result.Item.firstName} ${result.Item.lastName}`.trim(),
-    phone: '',
+    phone: result.Item.phone || '',
     department: result.Item.department,
     position: result.Item.position,
     status: 'pending_2fa',
@@ -560,11 +560,10 @@ async function handleLogin(body) {
     };
   }
   
-  // Buscar usuario por email
-  const result = await dynamodb.query({
+  // Buscar usuario por email (scan ya que no hay GSI)
+  const result = await dynamodb.scan({
     TableName: USERS_TABLE,
-    IndexName: 'EmailIndex',
-    KeyConditionExpression: 'email = :email',
+    FilterExpression: 'email = :email',
     ExpressionAttributeValues: { ':email': email }
   }).promise();
   

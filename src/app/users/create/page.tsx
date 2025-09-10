@@ -11,9 +11,13 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, ArrowLeft, UserPlus, Mail, Shield } from "lucide-react"
+import { useAuthContext } from "@/lib/auth/auth-context"
+import { createNewUser, canCreateUsers, getAvailableRoles } from "@/lib/auth/auth-integration"
+import { UserRoleType } from "@/types/users"
 
 export default function CreateUserPage() {
   const router = useRouter()
+  const { user: currentUser } = useAuthContext()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -26,10 +30,31 @@ export default function CreateUserPage() {
     position: ''
   })
 
-  const roles = [
-    { value: 'ADMIN', label: 'Administrador', description: 'Acceso completo al sistema' },
-    { value: 'EXECUTIVE', label: 'Ejecutivo', description: 'Acceso a módulos de ventas y clientes' }
-  ]
+  // Verificar si el usuario puede crear otros usuarios
+  if (!currentUser || !canCreateUsers(currentUser.role as UserRoleType)) {
+    return (
+      <MainLayout>
+        <div className="space-y-6">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl text-red-600">Acceso Denegado</CardTitle>
+              <CardDescription>
+                No tienes permisos para crear usuarios
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </MainLayout>
+    )
+  }
+
+  // Obtener roles disponibles según el usuario actual
+  const availableRoles = getAvailableRoles(currentUser.role as UserRoleType)
+  const roles = availableRoles.map(role => ({
+    value: role,
+    label: role === 'ADMIN' ? 'Administrador' : 'Ejecutivo',
+    description: role === 'ADMIN' ? 'Acceso completo al sistema' : 'Acceso a módulos de ventas y clientes'
+  }))
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -44,27 +69,24 @@ export default function CreateUserPage() {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/send-verification', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          createdBy: 'superadmin@onpoint.com' // En producción, obtener del contexto de auth
-        }),
+      const result = await createNewUser({
+        email: formData.email,
+        role: formData.role as UserRoleType,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        department: formData.department,
+        position: formData.position,
+        createdBy: currentUser?.email || 'system'
       })
 
-      const data = await response.json()
-
-      if (data.success) {
+      if (result.success) {
         setSuccess(true)
         // Redirigir a la lista de usuarios después de 3 segundos
         setTimeout(() => {
           router.push('/users')
         }, 3000)
       } else {
-        setError(data.message)
+        setError(result.message || 'Error creando usuario')
       }
     } catch (error) {
       setError('Error de conexión. Intenta nuevamente.')

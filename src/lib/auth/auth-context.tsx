@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { User, LoginRequest, LoginResponse, AuthContextType, UserRoleType } from '@/types/users'
 import { hasPermission, hasRole, canManageUser, canAssignRole, getAssignableRoles, canAccessRoute } from './permission-utils'
+import { authenticateExistingUser } from './auth-integration'
 
 // Alias con 'any' para evitar conflictos de tipos de React en herramientas/linter
 const ReactAny = React as any
@@ -82,53 +83,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true)
       
-      // Simulación de login para demostración
-      const mockUsers = {
-        'superadmin@onpoint.com': { role: 'superadmin', name: 'Super Admin' },
-        'admin@onpoint.com': { role: 'admin', name: 'Admin' },
-        'ejecutivo@onpoint.com': { role: 'ejecutivo', name: 'Ejecutivo' }
-      }
+      // Usar la función de integración que mantiene compatibilidad
+      const result = await authenticateExistingUser(email, password)
       
-      const userData = mockUsers[email as keyof typeof mockUsers]
-      
-      if (userData && password === 'password') {
-        const user: User = {
-          id: '1',
-          email,
-          password: 'hashed_password_placeholder',
-          firstName: userData.name.split(' ')[0] || userData.name,
-          lastName: userData.name.split(' ').slice(1).join(' ') || '',
-          name: userData.name,
-          phone: '+525512345678',
-          role: userData.role as UserRoleType,
-          department: 'IT',
-          position: userData.name,
-          status: 'active',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          createdBy: 'system'
-        }
-        
-        const token = 'mock_token_' + Date.now()
-        
+      if (result.success && result.user && result.token) {
         // Guardar token y usuario
-        localStorage.setItem('auth_token', token)
-        localStorage.setItem('user_data', JSON.stringify(user))
-        setUser(user)
+        localStorage.setItem('auth_token', result.token)
+        localStorage.setItem('user_data', JSON.stringify(result.user))
+        setUser(result.user)
         setIsAuthenticated(true)
-        
-        return {
-          success: true,
-          user,
-          token,
-          message: 'Login exitoso'
-        }
-      } else {
-        return {
-          success: false,
-          message: 'Credenciales inválidas'
-        }
       }
+      
+      return result
     } catch (error) {
       console.error('Error en login:', error)
       return {
