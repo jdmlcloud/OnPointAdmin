@@ -65,6 +65,7 @@ const UserManagementPage: React.FC = () => {
       department: 'Tecnología',
       position: 'Super Administrador',
       status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -80,6 +81,7 @@ const UserManagementPage: React.FC = () => {
       department: 'Administración',
       position: 'Administrador',
       status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -95,6 +97,7 @@ const UserManagementPage: React.FC = () => {
       department: 'Ventas',
       position: 'Ejecutivo',
       status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     }
@@ -117,6 +120,7 @@ const UserManagementPage: React.FC = () => {
       level: 1,
       isSystem: true,
       status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -133,6 +137,7 @@ const UserManagementPage: React.FC = () => {
       level: 2,
       isSystem: false,
       status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     },
@@ -148,6 +153,7 @@ const UserManagementPage: React.FC = () => {
       level: 3,
       isSystem: false,
       status: 'active',
+      createdAt: '2024-12-19T00:00:00.000Z',
       updatedAt: '2024-12-19T00:00:00.000Z',
       createdBy: 'system'
     }
@@ -162,9 +168,7 @@ const UserManagementPage: React.FC = () => {
       action: 'read',
       category: 'Usuarios',
       isSystem: true,
-      status: 'active',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      status: 'active'
     },
     {
       id: 'permission-users-manage',
@@ -174,9 +178,7 @@ const UserManagementPage: React.FC = () => {
       action: 'manage',
       category: 'Usuarios',
       isSystem: true,
-      status: 'active',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      status: 'active'
     },
     {
       id: 'permission-roles-manage',
@@ -186,9 +188,7 @@ const UserManagementPage: React.FC = () => {
       action: 'manage',
       category: 'Roles',
       isSystem: true,
-      status: 'active',
-      updatedAt: '2024-12-19T00:00:00.000Z',
-      createdBy: 'system'
+      status: 'active'
     }
   ]
 

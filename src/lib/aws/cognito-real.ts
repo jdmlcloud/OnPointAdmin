@@ -117,9 +117,9 @@ export class CognitoRealService {
   /**
    * Determinar el rol del usuario
    */
-  private static getUserRole(userInfo: any): UserRole {
+  private static getUserRole(userInfo: any): UserRoleType {
     if (userInfo.role) {
-      return userInfo.role as UserRole
+      return userInfo.role as UserRoleType
     }
     
     // Lógica para determinar rol basado en email o otros atributos

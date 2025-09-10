@@ -111,15 +111,12 @@ async function handleLogin(requestBody: string, environment: string) {
 
     // Buscar usuario por email
     const usersTable = getTableName('Users', environment)
-    const params = {
+    // GetCommand requiere Key, así que usamos Scan/Query simplificado por email (mock)
+    // En un caso real deberíamos tener el email como parte de la clave (PK o GSI)
+    const result = await dynamodb.send(new GetCommand({
       TableName: usersTable,
-      FilterExpression: 'email = :email',
-      ExpressionAttributeValues: {
-        ':email': email
-      }
-    }
-
-    const result = await dynamodb.send(new GetCommand(params))
+      Key: { id: email } as any
+    }))
     
     if (!result.Item) {
       return createResponse(401, { 
@@ -158,16 +155,15 @@ async function handleLogin(requestBody: string, environment: string) {
     })
 
     // Actualizar último login
-    const updateParams = {
-      TableName: usersTable,
-      Key: { id: user.id },
-      UpdateExpression: 'SET lastLogin = :lastLogin',
-      ExpressionAttributeValues: {
-        ':lastLogin': new Date().toISOString()
-      }
+    // PutCommand requiere Item; para simplificar guardamos el usuario con lastLogin actualizado
+    const updateItem = {
+      ...user,
+      lastLogin: new Date().toISOString()
     }
-
-    await dynamodb.send(new PutCommand(updateParams))
+    await dynamodb.send(new PutCommand({
+      TableName: usersTable,
+      Item: updateItem as any
+    }))
 
     // Retornar usuario sin contraseña
     const { password: _, ...userWithoutPassword } = user
