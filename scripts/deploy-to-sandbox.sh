@@ -10,8 +10,8 @@ echo "⚠️  IMPORTANTE: Verificando que NO se usen credenciales de producción
 
 # Verificar que estamos en la rama correcta
 CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" != "feature/user-management-v1.1.0" ]; then
-    echo "❌ Error: Debes estar en la rama feature/user-management-v1.1.0"
+if [ "$CURRENT_BRANCH" != "sandbox" ]; then
+    echo "❌ Error: Debes estar en la rama sandbox"
     echo "   Rama actual: $CURRENT_BRANCH"
     exit 1
 fi

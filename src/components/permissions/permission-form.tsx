@@ -69,7 +69,7 @@ export const PermissionForm: React.FC<PermissionFormProps> = ({
         description: permission.description,
         resource: permission.resource,
         action: permission.action,
-        category: permission.category
+        category: permission.resource
       })
     } else {
       setFormData({
