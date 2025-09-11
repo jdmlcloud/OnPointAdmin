@@ -1,22 +1,13 @@
 import { CognitoIdentityProviderClient, InitiateAuthCommand, SignUpCommand, ConfirmSignUpCommand, ForgotPasswordCommand, ConfirmForgotPasswordCommand } from '@aws-sdk/client-cognito-identity-provider';
-import { DynamoDBClient, GetItemCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
-import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
 // Configurar clientes AWS
 const cognitoClient = new CognitoIdentityProviderClient({
   region: process.env.AWS_REGION || 'us-east-1'
 });
 
-const dynamodbClient = new DynamoDBClient({
-  region: process.env.AWS_REGION || 'us-east-1'
-});
-
 // Configuración de Cognito
 const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID || 'us-east-1_pnE1wndnB';
 const CLIENT_ID = process.env.COGNITO_CLIENT_ID || '76ho4o7fqhh3vdsiqqq269jjt5';
-
-// Tablas DynamoDB
-const USERS_TABLE = process.env.USERS_TABLE || 'OnPointAdmin-Users-sandbox';
 
 export interface User {
   id: string;
@@ -125,23 +116,29 @@ export async function authenticateUser(credentials: LoginCredentials): Promise<L
 }
 
 /**
- * Obtiene datos adicionales del usuario desde DynamoDB
+ * Obtiene datos adicionales del usuario desde DynamoDB via API Route
  */
 async function getUserFromDynamoDB(email: string): Promise<User | null> {
   try {
-    const command = new GetItemCommand({
-      TableName: USERS_TABLE,
-      Key: marshall({ email })
+    console.log('🔍 Obteniendo usuario de DynamoDB via API:', email)
+    
+    const response = await fetch('/api/auth/get-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email })
     });
 
-    const result = await dynamodbClient.send(command);
+    const result = await response.json();
     
-    if (!result.Item) {
+    if (!result.success) {
+      console.log('❌ Error obteniendo usuario:', result.error)
       return null;
     }
 
-    const user = unmarshall(result.Item) as any;
-    return user as User;
+    console.log('✅ Usuario obtenido de DynamoDB:', result.user.email)
+    return result.user as User;
 
   } catch (error) {
     console.error('❌ Error obteniendo usuario de DynamoDB:', error);
