@@ -28,18 +28,18 @@ const authenticateExistingUser = async (email: string, password: string) => {
   const existingUsers = [
     { 
       email: 'admin@onpoint.com', 
-      password: 'password', 
-      role: 'ADMIN',
-      id: 'user-admin-001',
-      firstName: 'Admin',
-      lastName: 'User',
-      name: 'Admin User',
-      phone: '+525512345678',
+      password: 'admin123', 
+      role: 'SUPER_ADMIN',
+      id: 'user-1757550405081-7f5d3699',
+      firstName: 'Super',
+      lastName: 'Admin',
+      name: 'Super Admin',
+      phone: '+1234567890',
       department: 'IT',
-      position: 'Administrador',
+      position: 'System Administrator',
       status: 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: '2025-09-11T00:16:45.081Z',
+      updatedAt: '2025-09-11T00:16:45.081Z',
       createdBy: 'system'
     },
     { 
