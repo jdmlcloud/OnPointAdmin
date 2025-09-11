@@ -178,32 +178,8 @@ export async function registerUser(userData: {
     await cognitoClient.send(signUpCommand);
     console.log('✅ Usuario registrado en Cognito');
 
-    // Guardar datos adicionales en DynamoDB
-    const now = new Date().toISOString();
-    const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const userRecord = {
-      id: userId,
-      email: userData.email,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
-      role: userData.role,
-      department: userData.department || '',
-      position: userData.position || '',
-      phone: userData.phone || '',
-      status: 'pending_verification',
-      createdAt: now,
-      updatedAt: now,
-      createdBy: 'system'
-    };
-
-    const putCommand = new PutItemCommand({
-      TableName: USERS_TABLE,
-      Item: marshall(userRecord)
-    });
-
-    await dynamodbClient.send(putCommand);
-    console.log('✅ Datos de usuario guardados en DynamoDB');
+    // TODO: Guardar datos adicionales en DynamoDB via API Route
+    console.log('✅ Usuario registrado en Cognito');
 
     return { success: true };
 
