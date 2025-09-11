@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Test Session - OnPoint Admin</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background-color: #1d4ed8;
+        }
+        .success {
+            color: #059669;
+            background-color: #d1fae5;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .info {
+            background-color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Setup Test Session</h1>
+        <p>Este script configura una sesión de prueba para OnPoint Admin.</p>
+        
+        <div class="info">
+            <h3>📋 Credenciales de Prueba:</h3>
+            <p><strong>Email:</strong> admin@onpoint.com</p>
+            <p><strong>Password:</strong> admin123</p>
+            <p><strong>Rol:</strong> SUPER_ADMIN</p>
+        </div>
+
+        <button class="button" onclick="setupTestSession()">
+            🚀 Configurar Sesión de Prueba
+        </button>
+
+        <button class="button" onclick="clearSession()">
+            🗑️ Limpiar Sesión
+        </button>
+
+        <button class="button" onclick="goToApp()">
+            🏠 Ir a la Aplicación
+        </button>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function setupTestSession() {
+            try {
+                // Datos del usuario de prueba
+                const userData = {
+                    id: 'user-1757550405081-7f5d3699',
+                    email: 'admin@onpoint.com',
+                    firstName: 'Super',
+                    lastName: 'Admin',
+                    role: 'SUPER_ADMIN',
+                    department: 'IT',
+                    position: 'System Administrator',
+                    phone: '+1234567890',
+                    status: 'active',
+                    createdAt: '2025-09-11T00:16:45.081Z',
+                    updatedAt: '2025-09-11T00:16:45.081Z'
+                };
+
+                // Token simulado
+                const token = 'test-token-' + Date.now();
+
+                // Guardar en localStorage
+                localStorage.setItem('auth_token', token);
+                localStorage.setItem('user_data', JSON.stringify(userData));
+
+                document.getElementById('result').innerHTML = `
+                    <div class="success">
+                        ✅ Sesión de prueba configurada exitosamente!<br>
+                        📧 Usuario: ${userData.email}<br>
+                        👤 Rol: ${userData.role}<br>
+                        🔑 Token: ${token.substring(0, 20)}...
+                    </div>
+                `;
+
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div style="color: red; background-color: #fee2e2; padding: 10px; border-radius: 6px;">
+                        ❌ Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function clearSession() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_data');
+            document.getElementById('result').innerHTML = `
+                <div style="color: #059669; background-color: #d1fae5; padding: 10px; border-radius: 6px;">
+                    ✅ Sesión limpiada exitosamente
+                </div>
+            `;
+        }
+
+        function goToApp() {
+            window.location.href = 'http://localhost:3000';
+        }
+
+        // Verificar si ya hay una sesión
+        window.onload = function() {
+            const token = localStorage.getItem('auth_token');
+            const userData = localStorage.getItem('user_data');
+            
+            if (token && userData) {
+                const user = JSON.parse(userData);
+                document.getElementById('result').innerHTML = `
+                    <div class="success">
+                        ✅ Ya hay una sesión activa:<br>
+                        📧 Usuario: ${user.email}<br>
+                        👤 Rol: ${user.role}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
