@@ -41,11 +41,28 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, string[]> = {
 export const hasPermission = (user: User | null, resource: string, action: string): boolean => {
   if (!user) return false
 
+  // Debug: Verificar el tipo de rol
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 hasPermission - User:', user)
+    console.log('🔍 hasPermission - User Role:', user.role)
+    console.log('🔍 hasPermission - Role Type:', typeof user.role)
+  }
+
+  // Obtener el nombre del rol (puede ser string o objeto)
+  let roleName: string
+  if (typeof user.role === 'string') {
+    roleName = user.role
+  } else if (user.role && typeof user.role === 'object' && 'name' in user.role) {
+    roleName = (user.role as any).name
+  } else {
+    roleName = 'GUEST' // Rol por defecto
+  }
+
   // Super Admin tiene todos los permisos
-  if (user.role === 'SUPER_ADMIN') return true
+  if (roleName === 'SUPER_ADMIN') return true
 
   // Verificar permisos por defecto del rol
-  const rolePermissions = DEFAULT_ROLE_PERMISSIONS[user.role as keyof typeof DEFAULT_ROLE_PERMISSIONS] || []
+  const rolePermissions = DEFAULT_ROLE_PERMISSIONS[roleName as keyof typeof DEFAULT_ROLE_PERMISSIONS] || []
   const permissionString = `${resource}:${action}`
   
   return rolePermissions.includes(permissionString)

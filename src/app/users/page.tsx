@@ -440,9 +440,23 @@ export default function UsersPage() {
     }
   }
 
+  // Debug: Verificar el tipo de currentUser y su rol
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 Current User:', currentUser)
+    console.log('🔍 User Role:', currentUser?.role)
+    console.log('🔍 Role Type:', typeof currentUser?.role)
+  }
+
   const canManageUsers = hasPermission(currentUser, 'users', 'manage')
   const canManageRoles = hasPermission(currentUser, 'roles', 'manage')
   const canManagePermissions = hasPermission(currentUser, 'permissions', 'manage')
+
+  // Debug: Verificar los permisos
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 Can Manage Users:', canManageUsers)
+    console.log('🔍 Can Manage Roles:', canManageRoles)
+    console.log('🔍 Can Manage Permissions:', canManagePermissions)
+  }
 
   return (
     <MainLayout>
