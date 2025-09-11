@@ -5,22 +5,13 @@
 ### **🏠 Dashboard y Página Principal**
 - `/` - Página principal (redirige a login)
 - `/dashboard` - Dashboard principal del sistema
-- `/dashboard-cognito` - Dashboard con Cognito
 - `/dashboard-test` - Dashboard de pruebas
-- `/cognito-dashboard` - Dashboard Cognito (legacy)
-- `/cognito-dashboard-direct` - Dashboard Cognito directo
-- `/cognito-dashboard-real` - Dashboard Cognito real
-- `/cognito-dashboard-simple` - Dashboard Cognito simple
 
 ### **🔐 Autenticación**
 - `/auth/login` - Página de login principal
 - `/auth/verify` - Verificación de email
 - `/auth/setup-password` - Configuración de contraseña inicial
 - `/auth/verify-2fa` - Verificación de código 2FA
-- `/auth/cognito-signin` - Login con Cognito (legacy)
-- `/auth/cognito-signin-simple` - Login Cognito simple
-- `/auth/cognito-direct` - Login Cognito directo
-- `/auth/cognito-real` - Login Cognito real
 
 ### **👥 Gestión de Usuarios**
 - `/users` - Lista de usuarios
@@ -68,14 +59,11 @@
 ## 🔌 **Rutas de API**
 
 ### **🔐 Autenticación API**
-- `/api/auth/login` - Login de usuarios
 - `/api/auth/login-existing` - Login con usuarios existentes
 - `/api/auth/send-verification` - Enviar email de verificación
 - `/api/auth/verify-email` - Verificar email
 - `/api/auth/setup-password` - Configurar contraseña
 - `/api/auth/verify-2fa` - Verificar código 2FA
-- `/api/auth/verify-token` - Verificar token
-- `/api/lambda/auth` - Proxy a Lambda de autenticación
 
 ### **👥 Usuarios API**
 - `/api/users` - CRUD de usuarios
