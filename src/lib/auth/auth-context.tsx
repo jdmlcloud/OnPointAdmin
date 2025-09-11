@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { User, LoginRequest, LoginResponse, AuthContextType, UserRoleType } from '@/types/users'
 import { hasPermission, hasRole, canManageUser, canAssignRole, getAssignableRoles, canAccessRoute } from './permission-utils'
-import { authenticateExistingUser } from './auth-integration'
+import { authenticateUser } from './cognito-auth'
 
 // Alias con 'any' para evitar conflictos de tipos de React en herramientas/linter
 const ReactAny = React as any
@@ -83,18 +83,34 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setIsLoading(true)
       
-      // Usar la función de integración que mantiene compatibilidad
-      const result = await authenticateExistingUser(email, password)
+      // Usar la función de autenticación con Cognito
+      const result = await authenticateUser({ email, password })
       
-      if (result.success && result.user && result.token) {
+      if (result.success && result.user) {
+        console.log('✅ Login exitoso:', result.user.email)
+        
+        // Generar token JWT simple (en producción usar jwt.sign)
+        const token = `jwt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        
         // Guardar token y usuario
-        localStorage.setItem('auth_token', result.token)
+        localStorage.setItem('auth_token', token)
         localStorage.setItem('user_data', JSON.stringify(result.user))
         setUser(result.user)
         setIsAuthenticated(true)
+        
+        return {
+          success: true,
+          message: 'Login exitoso',
+          user: result.user,
+          token
+        }
+      } else {
+        console.log('❌ Login fallido:', result.error)
+        return {
+          success: false,
+          message: result.error || 'Credenciales inválidas'
+        }
       }
-      
-      return result
     } catch (error) {
       console.error('Error en login:', error)
       return {
