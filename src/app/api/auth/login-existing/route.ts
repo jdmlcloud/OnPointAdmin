@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { authenticateUser } from '@/lib/auth/dynamodb-auth'
+import { authenticateUser } from '@/lib/auth/cognito-auth'
 
 // Función para llamar a la Lambda de AWS
 const callLambdaFunction = async (path: string, body: any) => {
