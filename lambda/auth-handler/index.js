@@ -24,6 +24,121 @@ const generate2FACode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+// Función para enviar email de verificación
+const sendVerificationEmail = async (email, token, userData) => {
+  try {
+    const verificationUrl = `${process.env.APP_URL}/auth/verify?token=${token}`;
+    
+    // Plantilla HTML mejorada
+    const htmlTemplate = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verificación de Email - OnPoint Admin</title>
+          <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4; }
+              .container { background-color: #ffffff; border-radius: 10px; padding: 30px; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+              .header { text-align: center; margin-bottom: 30px; }
+              .logo { font-size: 28px; font-weight: bold; color: #2563eb; margin-bottom: 10px; }
+              .title { color: #1f2937; font-size: 24px; margin-bottom: 20px; }
+              .content { margin-bottom: 30px; }
+              .button { display: inline-block; background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; text-align: center; margin: 20px 0; }
+              .button:hover { background-color: #1d4ed8; }
+              .info { background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0; }
+              .footer { text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+              .warning { background-color: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 15px; border-radius: 8px; margin: 20px 0; }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <div class="header">
+                  <div class="logo">OnPoint Admin</div>
+                  <h1 class="title">Verificación de Email</h1>
+              </div>
+              <div class="content">
+                  <p>Hola <strong>${userData.firstName} ${userData.lastName}</strong>,</p>
+                  <p>Bienvenido a OnPoint Admin. Para completar tu registro y activar tu cuenta, necesitas verificar tu dirección de email.</p>
+                  <div class="info">
+                      <p><strong>Detalles de tu cuenta:</strong></p>
+                      <ul>
+                          <li><strong>Email:</strong> ${email}</li>
+                          <li><strong>Rol:</strong> ${userData.role}</li>
+                          <li><strong>Departamento:</strong> ${userData.department}</li>
+                          <li><strong>Posición:</strong> ${userData.position}</li>
+                      </ul>
+                  </div>
+                  <p>Haz clic en el siguiente botón para verificar tu email:</p>
+                  <div style="text-align: center;">
+                      <a href="${verificationUrl}" class="button">Verificar Email</a>
+                  </div>
+                  <div class="warning">
+                      <p><strong>⚠️ Importante:</strong></p>
+                      <ul>
+                          <li>Este enlace expira en 24 horas</li>
+                          <li>Si no solicitaste esta cuenta, ignora este email</li>
+                          <li>No compartas este enlace con nadie</li>
+                      </ul>
+                  </div>
+                  <p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+                  <p style="word-break: break-all; color: #2563eb;">${verificationUrl}</p>
+              </div>
+              <div class="footer">
+                  <p>Este email fue enviado por OnPoint Admin</p>
+                  <p>Si tienes preguntas, contacta a tu administrador</p>
+                  <p>© 2024 OnPoint Admin. Todos los derechos reservados.</p>
+              </div>
+          </div>
+      </body>
+      </html>
+    `;
+    
+    const params = {
+      Source: FROM_EMAIL,
+      Destination: {
+        ToAddresses: [email]
+      },
+      Message: {
+        Subject: {
+          Data: 'Verificación de Email - OnPoint Admin',
+          Charset: 'UTF-8'
+        },
+        Body: {
+          Html: {
+            Data: htmlTemplate,
+            Charset: 'UTF-8'
+          }
+        }
+      }
+    };
+    
+    await ses.sendEmail(params).promise();
+    console.log('✅ Email de verificación enviado a:', email);
+  } catch (error) {
+    console.error('❌ Error enviando email:', error);
+    throw error;
+  }
+};
+
+// Función para enviar código 2FA por SMS
+const send2FASMS = async (phone, code) => {
+  try {
+    const message = `Tu código de verificación OnPoint Admin es: ${code}. Válido por 10 minutos. No compartas este código.`;
+    
+    const params = {
+      Message: message,
+      PhoneNumber: phone
+    };
+    
+    await sns.publish(params).promise();
+    console.log('✅ SMS 2FA enviado a:', phone);
+  } catch (error) {
+    console.error('❌ Error enviando SMS:', error);
+    throw error;
+  }
+};
+
 // Helper function para enviar email
 const sendEmail = async (to, subject, htmlContent) => {
   const params = {
@@ -162,19 +277,28 @@ async function handleSendVerification(body) {
     }
   }).promise();
   
-  // Enviar email de verificación
-  const verificationUrl = `${process.env.APP_URL || 'https://sandbox.d3ts6pwgn7uyyh.amplifyapp.com'}/auth/verify?token=${verificationToken}`;
-  const emailContent = `
-    <h2>Bienvenido a OnPoint Admin</h2>
-    <p>Hola ${firstName || 'Usuario'},</p>
-    <p>Tu cuenta ha sido creada con el rol: <strong>${role}</strong></p>
-    <p>Para completar tu registro, haz clic en el siguiente enlace:</p>
-    <a href="${verificationUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verificar Cuenta</a>
-    <p>Este enlace expira en 24 horas.</p>
-    <p>Si no solicitaste esta cuenta, puedes ignorar este email.</p>
-  `;
-  
-  await sendEmail(email, 'Verificación de cuenta - OnPoint Admin', emailContent);
+  // Enviar email de verificación con plantilla mejorada
+  try {
+    const userData = {
+      firstName: firstName || 'Usuario',
+      lastName: lastName || '',
+      role,
+      department: department || '',
+      position: position || ''
+    };
+    
+    await sendVerificationEmail(email, verificationToken, userData);
+  } catch (error) {
+    console.error('❌ Error enviando email:', error);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({
+        success: false,
+        message: 'Error enviando email de verificación'
+      })
+    };
+  }
   
   return {
     statusCode: 200,
@@ -396,16 +520,25 @@ async function handleSetupPassword(body) {
     Key: { token: passwordSetupToken }
   }).promise();
   
-  // Enviar código 2FA por email (en producción sería por SMS)
-  const emailContent = `
-    <h2>Código de Verificación 2FA</h2>
-    <p>Tu código de verificación es:</p>
-    <h1 style="color: #007bff; font-size: 32px; text-align: center; letter-spacing: 5px;">${twoFACode}</h1>
-    <p>Este código expira en 10 minutos.</p>
-    <p>Si no solicitaste este código, contacta al administrador.</p>
-  `;
-  
-  await sendEmail(result.Item.email, 'Código de Verificación 2FA - OnPoint Admin', emailContent);
+  // Enviar código 2FA por SMS
+  try {
+    if (result.Item.phone) {
+      await send2FASMS(result.Item.phone, twoFACode);
+    } else {
+      // Fallback a email si no hay teléfono
+      const emailContent = `
+        <h2>Código de Verificación 2FA</h2>
+        <p>Tu código de verificación es:</p>
+        <h1 style="color: #007bff; font-size: 32px; text-align: center; letter-spacing: 5px;">${twoFACode}</h1>
+        <p>Este código expira en 10 minutos.</p>
+        <p>Si no solicitaste este código, contacta al administrador.</p>
+      `;
+      await sendEmail(result.Item.email, 'Código de Verificación 2FA - OnPoint Admin', emailContent);
+    }
+  } catch (error) {
+    console.error('❌ Error enviando 2FA:', error);
+    // Continuar aunque falle el envío
+  }
   
   return {
     statusCode: 200,

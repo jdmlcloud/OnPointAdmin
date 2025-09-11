@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código 2FA - OnPoint Admin</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #1f2937;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .code-container {
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #2563eb;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .info {
+            background-color: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .warning {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">OnPoint Admin</div>
+            <h1 class="title">Código de Verificación 2FA</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hola <strong>{{firstName}} {{lastName}}</strong>,</p>
+            
+            <p>Se ha solicitado un código de verificación de dos factores para tu cuenta de OnPoint Admin.</p>
+            
+            <div class="code-container">
+                <p style="margin: 0 0 10px 0; color: #6b7280;">Tu código de verificación es:</p>
+                <div class="code">{{twoFACode}}</div>
+                <p style="margin: 10px 0 0 0; color: #6b7280; font-size: 14px;">Válido por 10 minutos</p>
+            </div>
+            
+            <div class="info">
+                <p><strong>Información de la solicitud:</strong></p>
+                <ul>
+                    <li><strong>Email:</strong> {{email}}</li>
+                    <li><strong>Hora:</strong> {{timestamp}}</li>
+                    <li><strong>IP:</strong> {{ipAddress}}</li>
+                </ul>
+            </div>
+            
+            <div class="warning">
+                <p><strong>🔒 Seguridad:</strong></p>
+                <ul>
+                    <li>Nunca compartas este código con nadie</li>
+                    <li>OnPoint Admin nunca te pedirá este código por teléfono</li>
+                    <li>Si no solicitaste este código, contacta a tu administrador</li>
+                    <li>El código expira en 10 minutos</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Este email fue enviado por OnPoint Admin</p>
+            <p>Si tienes preguntas, contacta a tu administrador</p>
+            <p>© 2024 OnPoint Admin. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>
