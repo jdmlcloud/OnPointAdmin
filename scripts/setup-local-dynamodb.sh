@@ -1,3 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+COMPOSE_FILE="docker/dynamodb-local/docker-compose.yml"
+
+echo "🚀 Iniciando DynamoDB Local..."
+docker compose -f "$COMPOSE_FILE" up -d
+
+echo "⏳ Esperando disponibilidad (http://localhost:8000)..."
+for i in {1..20}; do
+  if curl -s http://localhost:8000 >/dev/null 2>&1; then
+    echo "✅ DynamoDB Local listo"
+    break
+  fi
+  sleep 1
+done
+
+echo "ℹ️  Endpoint: http://localhost:8000"
+echo "ℹ️  Región:   us-east-1"
+
+echo "💡 Listar tablas (si AWS CLI está configurado):"
+echo "   aws dynamodb list-tables --endpoint-url http://localhost:8000 --region us-east-1"
 #!/bin/bash
 
 # Script para configurar tablas de DynamoDB para desarrollo local
